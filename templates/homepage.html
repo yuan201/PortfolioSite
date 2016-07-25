@@ -1,0 +1,22 @@
+{%  extends "base.html" %}
+
+{% block title %}
+    Portfolios
+{% endblock %}
+
+{% block content %}
+
+<p>Portfolios</p>
+<div class="row">
+    <div class="col-md-3">
+        <table class="table table-striped" id="id_portfolio_table">
+            {%  for portfolio in object_list %}
+            <tr>
+                <td><a href="{% url 'portfolios:detail' portfolio.id %}">{{ portfolio.name }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+{% endblock %}

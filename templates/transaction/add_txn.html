@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load bootstrap3 %}
+
+{% block title %}
+Select Type
+{% endblock title %}
+
+{% block content %}
+    <div class="jumbotron">
+    <h3>New Transaction for {{ portfolio.name }}</h3>
+    <h4>Select a Type</h4>
+    </div>
+
+    <ul>
+        <li><a href="{% url 'transactions:add_buy' portfolio.id %}">Buy</a></li>
+        <li><a href="{% url 'transactions:add_sell' portfolio.id %}">Sell</a></li>
+        <li><a href="{% url 'transactions:add_dividend' portfolio.id %}">Divident</a></li>
+        <li><a href="{% url 'transactions:add_split' portfolio.id %}">Split</a></li>
+    </ul>
+
+{% endblock content %}
