@@ -1,11 +1,11 @@
-from django.shortcuts import render
-from django.views.generic.edit import CreateView
+from django.shortcuts import render, get_object_or_404
+from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic import TemplateView
-from django.shortcuts import get_object_or_404
+from django.core.urlresolvers import reverse, reverse_lazy
 
 from .models import BuyTransaction, SellTransaction,DividendTrasaction, SplitTransaction
 from portfolio.models import Portfolio
-
+from .forms import BuyTxnCreateForm
 
 class AddTxnView(TemplateView):
     template_name = 'transaction/add_txn.html'
@@ -17,11 +17,11 @@ class AddTxnView(TemplateView):
         return context
 
 
-class TxCreateViewBase(CreateView):
+class TxnCreateViewBase(CreateView):
     template_name = 'transaction/add_one_txn.html'
 
     def get_context_data(self, **kwargs):
-        context = super(TxCreateViewBase, self).get_context_data(**kwargs)
+        context = super(TxnCreateViewBase, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         context['portfolio'] = portfolio
         return context
@@ -30,45 +30,75 @@ class TxCreateViewBase(CreateView):
         new_txn = form.save(commit=False)
         new_txn.portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         new_txn.save()
-        return super(TxCreateViewBase, self).form_valid(form)
+        return super(TxnCreateViewBase, self).form_valid(form)
 
 
-class BuyTxCreateView(TxCreateViewBase):
+class BuyTxnCreateView(TxnCreateViewBase):
     model = BuyTransaction
-    fields = ['security', 'datetime', 'price', 'shares', 'fee']
+    form_class = BuyTxnCreateForm
 
     def get_context_data(self, **kwargs):
-        context = super(BuyTxCreateView, self).get_context_data(**kwargs)
+        context = super(BuyTxnCreateView, self).get_context_data(**kwargs)
         context['title'] = 'Buy'
         return context
 
 
-class SellTxCreateView(TxCreateViewBase):
+class SellTxnCreateView(TxnCreateViewBase):
     model = SellTransaction
     fields = ['security', 'datetime', 'price', 'shares', 'fee']
 
     def get_context_data(self, **kwargs):
-        context = super(SellTxCreateView, self).get_context_data(**kwargs)
+        context = super(SellTxnCreateView, self).get_context_data(**kwargs)
         context['title'] = 'Sell'
         return context
 
 
-class DividendTxCreateView(TxCreateViewBase):
+class DividendTxnCreateView(TxnCreateViewBase):
     model = DividendTrasaction
     fields = ['security', 'datetime', 'value']
 
     def get_context_data(self, **kwargs):
-        context = super(DividendTxCreateView, self).get_context_data(**kwargs)
+        context = super(DividendTxnCreateView, self).get_context_data(**kwargs)
         context['title'] = 'Dividend'
         return context
 
 
-class SplitTxCreateView(TxCreateViewBase):
+class SplitTxnCreateView(TxnCreateViewBase):
     model = SplitTransaction
     fields = ['security', 'datetime', 'ratio']
 
     def get_context_data(self, **kwargs):
-        context = super(SplitTxCreateView, self).get_context_data(**kwargs)
+        context = super(SplitTxnCreateView, self).get_context_data(**kwargs)
         context['title'] = 'Split'
         return context
+
+
+class TxnDeleteViewBase(DeleteView):
+    template_name = 'common/delete_confirm.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(TxnDeleteViewBase, self).get_context_data(**kwargs)
+        context['confirm_title'] = 'Delete Transaction'
+        context['confirm_msg'] = r'<p>Confirm Delete<p><h3>{}</h3>'.format(
+            self.object.as_p())
+        return context
+
+    def get_success_url(self):
+        return reverse('portfolios:detail', args=[self.object.portfolio.id])
+
+
+class BuyTxnDeleteView(TxnDeleteViewBase):
+    model = BuyTransaction
+
+
+class SellTxnDeleteView(TxnDeleteViewBase):
+    model = SellTransaction
+
+
+class DividendTxnDeleteView(TxnDeleteViewBase):
+    model = DividendTrasaction
+
+
+class SplitTxnDeleteView(TxnDeleteViewBase):
+    model = SplitTransaction
 

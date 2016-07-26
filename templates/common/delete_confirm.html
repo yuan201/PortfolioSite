@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block title %}
+{{ confirm_title }}
+{% endblock title %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-3">
+        {{ confirm_msg|safe }}
+        <form rol="form" method="POST">
+            {% csrf_token %}
+            {% buttons submit="OK" reset="Cancel" %}{% endbuttons %}
+        </form>
+    </div>
+</div>
+
+{% endblock content %}

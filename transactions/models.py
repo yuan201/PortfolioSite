@@ -2,6 +2,9 @@ from datetime import datetime, date
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from .misc import build_del_link
+
+from .exceptions import SellMoreThanHold
 
 
 class Security(models.Model):
@@ -49,6 +52,9 @@ class BuyTransaction(Transaction):
     def cash_value(self):
         return -self.price * self.shares - self.fee
 
+    def as_p(self):
+        return str(self)
+
     def as_t(self):
         return "<td>{type}</td>" \
                 "<td>{date:%Y-%m-%d}</td>" \
@@ -58,11 +64,13 @@ class BuyTransaction(Transaction):
                 "<td>{price:.2f}</td>" \
                 "<td>{fee:.2f}</td>" \
                 "<td>{cash_value:.2f}</td>" \
-                "<td>{ratio}</td>".format(
+                "<td>{ratio}</td>" \
+                "<td>{del_link}</td>".format(
                 type="Buy",date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares=self.shares,
                 price=self.price, fee=self.fee, cash_value=self.cash_value(),
                 ratio='',
+                del_link=build_del_link(reverse('transactions:del_buy', args=[self.id])),
         )
 
     def transact(self, holding):
@@ -85,6 +93,9 @@ class SellTransaction(Transaction):
     def cash_value(self):
         return self.price * self.shares - self.fee
 
+    def as_p(self):
+        return str(self)
+
     def as_t(self):
         return "<td>{type}</td>" \
                 "<td>{date:%Y-%m-%d}</td>" \
@@ -94,11 +105,13 @@ class SellTransaction(Transaction):
                 "<td>{price:.2f}</td>" \
                 "<td>{fee:.2f}</td>" \
                 "<td>{cash_value:.2f}</td>" \
-                "<td>{ratio}</td>".format(
+                "<td>{ratio}</td>" \
+                "<td>{del_link}</td>".format(
                 type="Sell",date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares=self.shares,
                 price=self.price, fee=self.fee, cash_value=self.cash_value(),
                 ratio='',
+                del_link=build_del_link(reverse('transactions:del_sell', args=[self.id])),
                 )
 
     def transact(self, holding):
@@ -111,10 +124,6 @@ class SellTransaction(Transaction):
         return holding
 
 
-class SellMoreThanHold(Exception):
-    pass
-
-
 class DividendTrasaction(Transaction):
 
     value = models.DecimalField(decimal_places=4, max_digits=15)
@@ -123,6 +132,9 @@ class DividendTrasaction(Transaction):
         return "On {}, {}({}) paid {} dividend".format(
             self.datetime, self.security.name, self.security.symbol, self.value
         )
+
+    def as_p(self):
+        return str(self)
 
     def as_t(self):
         return "<td>{type}</td>" \
@@ -133,10 +145,12 @@ class DividendTrasaction(Transaction):
                 "<td>{price}</td>" \
                 "<td>{fee}</td>" \
                 "<td>{cash_value:.2f}</td>" \
-                "<td>{ratio}</td>".format(
+                "<td>{ratio}</td>" \
+                "<td>{del_link}</td>".format(
                 type="Dividend", date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares='', price='', fee='',
                 cash_value=self.value, ratio='',
+                del_link=build_del_link(reverse('transactions:del_dividend', args=[self.id])),
                 )
 
     def transact(self, holding):
@@ -153,6 +167,9 @@ class SplitTransaction(Transaction):
             self.datetime, self.security.name, self.security.symbol, self.ratio
         )
 
+    def as_p(self):
+        return str(self)
+
     def as_t(self):
         return "<td>{type}</td>" \
                 "<td>{date:%Y-%m-%d}</td>" \
@@ -162,10 +179,12 @@ class SplitTransaction(Transaction):
                 "<td>{price}</td>" \
                 "<td>{fee}</td>" \
                 "<td>{cash_value}</td>" \
-                "<td>{ratio:.2f}</td>".format(
+                "<td>{ratio:.2f}</td>" \
+                "<td>{del_link}</td>".format(
                 type="Split", date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares='', price='', fee='',
                 cash_value='', ratio=self.ratio,
+                del_link=build_del_link(reverse('transactions:del_split', args=[self.id])),
                 )
 
     def transact(self, holding):

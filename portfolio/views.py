@@ -32,3 +32,8 @@ class PortfolioDetailView(DetailView):
         context['transactions'] = portfolio.transactions()
         context['holdings'] = portfolio.holdings(datetime.datetime.now()).values()
         return context
+
+
+
+
+
