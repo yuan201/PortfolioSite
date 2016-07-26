@@ -5,7 +5,8 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from .models import BuyTransaction, SellTransaction,DividendTrasaction, SplitTransaction
 from portfolio.models import Portfolio
-from .forms import BuyTxnCreateForm
+from .forms import BuyTxnCreateForm, SellTxnCreateForm
+
 
 class AddTxnView(TemplateView):
     template_name = 'transaction/add_txn.html'
@@ -32,6 +33,11 @@ class TxnCreateViewBase(CreateView):
         new_txn.save()
         return super(TxnCreateViewBase, self).form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(TxnCreateViewBase, self).get_form_kwargs()
+        kwargs['portfolio'] = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
+        return kwargs
+
 
 class BuyTxnCreateView(TxnCreateViewBase):
     model = BuyTransaction
@@ -45,7 +51,7 @@ class BuyTxnCreateView(TxnCreateViewBase):
 
 class SellTxnCreateView(TxnCreateViewBase):
     model = SellTransaction
-    fields = ['security', 'datetime', 'price', 'shares', 'fee']
+    form_class = SellTxnCreateForm
 
     def get_context_data(self, **kwargs):
         context = super(SellTxnCreateView, self).get_context_data(**kwargs)

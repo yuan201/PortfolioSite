@@ -1,4 +1,5 @@
 from datetime import datetime, date
+from decimal import getcontext
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -6,6 +7,8 @@ from .misc import build_del_link
 
 from .exceptions import SellMoreThanHold
 
+PREC = getcontext().prec
+MAXD = PREC + 10
 
 class Security(models.Model):
 
@@ -40,9 +43,9 @@ class Transaction(models.Model):
 
 class BuyTransaction(Transaction):
 
-    price = models.DecimalField(decimal_places=4, max_digits=15)
+    price = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
     shares = models.IntegerField()
-    fee = models.DecimalField(decimal_places=4, max_digits=15)
+    fee = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {} Buy {} share of {}({}) @ {}".format(
@@ -81,9 +84,9 @@ class BuyTransaction(Transaction):
 
 class SellTransaction(Transaction):
 
-    price = models.DecimalField(decimal_places=4, max_digits=15)
+    price = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
     shares = models.IntegerField()
-    fee = models.DecimalField(decimal_places=4, max_digits=15)
+    fee = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {} Sell {} share of {}({}) @ {}".format(
@@ -126,7 +129,7 @@ class SellTransaction(Transaction):
 
 class DividendTrasaction(Transaction):
 
-    value = models.DecimalField(decimal_places=4, max_digits=15)
+    value = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {}, {}({}) paid {} dividend".format(
@@ -160,7 +163,7 @@ class DividendTrasaction(Transaction):
 
 class SplitTransaction(Transaction):
 
-    ratio = models.DecimalField(decimal_places=4, max_digits=10)
+    ratio = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {}, {}({}) split {}".format(
