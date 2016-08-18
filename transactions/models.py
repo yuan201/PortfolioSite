@@ -3,12 +3,24 @@ from decimal import getcontext
 
 from django.db import models
 from django.core.urlresolvers import reverse
-from .misc import build_del_link
+from django.core import validators
+from django.core.validators import ValidationError
 
+from .misc import build_del_link
 from .exceptions import SellMoreThanHold
 
 PREC = getcontext().prec
 MAXD = PREC + 10
+
+
+def PositiveValidator(value):
+    if value < 0:
+        raise ValidationError(_('Negative value'), code='negative')
+
+
+class PositiveDecimalField(models.DecimalField):
+    default_validators = [PositiveValidator]
+
 
 class Security(models.Model):
 
@@ -43,9 +55,9 @@ class Transaction(models.Model):
 
 class BuyTransaction(Transaction):
 
-    price = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
-    shares = models.IntegerField()
-    fee = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
+    price = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    shares = models.PositiveIntegerField()
+    fee = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {} Buy {} share of {}({}) @ {}".format(
@@ -84,9 +96,9 @@ class BuyTransaction(Transaction):
 
 class SellTransaction(Transaction):
 
-    price = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
-    shares = models.IntegerField()
-    fee = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
+    price = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    shares = models.PositiveIntegerField()
+    fee = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {} Sell {} share of {}({}) @ {}".format(
@@ -129,7 +141,7 @@ class SellTransaction(Transaction):
 
 class DividendTrasaction(Transaction):
 
-    value = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
+    value = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {}, {}({}) paid {} dividend".format(
@@ -163,7 +175,7 @@ class DividendTrasaction(Transaction):
 
 class SplitTransaction(Transaction):
 
-    ratio = models.DecimalField(decimal_places=PREC, max_digits=MAXD)
+    ratio = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
         return "On {}, {}({}) split {}".format(

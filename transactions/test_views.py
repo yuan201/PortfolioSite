@@ -12,22 +12,34 @@ from portfolio.models import Portfolio
 
 class NewTransactionTestBase(TestCase):
 
-    def setUp(self):
-        self.s1 = Security.objects.create(name='Google', symbol='GOOG', currency='USD')
-        self.s2 = Security.objects.create(name='Apple', symbol='APPL', currency='USD')
-        self.p1 = Portfolio.objects.create(name='BigCap', description='Test')
+    @classmethod
+    def setUpClass(cls):
+        super(NewTransactionTestBase, cls).setUpClass()
+        Security.objects.create(name='Google', symbol='GOOG', currency='USD')
+        Security.objects.create(name='Apple', symbol='APPL', currency='USD')
+        Portfolio.objects.create(name='BigCap', description='Test')
+
+    @classmethod
+    def tearDownClass(cls):
+        Security.objects.all().delete()
+        Portfolio.objects.all().delete()
+        super(NewTransactionTestBase, cls).tearDownClass()
 
     def setup_buy_transaction(self):
         txndt = dt.datetime.strptime("2015-01-01 15:00:00", "%Y-%m-%d %H:%M:%S")
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
         self.t1 = BuyTransaction.objects.create(
-            security=self.s1, portfolio=self.p1, datetime=txndt,
+            security=s1, portfolio=p1, datetime=txndt,
             price=10., shares=100, fee=6.
         )
 
     def setup_sell_transaction(self):
-        txndt = dt.datetime.strptime("2015-01-01 15:00:00", "%Y-%m-%d %H:%M:%S")
+        txndt = dt.datetime.strptime("2015-01-01 15:10:00", "%Y-%m-%d %H:%M:%S")
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
         self.t2 = SellTransaction.objects.create(
-            security=self.s1, portfolio=self.p1, datetime=txndt,
+            security=s2, portfolio=p1, datetime=txndt,
             price=12., shares=50, fee=2.
         )
 
@@ -35,8 +47,10 @@ class NewTransactionTestBase(TestCase):
 class BuyTransactionCreateViewTest(NewTransactionTestBase):
 
     def test_can_post_a_new_buy_txn(self):
-        self.client.post(reverse('transactions:add_buy', args=[self.p1.id]), data={
-            'security': '1',
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
+        self.client.post(reverse('transactions:add_buy', args=[p1.id]), data={
+            'security': '{}'.format(s1.id),
             'datetime': '2015-1-1 15:00:00',
             'price': '15.3',
             'shares': '100',
@@ -44,18 +58,20 @@ class BuyTransactionCreateViewTest(NewTransactionTestBase):
         })
 
         txn = BuyTransaction.objects.first()
-        self.assertEqual(txn.security, self.s1)
-        self.assertEqual(txn.portfolio, self.p1)
-        self.assertEqual(txn.datetime, dt.datetime(2015, 1, 1, 15, 0, 0, tzinfo=dt.timezone.utc))
+        self.assertEqual(txn.security, s1)
+        self.assertEqual(txn.portfolio, p1)
+        self.assertEqual(txn.datetime, dt.datetime(2015, 1, 1, 15, 0, 0))
         self.assertAlmostEqual(txn.price, Decimal(15.3))
         self.assertEqual(txn.shares, Decimal(100))
         self.assertAlmostEqual(txn.fee, Decimal(10.1))
 
     def test_cannot_post_a_colliding_txn(self):
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
         self.setup_buy_transaction()
 
-        response = self.client.post(reverse('transactions:add_buy', args=[self.p1.id]), data={
-            'security': '1',
+        response = self.client.post(reverse('transactions:add_buy', args=[p1.id]), data={
+            'security': '{}'.format(s1.id),
             'datetime': '2015-01-01 15:00:00',
             'price': '12.0',
             'shares': '200',
@@ -68,8 +84,11 @@ class BuyTransactionCreateViewTest(NewTransactionTestBase):
 class SellTransactionCreateViewTest(NewTransactionTestBase):
 
     def test_can_post_a_new_sell_txn(self):
-        self.client.post(reverse('transactions:add_sell', args=[self.p1.id]), data={
-            'security': '1',
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
+
+        self.client.post(reverse('transactions:add_sell', args=[p1.id]), data={
+            'security': '{}'.format(s1.id),
             'datetime': '2015-7-6 9:30:00',
             'price': '26.2',
             'shares': '1000',
@@ -77,10 +96,62 @@ class SellTransactionCreateViewTest(NewTransactionTestBase):
         })
 
         txn = SellTransaction.objects.first()
-        self.assertEqual(txn.security, self.s1)
-        self.assertEqual(txn.portfolio, self.p1)
-        self.assertEqual(txn.datetime, dt.datetime(2015, 7, 6, 9, 30, 0, tzinfo=dt.timezone.utc))
+        self.assertEqual(txn.security, s1)
+        self.assertEqual(txn.portfolio, p1)
+        self.assertEqual(txn.datetime, dt.datetime(2015, 7, 6, 9, 30, 0))
         self.assertAlmostEqual(txn.price, Decimal(26.2))
         self.assertEqual(txn.shares, Decimal(1000))
         self.assertAlmostEqual(txn.fee, Decimal(25.4))
 
+    def test_can_NOT_post_a_colling_txn(self):
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
+        self.setup_sell_transaction()
+
+        response = self.client.post(reverse('transactions:add_sell', args=[p1.id]), data={
+            'security': '{}'.format(s2.id),
+            'datetime': '2015-01-01 15:10:00',
+            'price': '13.5',
+            'shares': '300',
+            'fee': '15.3',
+        })
+
+        self.assertFormError(response, 'form', None, "Transaction Already Exists")
+
+
+class SplitTransactionCreateViewTest(NewTransactionTestBase):
+
+    def test_can_post_a_new_split_txn(self):
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
+
+        self.client.post(reverse('transactions:add_split', args=[p1.id]), data={
+            'security': '{}'.format(s2.id),
+            'datetime': '2015-5-3 10:24:00',
+            'ratio': '1.5',
+        })
+
+        txn = SplitTransaction.objects.first()
+        self.assertEqual(txn.security, s2)
+        self.assertEqual(txn.portfolio, p1)
+        self.assertEqual(txn.datetime, dt.datetime(2015, 5, 3, 10, 24, 0))
+        self.assertAlmostEqual(txn.ratio, Decimal(1.5))
+
+
+class DividendTransactionCreateViewTest(NewTransactionTestBase):
+
+    def test_can_post_a_new_dividend_txn(self):
+        s1, s2 = Security.objects.all()
+        p1 = Portfolio.objects.first()
+
+        self.client.post(reverse('transactions:add_dividend', args=[p1.id]), data={
+            'security': '{}'.format(s2.id),
+            'datetime': '2015-3-2 11:30:00',
+            'value': '120',
+        })
+
+        txn = DividendTrasaction.objects.first()
+        self.assertEqual(txn.security, s2)
+        self.assertEqual(txn.portfolio, p1)
+        self.assertEqual(txn.datetime, dt.datetime(2015, 3, 2, 11, 30, 0))
+        self.assertAlmostEqual(txn.value, Decimal(120.))

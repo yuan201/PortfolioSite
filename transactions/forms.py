@@ -1,6 +1,7 @@
 from django import forms
 
 from .models import BuyTransaction, SellTransaction, DividendTrasaction, SplitTransaction
+from .models import Security
 
 
 class TxnFormMixin():
@@ -25,10 +26,6 @@ class BuyTxnCreateForm(TxnFormMixin, forms.ModelForm):
         model = BuyTransaction
         fields = ('security', 'datetime', 'price', 'shares', 'fee')
 
-    #def __init__(self, **kwargs):
-    #    self.portfolio = kwargs.pop('portfolio')
-    #    super().__init__(**kwargs)
-
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, BuyTransaction)
@@ -46,3 +43,26 @@ class SellTxnCreateForm(TxnFormMixin, forms.ModelForm):
         self.check_duplicate_txn(cleaned_data, SellTransaction)
         return cleaned_data
 
+
+class DividendTxnCreateForm(TxnFormMixin, forms.ModelForm):
+
+    class Meta:
+        model = DividendTrasaction
+        fields = ('security', 'datetime', 'value')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        self.check_duplicate_txn(cleaned_data, DividendTrasaction)
+        return cleaned_data
+
+
+class SplitTxnCreateForm(TxnFormMixin, forms.ModelForm):
+
+    class Meta:
+        model = SplitTransaction
+        fields = ('security', 'datetime', 'ratio')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        self.check_duplicate_txn(cleaned_data, SplitTransaction)
+        return cleaned_data
