@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core import validators
 from django.core.validators import ValidationError
 
-from .misc import build_del_link
+from .misc import build_link
 from .exceptions import SellMoreThanHold
 
 PREC = getcontext().prec
@@ -80,12 +80,14 @@ class BuyTransaction(Transaction):
                 "<td>{fee:.2f}</td>" \
                 "<td>{cash_value:.2f}</td>" \
                 "<td>{ratio}</td>" \
-                "<td>{del_link}</td>".format(
+                "<td>{del_link}</td>" \
+                "<td>{update_link}</td>".format(
                 type="Buy",date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares=self.shares,
                 price=self.price, fee=self.fee, cash_value=self.cash_value(),
                 ratio='',
-                del_link=build_del_link(reverse('transactions:del_buy', args=[self.id])),
+                del_link=build_link(reverse('transactions:del_buy', args=[self.id]), 'Del'),
+                update_link=build_link(reverse('transactions:update_buy', args=[self.id]), 'Update'),
         )
 
     def transact(self, holding):
@@ -121,12 +123,14 @@ class SellTransaction(Transaction):
                 "<td>{fee:.2f}</td>" \
                 "<td>{cash_value:.2f}</td>" \
                 "<td>{ratio}</td>" \
-                "<td>{del_link}</td>".format(
+                "<td>{del_link}</td>" \
+                "<td>{update_link}</td>".format(
                 type="Sell",date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares=self.shares,
                 price=self.price, fee=self.fee, cash_value=self.cash_value(),
                 ratio='',
-                del_link=build_del_link(reverse('transactions:del_sell', args=[self.id])),
+                del_link=build_link(reverse('transactions:del_sell', args=[self.id]), 'Del'),
+                update_link=build_link(reverse('transactions:update_sell', args=[self.id]), 'Update'),
                 )
 
     def transact(self, holding):
@@ -139,7 +143,7 @@ class SellTransaction(Transaction):
         return holding
 
 
-class DividendTrasaction(Transaction):
+class DividendTransaction(Transaction):
 
     value = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
@@ -161,11 +165,13 @@ class DividendTrasaction(Transaction):
                 "<td>{fee}</td>" \
                 "<td>{cash_value:.2f}</td>" \
                 "<td>{ratio}</td>" \
-                "<td>{del_link}</td>".format(
+                "<td>{del_link}</td>" \
+                "<td>{update_link}</td>".format(
                 type="Dividend", date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares='', price='', fee='',
                 cash_value=self.value, ratio='',
-                del_link=build_del_link(reverse('transactions:del_dividend', args=[self.id])),
+                del_link=build_link(reverse('transactions:del_dividend', args=[self.id]), 'Del'),
+                update_link=build_link(reverse('transactions:update_dividend', args=[self.id]), 'Update'),
                 )
 
     def transact(self, holding):
@@ -195,11 +201,13 @@ class SplitTransaction(Transaction):
                 "<td>{fee}</td>" \
                 "<td>{cash_value}</td>" \
                 "<td>{ratio:.2f}</td>" \
-                "<td>{del_link}</td>".format(
+                "<td>{del_link}</td>" \
+                "<td>{update_link}</td>".format(
                 type="Split", date=self.datetime, name=self.security.name,
                 symbol=self.security.symbol, shares='', price='', fee='',
                 cash_value='', ratio=self.ratio,
-                del_link=build_del_link(reverse('transactions:del_split', args=[self.id])),
+                del_link=build_link(reverse('transactions:del_split', args=[self.id]), 'Del'),
+                update_link=build_link(reverse('transactions:update_split', args=[self.id]), 'Update'),
                 )
 
     def transact(self, holding):

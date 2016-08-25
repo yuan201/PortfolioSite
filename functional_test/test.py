@@ -41,8 +41,8 @@ class NewPortfolioTest(StaticLiveServerTestCase):
         self.assertIn('Value', page_text)
 
         # Follow the link on the portfolio name, he finds a page summaries the portfolio
-        link = self.browser.find_element_by_link_text('Value')
-        link.click()
+        # link = self.browser.find_element_by_link_text('Value')
+        # link.click()
 
 
 

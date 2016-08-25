@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-from .models import BuyTransaction, SellTransaction, DividendTrasaction
+from .models import BuyTransaction, SellTransaction, DividendTransaction
 from .models import SplitTransaction, Holding, Security
 from portfolio.models import Portfolio
 
@@ -147,10 +147,10 @@ class DividendTransactionCreateViewTest(NewTransactionTestBase):
         self.client.post(reverse('transactions:add_dividend', args=[p1.id]), data={
             'security': '{}'.format(s2.id),
             'datetime': '2015-3-2 11:30:00',
-            'value': '120',
+             'value': '120',
         })
 
-        txn = DividendTrasaction.objects.first()
+        txn = DividendTransaction.objects.first()
         self.assertEqual(txn.security, s2)
         self.assertEqual(txn.portfolio, p1)
         self.assertEqual(txn.datetime, dt.datetime(2015, 3, 2, 11, 30, 0))

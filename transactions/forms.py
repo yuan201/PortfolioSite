@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import BuyTransaction, SellTransaction, DividendTrasaction, SplitTransaction
+from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction
 from .models import Security
 
 
@@ -20,11 +20,16 @@ class TxnFormMixin():
         super().__init__(**kwargs)
 
 
-class BuyTxnCreateForm(TxnFormMixin, forms.ModelForm):
+class BuyTxnUpdateForm(TxnFormMixin, forms.ModelForm):
+
+    model = BuyTransaction
 
     class Meta:
         model = BuyTransaction
         fields = ('security', 'datetime', 'price', 'shares', 'fee')
+
+
+class BuyTxnCreateForm(BuyTxnUpdateForm):
 
     def clean(self):
         cleaned_data = super().clean()
@@ -32,11 +37,16 @@ class BuyTxnCreateForm(TxnFormMixin, forms.ModelForm):
         return cleaned_data
 
 
-class SellTxnCreateForm(TxnFormMixin, forms.ModelForm):
+class SellTxnUpdateForm(TxnFormMixin, forms.ModelForm):
+
+    model = SellTransaction
 
     class Meta:
         model = SellTransaction
         fields = ('security', 'datetime', 'price', 'shares', 'fee')
+
+
+class SellTxnCreateForm(SellTxnUpdateForm):
 
     def clean(self):
         cleaned_data = super().clean()
@@ -44,23 +54,33 @@ class SellTxnCreateForm(TxnFormMixin, forms.ModelForm):
         return cleaned_data
 
 
-class DividendTxnCreateForm(TxnFormMixin, forms.ModelForm):
+class DividendTxnUpdateForm(TxnFormMixin, forms.ModelForm):
+
+    model = DividendTransaction
 
     class Meta:
-        model = DividendTrasaction
+        model = DividendTransaction
         fields = ('security', 'datetime', 'value')
+
+
+class DividendTxnCreateForm(DividendTxnUpdateForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        self.check_duplicate_txn(cleaned_data, DividendTrasaction)
+        self.check_duplicate_txn(cleaned_data, DividendTransaction)
         return cleaned_data
 
 
-class SplitTxnCreateForm(TxnFormMixin, forms.ModelForm):
+class SplitTxnUpdateForm(TxnFormMixin, forms.ModelForm):
+
+    model = SplitTransaction
 
     class Meta:
         model = SplitTransaction
         fields = ('security', 'datetime', 'ratio')
+
+
+class SplitTxnCreateForm(SplitTxnUpdateForm):
 
     def clean(self):
         cleaned_data = super().clean()

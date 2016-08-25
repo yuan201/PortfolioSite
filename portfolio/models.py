@@ -4,7 +4,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 from transactions.models import BuyTransaction, SellTransaction, \
-    SplitTransaction, DividendTrasaction, Security, Holding
+    SplitTransaction, DividendTransaction, Security, Holding
 
 
 class Portfolio(models.Model):
@@ -23,7 +23,7 @@ class Portfolio(models.Model):
     def transactions(self):
         txns = list(BuyTransaction.objects.filter(portfolio=self).all())
         txns += list(SellTransaction.objects.filter(portfolio=self).all())
-        txns += list(DividendTrasaction.objects.filter(portfolio=self).all())
+        txns += list(DividendTransaction.objects.filter(portfolio=self).all())
         txns += list(SplitTransaction.objects.filter(portfolio=self).all())
         txns.sort()
         return txns
