@@ -5,8 +5,19 @@ from .models import Security
 
 
 class TxnFormMixin():
-
+    """
+    Mixin class for all transactions create forms. Provide a few common functions.
+    """
     def check_duplicate_txn(self, cleaned_data, txn_cls):
+        """
+        Use the form message system to report if the transaction to add already
+        exists. If another transaction of the same type, for the same security and
+        occurs at the same time is found in the system, the new transaction is considered
+        a duplicate.
+        :param cleaned_data:
+        :param txn_cls:
+        :return:
+        """
         security = cleaned_data.get('security')
         datetime = cleaned_data.get('datetime')
 
@@ -16,12 +27,19 @@ class TxnFormMixin():
             self.add_error(None, msg)
 
     def __init__(self, **kwargs):
+        """
+        When creating the transaction, the portfolio the new transaction belongs to is
+        already defined. This parameter is passed in through kwargs.
+        :param kwargs:
+        """
         self.portfolio = kwargs.pop('portfolio')
         super().__init__(**kwargs)
 
 
-class BuyTxnUpdateForm(TxnFormMixin, forms.ModelForm):
-
+class BuyTxnUpdateForm(forms.ModelForm):
+    """
+    BuyTxnUpdateForm is used to update an existing buy transaction
+    """
     model = BuyTransaction
 
     class Meta:
@@ -29,16 +47,20 @@ class BuyTxnUpdateForm(TxnFormMixin, forms.ModelForm):
         fields = ('security', 'datetime', 'price', 'shares', 'fee')
 
 
-class BuyTxnCreateForm(BuyTxnUpdateForm):
-
+class BuyTxnCreateForm(TxnFormMixin, BuyTxnUpdateForm):
+    """
+    BuyTxnCreateFrom is used to create a new buy transaction.
+    """
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, BuyTransaction)
         return cleaned_data
 
 
-class SellTxnUpdateForm(TxnFormMixin, forms.ModelForm):
-
+class SellTxnUpdateForm(forms.ModelForm):
+    """
+    SellTxnUpdateForm is used to update an existing sell transaction.
+    """
     model = SellTransaction
 
     class Meta:
@@ -46,16 +68,20 @@ class SellTxnUpdateForm(TxnFormMixin, forms.ModelForm):
         fields = ('security', 'datetime', 'price', 'shares', 'fee')
 
 
-class SellTxnCreateForm(SellTxnUpdateForm):
-
+class SellTxnCreateForm(TxnFormMixin, SellTxnUpdateForm):
+    """
+    SellTxnCreateForm is used to create a new sell transaction.
+    """
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, SellTransaction)
         return cleaned_data
 
 
-class DividendTxnUpdateForm(TxnFormMixin, forms.ModelForm):
-
+class DividendTxnUpdateForm(forms.ModelForm):
+    """
+    DividendTxnUpdateForm is used to update an existing dividend transaction.
+    """
     model = DividendTransaction
 
     class Meta:
@@ -63,16 +89,20 @@ class DividendTxnUpdateForm(TxnFormMixin, forms.ModelForm):
         fields = ('security', 'datetime', 'value')
 
 
-class DividendTxnCreateForm(DividendTxnUpdateForm):
-
+class DividendTxnCreateForm(TxnFormMixin, DividendTxnUpdateForm):
+    """
+    DividendTxnCreateForm is used to create a new dividend transaction.
+    """
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, DividendTransaction)
         return cleaned_data
 
 
-class SplitTxnUpdateForm(TxnFormMixin, forms.ModelForm):
-
+class SplitTxnUpdateForm(forms.ModelForm):
+    """
+    SplitTxnUpdateForm is used to update an existing split transaction.
+    """
     model = SplitTransaction
 
     class Meta:
@@ -80,8 +110,10 @@ class SplitTxnUpdateForm(TxnFormMixin, forms.ModelForm):
         fields = ('security', 'datetime', 'ratio')
 
 
-class SplitTxnCreateForm(SplitTxnUpdateForm):
-
+class SplitTxnCreateForm(TxnFormMixin, SplitTxnUpdateForm):
+    """
+    SplitTxnCreateForm is used to create a new split transaction.
+    """
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, SplitTransaction)

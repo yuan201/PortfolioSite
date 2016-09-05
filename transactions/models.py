@@ -23,7 +23,10 @@ class PositiveDecimalField(models.DecimalField):
 
 
 class Security(models.Model):
-
+    """
+    The Security model is used to represent a security that can be
+    traded on some market.
+    """
     symbol = models.CharField(max_length=20)
     name = models.CharField(max_length=50)
     currency = models.CharField(max_length=10, default='')
@@ -38,7 +41,9 @@ class Security(models.Model):
 
 
 class Transaction(models.Model):
-
+    """
+    The Transactions model is a base model for all types of transactions
+    """
     security = models.ForeignKey(Security)
     datetime = models.DateTimeField()
     portfolio = models.ForeignKey("portfolio.Portfolio", on_delete=models.CASCADE)
@@ -54,7 +59,9 @@ class Transaction(models.Model):
 
 
 class BuyTransaction(Transaction):
-
+    """
+    A BuyTransaction represents a buy.
+    """
     price = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
     shares = models.PositiveIntegerField()
     fee = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
@@ -91,13 +98,21 @@ class BuyTransaction(Transaction):
         )
 
     def transact(self, holding):
+        """
+        the transact function operate on a holding according to the transaction and
+        return the new holding
+        :param holding:
+        :return holding:
+        """
         holding.shares += self.shares
         holding.cost += self.cash_value()
         return holding
 
 
 class SellTransaction(Transaction):
-
+    """
+    A SellTransaction represents a sell.
+    """
     price = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
     shares = models.PositiveIntegerField()
     fee = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
@@ -134,6 +149,13 @@ class SellTransaction(Transaction):
                 )
 
     def transact(self, holding):
+        """
+        the transact function operate on a holding, raise SellMoreThanHold if the holding
+        doesn't have enough shares to sell. Otherwise, it removes the shares from the holding,
+        calculate the gain/loss based on average cost and return new holding.
+        :param holding:
+        :return holding:
+        """
         if self.shares > holding.shares:
             raise SellMoreThanHold
         cost_s = holding.cost_per_share()
@@ -144,7 +166,9 @@ class SellTransaction(Transaction):
 
 
 class DividendTransaction(Transaction):
-
+    """
+    A DividendTransaction represents dividend from the security.
+    """
     value = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
@@ -180,7 +204,9 @@ class DividendTransaction(Transaction):
 
 
 class SplitTransaction(Transaction):
-
+    """
+    A SplitTransaction represents split/reverse split of a security.
+    """
     ratio = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
 
     def __str__(self):
@@ -216,7 +242,10 @@ class SplitTransaction(Transaction):
 
 
 class Holding():
-
+    """
+    A Holding is one item in a portfolio. It represents a particular security, how much
+    shares has, total cost and any gain/loss, dividend received from this security.
+    """
     def __init__(self, security, shares, cost):
         self.security = security
         self.shares = shares
@@ -251,6 +280,11 @@ class Holding():
                )
 
     def cost_per_share(self):
+        """
+        The cost is generally a negative number representing cash outflow. Since cost per
+        share is more interesting in absolute terms, the conversion is performed in the func.
+        :return cost per share in absolute number:
+        """
         return -self.cost/self.shares
 
 

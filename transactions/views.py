@@ -19,11 +19,9 @@ class AddTxnView(TemplateView):
         return context
 
 
-class TxnCreateUpdateMixin(object):
-    template_name = 'transaction/add_update_txn.html'
-
+class TxnCreateMixin(object):
     def get_context_data(self, **kwargs):
-        context = super(TxnCreateUpdateMixin, self).get_context_data(**kwargs)
+        context = super(TxnCreateMixin, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         context['portfolio'] = portfolio
         return context
@@ -32,21 +30,25 @@ class TxnCreateUpdateMixin(object):
         new_txn = form.save(commit=False)
         new_txn.portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         new_txn.save()
-        return super(TxnCreateUpdateMixin, self).form_valid(form)
+        return super(TxnCreateMixin, self).form_valid(form)
 
     def get_form_kwargs(self):
-        kwargs = super(TxnCreateUpdateMixin, self).get_form_kwargs()
+        kwargs = super(TxnCreateMixin, self).get_form_kwargs()
         kwargs['portfolio'] = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         return kwargs
 
+
+class TxnTemplateTitleHeaderMixin(object):
+    template_name = 'transaction/add_update_txn.html'
+
     def get_context_data(self, **kwargs):
-        context = super(TxnCreateUpdateMixin, self).get_context_data(**kwargs)
+        context = super(TxnTemplateTitleHeaderMixin, self).get_context_data(**kwargs)
         context['title'] = self.title
         context['header'] = self.header
         return context
 
 
-class BuyTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
+class BuyTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
     model = BuyTransaction
     form_class = BuyTxnCreateForm
 
@@ -55,7 +57,7 @@ class BuyTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
         self.header = 'New Buy Transaction'
 
 
-class SellTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
+class SellTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
     model = SellTransaction
     form_class = SellTxnCreateForm
 
@@ -64,7 +66,7 @@ class SellTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
         self.header = 'New Sell Transaction'
 
 
-class DividendTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
+class DividendTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
     model = DividendTransaction
     form_class = DividendTxnCreateForm
 
@@ -73,7 +75,7 @@ class DividendTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
         self.header = 'New Dividend Transaction'
 
 
-class SplitTxnCreateUpdateView(TxnCreateUpdateMixin, CreateView):
+class SplitTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
     model = SplitTransaction
     form_class = SplitTxnCreateForm
 
@@ -112,7 +114,7 @@ class SplitTxnDeleteView(TxnDeleteMixin, DeleteView):
     model = SplitTransaction
 
 
-class BuyTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
+class BuyTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
     model = BuyTransaction
     form_class = BuyTxnUpdateForm
 
@@ -121,7 +123,7 @@ class BuyTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
         self.header = 'Update Buy Transaction'
 
 
-class SellTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
+class SellTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
     model = SellTransaction
     form_class = SellTxnUpdateForm
 
@@ -130,7 +132,7 @@ class SellTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
         self.header = 'Update Sell Transaction'
 
 
-class DividendTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
+class DividendTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
     model = DividendTransaction
     form_class = DividendTxnUpdateForm
 
@@ -139,7 +141,7 @@ class DividendTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
         self.header = 'Update Dividend Transaction'
 
 
-class SplitTxnUpdateView(TxnCreateUpdateMixin, UpdateView):
+class SplitTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
     model = SplitTransaction
     form_class = SplitTxnUpdateForm
 

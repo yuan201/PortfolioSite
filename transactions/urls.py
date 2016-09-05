@@ -1,25 +1,25 @@
 from django.conf.urls import url
 
-from .views import BuyTxnCreateUpdateView, AddTxnView, SellTxnCreateUpdateView, DividendTxnCreateUpdateView, SplitTxnCreateUpdateView
+from .views import BuyTxnCreateView, AddTxnView, SellTxnCreateView, DividendTxnCreateView, SplitTxnCreateView
 from .views import BuyTxnDeleteView, SellTxnDeleteView, DividendTxnDeleteView, SplitTxnDeleteView
 from .views import BuyTxnUpdateView, SellTxnUpdateView, DividendTxnUpdateView, SplitTxnUpdateView
 
 
 urlpatterns = [
     url(regex=r'^(?P<pk>[0-9]+)/add_buy$',
-        view=BuyTxnCreateUpdateView.as_view(),
+        view=BuyTxnCreateView.as_view(),
         name="add_buy"),
 
     url(regex=r'^(?P<pk>[0-9]+)/add_sell$',
-        view=SellTxnCreateUpdateView.as_view(),
+        view=SellTxnCreateView.as_view(),
         name="add_sell"),
 
     url(regex=r'^(?P<pk>[0-9]+)/add_divident$',
-        view=DividendTxnCreateUpdateView.as_view(),
+        view=DividendTxnCreateView.as_view(),
         name="add_dividend"),
 
     url(regex=r'^(?P<pk>[0-9]+)/add_split$',
-        view=SplitTxnCreateUpdateView.as_view(),
+        view=SplitTxnCreateView.as_view(),
         name="add_split"),
 
     url(regex=r'^(?P<pk>[0-9]+)/add$',
