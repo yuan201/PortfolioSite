@@ -6,38 +6,11 @@ from django.core.urlresolvers import reverse
 from django.core import validators
 from django.core.validators import ValidationError
 
-from .misc import build_link
+from core.utils import build_link
 from .exceptions import SellMoreThanHold
 
-PREC = getcontext().prec
-MAXD = PREC + 10
-
-
-def PositiveValidator(value):
-    if value < 0:
-        raise ValidationError(_('Negative value'), code='negative')
-
-
-class PositiveDecimalField(models.DecimalField):
-    default_validators = [PositiveValidator]
-
-
-class Security(models.Model):
-    """
-    The Security model is used to represent a security that can be
-    traded on some market.
-    """
-    symbol = models.CharField(max_length=20)
-    name = models.CharField(max_length=50)
-    currency = models.CharField(max_length=10, default='')
-
-    def __str__(self):
-        return "{}({})".format(self.name, self.symbol)
-
-    def __repr__(self):
-        return "Security(name={},symbol={},currency={}".format(
-            self.name, self.symbol, self.currency
-        )
+from core.types import PositiveDecimalField
+from securities.models import Security
 
 
 class Transaction(models.Model):
@@ -62,9 +35,9 @@ class BuyTransaction(Transaction):
     """
     A BuyTransaction represents a buy.
     """
-    price = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    price = PositiveDecimalField()
     shares = models.PositiveIntegerField()
-    fee = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    fee = PositiveDecimalField()
 
     def __str__(self):
         return "On {} Buy {} share of {}({}) @ {}".format(
@@ -113,9 +86,9 @@ class SellTransaction(Transaction):
     """
     A SellTransaction represents a sell.
     """
-    price = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    price = PositiveDecimalField()
     shares = models.PositiveIntegerField()
-    fee = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    fee = PositiveDecimalField()
 
     def __str__(self):
         return "On {} Sell {} share of {}({}) @ {}".format(
@@ -169,7 +142,7 @@ class DividendTransaction(Transaction):
     """
     A DividendTransaction represents dividend from the security.
     """
-    value = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    value = PositiveDecimalField()
 
     def __str__(self):
         return "On {}, {}({}) paid {} dividend".format(
@@ -207,7 +180,7 @@ class SplitTransaction(Transaction):
     """
     A SplitTransaction represents split/reverse split of a security.
     """
-    ratio = PositiveDecimalField(decimal_places=PREC, max_digits=MAXD)
+    ratio = PositiveDecimalField()
 
     def __str__(self):
         return "On {}, {}({}) split {}".format(

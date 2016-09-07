@@ -1,0 +1,39 @@
+import pandas as pd
+import tushare as ts
+
+
+class SymbolNotExist(Exception):
+    pass
+
+
+class UnknownQuoter(Exception):
+    pass
+
+
+class Quoter(object):
+    """
+    A Quoter give back quotes for a security or index.
+    """
+    def get_quotes(self, symbol, start, end):
+        raise NotImplemented
+
+
+class QuoterTushare(Quoter):
+    """
+    Use the TuShare library to get quote. This should work fine for all securities listed
+    in China.
+    """
+    def get_quotes(self, symbol, start, end):
+        quotes = ts.get_hist_data(symbol, start, end)
+        if quotes is not None:
+            #return quotes[['open', 'close', 'high', 'low', 'volume']]
+            return quotes[['open', 'close', 'high', 'low', 'volume']]
+        else:
+            raise SymbolNotExist()
+
+
+def quoter_factory(quoter):
+    if quoter == "Tushare":
+        return QuoterTushare()
+    else:
+        raise UnknownQuoter

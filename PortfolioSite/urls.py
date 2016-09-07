@@ -24,4 +24,6 @@ urlpatterns = [
     url(r'^$', HomePageView.as_view(), name='home'),
     url(r'^portfolio/', include('portfolio.urls', namespace='portfolios')),
     url(r'^txn/', include('transactions.urls', namespace='transactions')),
+    url(r'^sec/', include('securities.urls', namespace='securities')),
+    url(r'^quotes/', include('quotes.urls', namespace='quotes')),
 ]

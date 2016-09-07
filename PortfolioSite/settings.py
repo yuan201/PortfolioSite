@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'portfolio',
     'bootstrap3',
     'transactions',
+    'securities',
+    'quotes',
+    'benchmarks',
 ]
 
 MIDDLEWARE_CLASSES = [

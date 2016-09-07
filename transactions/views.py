@@ -7,6 +7,7 @@ from .models import BuyTransaction, SellTransaction,DividendTransaction, SplitTr
 from portfolio.models import Portfolio
 from .forms import BuyTxnCreateForm, SellTxnCreateForm, SplitTxnCreateForm, DividendTxnCreateForm
 from .forms import BuyTxnUpdateForm, SellTxnUpdateForm, DividendTxnUpdateForm, SplitTxnUpdateForm
+from core.mixins import TitleHeaderMixin
 
 
 class AddTxnView(TemplateView):
@@ -38,17 +39,11 @@ class TxnCreateMixin(object):
         return kwargs
 
 
-class TxnTemplateTitleHeaderMixin(object):
+class TxnTemplateMixin(object):
     template_name = 'transaction/add_update_txn.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(TxnTemplateTitleHeaderMixin, self).get_context_data(**kwargs)
-        context['title'] = self.title
-        context['header'] = self.header
-        return context
 
-
-class BuyTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
+class BuyTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
     model = BuyTransaction
     form_class = BuyTxnCreateForm
 
@@ -57,7 +52,7 @@ class BuyTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
         self.header = 'New Buy Transaction'
 
 
-class SellTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
+class SellTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
     model = SellTransaction
     form_class = SellTxnCreateForm
 
@@ -66,7 +61,7 @@ class SellTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView)
         self.header = 'New Sell Transaction'
 
 
-class DividendTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
+class DividendTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
     model = DividendTransaction
     form_class = DividendTxnCreateForm
 
@@ -75,7 +70,7 @@ class DividendTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateV
         self.header = 'New Dividend Transaction'
 
 
-class SplitTxnCreateView(TxnCreateMixin, TxnTemplateTitleHeaderMixin, CreateView):
+class SplitTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
     model = SplitTransaction
     form_class = SplitTxnCreateForm
 
@@ -114,7 +109,7 @@ class SplitTxnDeleteView(TxnDeleteMixin, DeleteView):
     model = SplitTransaction
 
 
-class BuyTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
+class BuyTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     model = BuyTransaction
     form_class = BuyTxnUpdateForm
 
@@ -123,7 +118,7 @@ class BuyTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
         self.header = 'Update Buy Transaction'
 
 
-class SellTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
+class SellTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     model = SellTransaction
     form_class = SellTxnUpdateForm
 
@@ -132,7 +127,7 @@ class SellTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
         self.header = 'Update Sell Transaction'
 
 
-class DividendTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
+class DividendTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     model = DividendTransaction
     form_class = DividendTxnUpdateForm
 
@@ -141,7 +136,7 @@ class DividendTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
         self.header = 'Update Dividend Transaction'
 
 
-class SplitTxnUpdateView(TxnTemplateTitleHeaderMixin, UpdateView):
+class SplitTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     model = SplitTransaction
     form_class = SplitTxnUpdateForm
 

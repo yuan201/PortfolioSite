@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('datetime', models.DateTimeField()),
-                ('value', transactions.models.PositiveDecimalField(decimal_places=28, max_digits=38)),
+                ('value', transactions.models.PositiveDecimalField()),
                 ('portfolio', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='portfolio.Portfolio')),
                 ('security', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='transactions.Security')),
             ],
@@ -39,12 +39,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='buytransaction',
             name='fee',
-            field=transactions.models.PositiveDecimalField(decimal_places=28, max_digits=38),
+            field=transactions.models.PositiveDecimalField(),
         ),
         migrations.AlterField(
             model_name='buytransaction',
             name='price',
-            field=transactions.models.PositiveDecimalField(decimal_places=28, max_digits=38),
+            field=transactions.models.PositiveDecimalField(),
         ),
         migrations.AlterField(
             model_name='buytransaction',
@@ -54,12 +54,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='selltransaction',
             name='fee',
-            field=transactions.models.PositiveDecimalField(decimal_places=28, max_digits=38),
+            field=transactions.models.PositiveDecimalField(),
         ),
         migrations.AlterField(
             model_name='selltransaction',
             name='price',
-            field=transactions.models.PositiveDecimalField(decimal_places=28, max_digits=38),
+            field=transactions.models.PositiveDecimalField(),
         ),
         migrations.AlterField(
             model_name='selltransaction',
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='splittransaction',
             name='ratio',
-            field=transactions.models.PositiveDecimalField(decimal_places=28, max_digits=38),
+            field=transactions.models.PositiveDecimalField(),
         ),
         migrations.DeleteModel(
             name='DividendTrasaction',
