@@ -150,5 +150,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'quotes_model': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
 }

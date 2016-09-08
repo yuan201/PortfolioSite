@@ -60,19 +60,6 @@ class QuotesForm(forms.Form):
         logger.debug('saving {} quotes to db, mode:{}'.format(
             self.quotes['open'].count(), self.cleaned_data['mode']))
         mode = self.cleaned_data['mode']
-        if mode == '1':
-            pass
-        elif mode == '2':
-            pass
-        elif mode == '3': #discard existing
-            Quote.objects.filter(security=self.security).delete()
-            for date, quote in self.quotes.iterrows():
-                Quote.objects.create(security=self.security,
-                                     date=date,
-                                     open=quote['open'],
-                                     close=quote['close'],
-                                     high=quote['high'],
-                                     low=quote['low'],
-                                     volume=quote['volume'])
+        Quote.update_quotes(new_quotes_df=self.quotes, security=self.security, mode=mode)
 
 

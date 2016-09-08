@@ -26,7 +26,9 @@ class QuoterTushare(Quoter):
     def get_quotes(self, symbol, start, end):
         quotes = ts.get_hist_data(symbol, start, end)
         if quotes is not None:
-            #return quotes[['open', 'close', 'high', 'low', 'volume']]
+            # convert string based index to  DatatimeIndex
+            dt_index = [pd.to_datetime(i) for i in quotes.index]
+            quotes.index = dt_index
             return quotes[['open', 'close', 'high', 'low', 'volume']]
         else:
             raise SymbolNotExist()
