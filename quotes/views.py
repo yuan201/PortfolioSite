@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render
 from django.views.generic import FormView
 from django.core.urlresolvers import reverse
@@ -5,6 +7,8 @@ from django.core.urlresolvers import reverse
 from .forms import QuotesForm
 from securities.models import Security
 from core.mixins import TitleHeaderMixin
+
+logger = logging.getLogger('quotes_view')
 
 
 class GetQuotesView(TitleHeaderMixin, FormView):
@@ -30,4 +34,5 @@ class GetQuotesView(TitleHeaderMixin, FormView):
         :param form:
         :return:
         """
+        form.save_quotes()
         return super(GetQuotesView, self).form_valid(form)

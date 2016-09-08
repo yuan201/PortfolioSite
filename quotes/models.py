@@ -16,4 +16,14 @@ class Quote(models.Model):
     low = PositiveDecimalField()
     volume = PositiveDecimalField()
 
-
+    def __str__(self):
+        return "{name}({symbol})@{date}:[{open:.2f}, {close:.2f}, {high:.2f}, {low:.2f}, {volume:.2f}]".format(
+            name=self.security.name,
+            symbol=self.security.symbol,
+            date=self.date,
+            open=self.open,
+            close=self.close,
+            high=self.high,
+            low=self.low,
+            volume=self.volume,
+        )

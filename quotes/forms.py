@@ -1,15 +1,24 @@
+import logging
+
 from django import forms
+import pandas as pd
 
 from quoters.quoter import quoter_factory, SymbolNotExist, UnknownQuoter
+from quotes.models import Quote
+
+logger = logging.getLogger('quotes_view')
 
 
 class QuotesForm(forms.Form):
-    start = forms.DateField()
-    end = forms.DateField()
+    start = forms.DateField(required=True)
+    end = forms.DateField(required=True)
+    MODE_CHOICES = (('1', 'Append'), ('2', 'Overwrite'), ('3', 'Discard Existing'))
+    mode = forms.ChoiceField(widget=forms.RadioSelect, choices=MODE_CHOICES, required=True)
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.security = kwargs.pop('security')
-        super(QuotesForm, self).__init__(**kwargs)
+        super(QuotesForm, self).__init__(*args, **kwargs)
+        self.quotes = pd.DataFrame()
 
     def clean(self):
         cleaned_data = super(QuotesForm, self).clean()
@@ -35,10 +44,35 @@ class QuotesForm(forms.Form):
 
         try:
             self.quotes = qtr.get_quotes(self.security.symbol,
-                                    start=start.isoformat(),
-                                    end=end.isoformat())
+                                         start=start.isoformat(),
+                                         end=end.isoformat())
+            logger.debug('getting quotes for {}, from {} to {}'.format(
+                self.security.symbol, start.isoformat(), end.isoformat())
+            )
+            logger.debug('get {} quotes'.format(self.quotes['open'].count()))
         except SymbolNotExist:
             msg = u'symbol not found on this quoter'
             self.add_error(None, msg)
 
         return cleaned_data
+
+    def save_quotes(self):
+        logger.debug('saving {} quotes to db, mode:{}'.format(
+            self.quotes['open'].count(), self.cleaned_data['mode']))
+        mode = self.cleaned_data['mode']
+        if mode == '1':
+            pass
+        elif mode == '2':
+            pass
+        elif mode == '3': #discard existing
+            Quote.objects.filter(security=self.security).delete()
+            for date, quote in self.quotes.iterrows():
+                Quote.objects.create(security=self.security,
+                                     date=date,
+                                     open=quote['open'],
+                                     close=quote['close'],
+                                     high=quote['high'],
+                                     low=quote['low'],
+                                     volume=quote['volume'])
+
+
