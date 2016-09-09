@@ -143,6 +143,11 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
         },
+        'unittest': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'unittest.log',
+        }
     },
     'loggers': {
         'quotes_view': {
@@ -152,6 +157,11 @@ LOGGING = {
         },
         'quotes_model': {
             'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'quotes.test_models': {
+            'handlers': ['unittest'],
             'level': 'DEBUG',
             'propagate': True,
         }

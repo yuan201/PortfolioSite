@@ -9,11 +9,29 @@
 {% block content %}
 <div class="jumbotron">
     <h1>{{ header }}</h1>
+    <p><a href="{%  url 'quotes:get' object.id %}">Get Quote</a></p>
 </div>
 
 <div>
-    <p>Symbol: {{ object.symbol }}</p>
-    <p>Currency: {{ object.currency }}</p>
-    <p>Quoter: {{ object.quoter }}</p>
+    <table class="table">
+        <td>Symbol: {{ object.symbol }}</td>
+        <td>Currency: {{ object.currency }}</td>
+        <td>Quoter: {{ object.quoter }}</td>
+    </table>
+
+    <div class="col-md-4">
+        <table class="table table-striped">
+            <thead>
+                <td>Date</td>
+                <td>Close</td>
+            </thead>
+            {% for quote in quotes %}
+                <tr>
+                    <td>{{ quote.date }}</td>
+                    <td>{{ quote.close|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 </div>
 {% endblock content %}

@@ -13,7 +13,7 @@ class Quote(models.Model):
     """
     In this app, only close quote is used.
     """
-    security = models.ForeignKey(Security)
+    security = models.ForeignKey(Security, on_delete=models.CASCADE)
     date = models.DateField()
     open = PositiveDecimalField()
     close = PositiveDecimalField()
@@ -39,22 +39,22 @@ class Quote(models.Model):
         old_quotes_df = cls.to_DataFrame(old_quotes)
         old_dates = old_quotes_df.index
         new_dates = new_quotes_df.index
-        logger.debug('old_dates:{}'.format(old_dates))
-        logger.debug('new_dates:{}'.format(new_dates))
-        if mode == '1': #append new quotes
+        # logger.debug('old_dates:{}'.format(old_dates))
+        # logger.debug('new_dates:{}'.format(new_dates))
+        if mode == '1': # append new quotes
             append_dates = new_dates.difference(old_dates)
-            logger.debug('append_dates:{}'.format(append_dates))
+            # logger.debug('append_dates:{}'.format(append_dates))
             cls.add_quotes(new_quotes_df.ix[append_dates], security)
-        elif mode == '2': #overwrite old quotes
+        elif mode == '2': # overwrite old quotes
             intersection = new_dates.intersection(old_dates)
-            overwrite_qs = cls.objects.filter(security=security).\
-                filter(date__gte=intersection.min()).\
-                filter(date__lte=intersection.max()).delete()
+            if intersection.size > 0:
+                overwrite_qs = cls.objects.filter(security=security).\
+                                   filter(date__gte=intersection.min()).\
+                                   filter(date__lte=intersection.max()).delete()
             cls.add_quotes(new_quotes_df, security)
-        elif mode == '3': #discard all existing quotes
+        elif mode == '3': # discard all existing quotes
             old_quotes.delete()
             cls.add_quotes(new_quotes_df, security)
-
 
     @classmethod
     def add_quotes(cls, quotes_df, security):
@@ -66,7 +66,6 @@ class Quote(models.Model):
                                high=quote['high'],
                                low=quote['low'],
                                volume=quote['volume'])
-
 
     @classmethod
     def to_DataFrame(cls, qs):

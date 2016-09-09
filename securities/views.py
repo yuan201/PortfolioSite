@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 from core.mixins import TitleHeaderMixin
 from .models import Security
+from quotes.models import Quote
 
 
 class SecCreateView(TitleHeaderMixin, CreateView):
@@ -61,4 +62,5 @@ class SecDetailView(TitleHeaderMixin, DetailView):
     def get_context_data(self, **kwargs):
         self.header = self.object.name
         context = super(SecDetailView, self).get_context_data(**kwargs)
+        context['quotes'] = Quote.objects.filter(security=self.object).order_by('-date').all()[:5]
         return context

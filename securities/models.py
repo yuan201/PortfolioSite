@@ -19,12 +19,12 @@ class Security(models.Model):
         return "{}({})".format(self.name, self.symbol)
 
     def __repr__(self):
-        return "Security(name={},symbol={},currency={}".format(
-            self.name, self.symbol, self.currency
+        return "Security(name={},symbol={},currency={},quoter={},index={}".format(
+            self.name, self.symbol, self.currency, self.quoter, self.isindex
         )
 
     def get_absolute_url(self):
-        return reverse('securities:list')
+        return reverse('securities:detail', args=[self.id])
 
     def __str__(self):
         return "{}({})".format(self.name, self.symbol)
