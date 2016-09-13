@@ -1,22 +1,11 @@
-{%  extends "base.html" %}
+{% extends "__l_single_col.html" %}
 
 {% block title %}
     Portfolios
-{% endblock %}
+{% endblock title %}
 
-{% block content %}
-
-<p>Portfolios</p>
-<div class="row">
+{% block main_col %}
     <div class="col-md-3">
-        <table class="table table-striped" id="id_portfolio_table">
-            {%  for portfolio in object_list %}
-            <tr>
-                <td><a href="{% url 'portfolios:detail' portfolio.id %}">{{ portfolio.name }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        {% include "portfolio/_portfolio_list.html" with portfolios=object_list %}
     </div>
-</div>
-
-{% endblock %}
+{% endblock main_col %}

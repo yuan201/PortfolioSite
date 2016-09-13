@@ -18,11 +18,11 @@ class HomePageView(ListView):
 class PortfolioCreateView(CreateView):
     model = Portfolio
     fields = ['name', 'description']
-    template_name = 'new_portfolio.html'
+    template_name = 'portfolio/new_portfolio.html'
 
 
 class PortfolioDetailView(DetailView):
-    template_name = 'portfolio_detail.html'
+    template_name = 'portfolio/portfolio_detail.html'
     model = Portfolio
 
     def get_context_data(self, **kwargs):

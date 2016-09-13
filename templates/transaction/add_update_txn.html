@@ -7,14 +7,7 @@
 {% endblock title %}
 
 {% block content %}
-    <div class="jumbotron">
-        <h1>{{ header }}</h1>
-    </div>
+    {% include "includes/_jumbotron_header.html" %}
 
-    <form role="form" method="post">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        {% buttons submit="Save" %}{% endbuttons %}
-    </form>
-
+    {% include "includes/_form.html" %}
 {% endblock content %}
