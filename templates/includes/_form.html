@@ -1,7 +1,7 @@
-{% load bootstrap3 %}
-
-<form role="form" method="post">
+<form method="post" action="{% block form_action %}{% endblock %}">
+    <div class="form-group">
         {% csrf_token %}
-        {% bootstrap_form form %}
-        {% buttons submit="OK" %}{% endbuttons %}
+        {{ form }}
+        <input type=submit value="OK">
+    </div>
 </form>
