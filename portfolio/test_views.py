@@ -23,8 +23,17 @@ class HomePageTest(TestCase):
 class NewPortfolioPageTest(TestCase):
 
     def test_add_new_portfolio(self):
-        self.client.post(reverse('portfolios:new'), data={'name': 'Value', 'description':'value portfolio'})
+        self.client.post(reverse('portfolios:new'),
+                         data={'name': 'Value', 'description':'value portfolio'})
         self.assertEqual(Portfolio.objects.first().name, 'Value')
         self.assertEqual(Portfolio.objects.first().description, 'value portfolio')
 
+    def test_new_portfolio_view_use_proper_template(self):
+        response = self.client.get(reverse('portfolios:new'))
+        self.assertTemplateUsed(response, 'portfolio/new_portfolio.html')
 
+    def test_add_portfolio_view_redirect_to_detail_view(self):
+        response = self.client.post(reverse('portfolios:new'),
+                                    data={'name': 'Value', 'description': 'value portfolio'})
+        p = Portfolio.objects.first()
+        self.assertRedirects(response, reverse('portfolios:detail', args=[p.id]))
