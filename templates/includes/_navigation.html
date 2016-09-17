@@ -3,9 +3,38 @@
         <div class="navbar-header">
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'home' %}"><b>Home</b></a></li>
-                <li><a href="{% url 'portfolios:new' %}"><b>New Portfolio</b></a></li>
-                <li><a href="{% url 'securities:new' %}"><b>New Security</b></a></li>
-                <li><a href="{%  url 'securities:list' %}"><b>All Securities</b></a></li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Security
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'securities:new' %}">New</a></li>
+                        <li><a href="{% url 'securities:list' %}">List All</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Portfolio
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'portfolios:new' %}">New</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Benchmark
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'benchmarks:create' %}">Create</a></li>
+                        <li><a href="{% url 'benchmarks:list' %}">List All</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

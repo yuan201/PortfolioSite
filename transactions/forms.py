@@ -28,11 +28,11 @@ class TxnFormMixin():
 
     def __init__(self, **kwargs):
         """
-        When creating the transaction, the portfolio the new transaction belongs to is
+        When creating the transaction, the portfolios the new transaction belongs to is
         already defined. This parameter is passed in through kwargs.
         :param kwargs:
         """
-        self.portfolio = kwargs.pop('portfolio')
+        self.portfolio = kwargs.pop('portfolios')
         super().__init__(**kwargs)
 
 

@@ -33,14 +33,11 @@ class Security(models.Model):
         return "<td>{symbol}</td>" \
                 "<td>{name}</td>" \
                 "<td>{currency}</td>" \
-                "<td>{del_link}</td>" \
-                "<td>{update_link}</td>" \
-                "<td>{quote_link}</td>".format(
+                "<td>{quote_count}</td>" \
+                "<td>{last_quote:.2f}</td>".format(
                 symbol=build_link(reverse('securities:detail', args=[self.id]), self.symbol),
-                name=self.name, currency=self.currency,
-                del_link=build_link(reverse('securities:del', args=[self.id]), 'Del'),
-                update_link=build_link(reverse('securities:update', args=[self.id]), 'Update'),
-                quote_link=build_link(reverse('quotes:get', args=[self.id]), 'Quote'),
+                name=self.name, currency=self.currency, quote_count=self.quotes.count(),
+                last_quote=self.quotes.order_by("-date").first().close
         )
 
     def as_p(self):
