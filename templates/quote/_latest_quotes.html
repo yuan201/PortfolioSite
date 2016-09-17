@@ -1,0 +1,12 @@
+<table class="table table-striped">
+    <thead>
+    <td>Date</td>
+    <td>Close</td>
+    </thead>
+    {% for quote in quotes %}
+        <tr>
+            <td>{{ quote.date }}</td>
+            <td>{{ quote.close|floatformat:2 }}</td>
+        </tr>
+    {% endfor %}
+</table>

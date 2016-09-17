@@ -1,0 +1,12 @@
+<table class="table table-striped">
+    <thead>
+    <td>Symbol</td>
+    <td>Name</td>
+    <td>Currency</td>
+    <td>No. of Quotes</td>
+    <td>Last Quote</td>
+    </thead>
+    {% for sec in securities %}
+        <tr>{{ sec.as_t|safe }}</tr>
+    {% endfor %}
+</table>

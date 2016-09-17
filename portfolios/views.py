@@ -8,9 +8,10 @@ from django.views.generic.detail import DetailView
 from django.shortcuts import get_object_or_404
 
 from .models import Portfolio
+from core.mixins import PortfoliosMixin
 
 
-class HomePageView(ListView):
+class HomePageView(PortfoliosMixin, ListView):
     model = Portfolio
     template_name = 'homepage.html'
 
@@ -28,7 +29,7 @@ class PortfolioDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(PortfolioDetailView, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
-        context['portfolio'] = portfolio
+        context['portfolios'] = portfolio
         context['transactions'] = portfolio.transactions()
         context['holdings'] = portfolio.holdings(datetime.datetime.now()).values()
         return context

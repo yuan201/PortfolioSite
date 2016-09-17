@@ -1,0 +1,13 @@
+<div class="sec-header">
+    <h1>{{ security.name }}({{ security.symbol }})</h1>
+    <a href="{%  url 'securities:update' security.id %}">Update</a>
+    /
+    <a href="{%  url 'securities:del' security.id %}">Delete</a>
+</div>
+
+<div class="sec-detail-info">
+    <ul>
+        <li>Currency: {{ security.currency }}</li>
+        <li>Quoter: {{ security.quoter }}</li>
+    </ul>
+</div>

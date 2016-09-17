@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Benchmark, BenchmarkConstitute
+
+admin.site.register(Benchmark)
+admin.site.register(BenchmarkConstitute)

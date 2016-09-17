@@ -1,0 +1,20 @@
+<table class="table table-stripped">
+    <thead>
+        <td>Security</td>
+        <td><a href="{% url 'benchmarks:normalize-cst' benchmark.id %}">Percent</a></td>
+    </thead>
+
+    {% for cst in constitutes %}
+        <tr>
+            <td><a href="{% url 'benchmarks:update-cst' cst.id %}">{{ cst.security.name }}</a></td>
+            <td>{{ cst.percent|floatformat }}</td>
+            <td><a href="{% url 'benchmarks:delete-cst' cst.id %}">delete</a></td>
+        </tr>
+    {% endfor %}
+
+    <tfoot>
+        <td><a href="{% url 'benchmarks:create-cst' benchmark.id %}">Add</a></td>
+    </tfoot>
+</table>
+
+

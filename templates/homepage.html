@@ -5,7 +5,5 @@
 {% endblock title %}
 
 {% block main_col %}
-    <div class="col-md-3">
-        {% include "portfolio/_portfolio_list.html" with portfolios=object_list %}
-    </div>
+    {% include "portfolio/_portfolio_list.html" %}
 {% endblock main_col %}

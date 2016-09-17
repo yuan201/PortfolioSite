@@ -19,7 +19,7 @@ class Transaction(models.Model):
     """
     security = models.ForeignKey(Security)
     datetime = models.DateTimeField()
-    portfolio = models.ForeignKey("portfolio.Portfolio", on_delete=models.CASCADE)
+    portfolio = models.ForeignKey("portfolios.Portfolio", on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
@@ -216,7 +216,7 @@ class SplitTransaction(Transaction):
 
 class Holding():
     """
-    A Holding is one item in a portfolio. It represents a particular security, how much
+    A Holding is one item in a portfolios. It represents a particular security, how much
     shares has, total cost and any gain/loss, dividend received from this security.
     """
     def __init__(self, security, shares, cost):

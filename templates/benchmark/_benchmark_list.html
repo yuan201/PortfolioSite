@@ -1,0 +1,3 @@
+{% for bk in benchmarks %}
+    <li><a href="{%  url 'benchmarks:detail' bk.id %}">{{ bk.name }}</a></li>
+{% endfor %}

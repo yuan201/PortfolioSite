@@ -1,37 +1,22 @@
-{% extends "base.html" %}
-
-{% load bootstrap3 %}
+{% extends "__l_single_col.html" %}
 
 {% block title %}
     {{ title }}
 {% endblock title %}
 
-{% block content %}
-<div class="jumbotron">
-    <h1>{{ header }}</h1>
-    <p><a href="{%  url 'quotes:get' object.id %}">Get Quote</a></p>
-</div>
+{% block main_col %}
+    <section class="sec-summary col-md-8">
+        {% include "security/_sec_summary.html" %}
+    </section>
 
-<div>
-    <table class="table">
-        <td>Symbol: {{ object.symbol }}</td>
-        <td>Currency: {{ object.currency }}</td>
-        <td>Quoter: {{ object.quoter }}</td>
-    </table>
+    <section class="col-md-8">
+        {% include "quote/_get_quotes_form.html" %}
+    </section>
 
-    <div class="col-md-4">
-        <table class="table table-striped">
-            <thead>
-                <td>Date</td>
-                <td>Close</td>
-            </thead>
-            {% for quote in quotes %}
-                <tr>
-                    <td>{{ quote.date }}</td>
-                    <td>{{ quote.close|floatformat:2 }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-</div>
-{% endblock content %}
+    {% if quotes %}
+        <section class="col-md-4">
+            {% include "quote/_latest_quotes.html" %}
+        </section>
+    {% endif %}
+
+{% endblock main_col %}
