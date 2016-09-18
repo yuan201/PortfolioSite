@@ -9,11 +9,17 @@ from django.shortcuts import get_object_or_404
 
 from .models import Portfolio
 from core.mixins import PortfoliosMixin
+from todos.models import Todo
 
 
-class HomePageView(PortfoliosMixin, ListView):
+class HomePageView(ListView):
     model = Portfolio
     template_name = 'homepage.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(HomePageView, self).get_context_data(**kwargs)
+        context['todos'] = Todo.objects.first()
+        return context
 
 
 class PortfolioCreateView(CreateView):
@@ -34,6 +40,10 @@ class PortfolioDetailView(DetailView):
         context['holdings'] = portfolio.holdings(datetime.datetime.now()).values()
         return context
 
+
+class PortfolioListView(ListView):
+    model = Portfolio
+    template_name = 'portfolio/portfolio_list.html'
 
 
 

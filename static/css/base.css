@@ -19,3 +19,7 @@ section {
 .sec-detail-info {
     float: right;
 }
+
+.todo-done {
+    text-decoration: line-through;
+}

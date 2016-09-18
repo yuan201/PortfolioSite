@@ -5,5 +5,27 @@
 {% endblock title %}
 
 {% block main_col %}
-    {% include "portfolio/_portfolio_list.html" %}
+    <div class="row">
+    <h1 class="col-lg-offset-4">Todos</h1>
+        <div class="col-lg-4">
+            <h3>Inactive</h3>
+            <ul>
+                {{ todos.inactive_as_l|safe }}
+            </ul>
+        </div>
+
+        <div class="col-lg-4">
+            <h3>Active</h3>
+            <ul>
+                {{ todos.active_as_l|safe }}
+            </ul>
+        </div>
+
+        <div class="col-lg-4">
+            <h3>Done</h3>
+            <ul>
+                {{ todos.done_as_l|safe }}
+            </ul>
+        </div>
+    </div>
 {% endblock main_col %}
