@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'quotes',
     'benchmarks',
     'crispy_forms',
+    'todos',
 ]
 
 MIDDLEWARE_CLASSES = [
