@@ -16,14 +16,16 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from portfolio.views import HomePageView
+from portfolios.views import HomePageView
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', HomePageView.as_view(), name='home'),
-    url(r'^portfolio/', include('portfolio.urls', namespace='portfolios')),
+    url(r'^portfolios/', include('portfolios.urls', namespace='portfolios')),
     url(r'^txn/', include('transactions.urls', namespace='transactions')),
     url(r'^sec/', include('securities.urls', namespace='securities')),
     url(r'^quotes/', include('quotes.urls', namespace='quotes')),
+    url(r'^benchmarks/', include('benchmarks.urls', namespace='benchmarks')),
+    url(r'^todos/', include('todos.urls', namespace='todos')),
 ]

@@ -1,22 +1,31 @@
-{%  extends "base.html" %}
+{% extends "__l_single_col.html" %}
 
 {% block title %}
     Portfolios
-{% endblock %}
+{% endblock title %}
 
-{% block content %}
+{% block main_col %}
+    <div class="row">
+    <h1 class="col-lg-offset-4">Todos</h1>
+        <div class="col-lg-4">
+            <h3>Inactive</h3>
+            <ul>
+                {{ todo.inactive_as_l|safe }}
+            </ul>
+        </div>
 
-<p>Portfolios</p>
-<div class="row">
-    <div class="col-md-3">
-        <table class="table table-striped" id="id_portfolio_table">
-            {%  for portfolio in object_list %}
-            <tr>
-                <td><a href="{% url 'portfolios:detail' portfolio.id %}">{{ portfolio.name }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <div class="col-lg-4">
+            <h3>Active</h3>
+            <ul>
+                {{ todo.active_as_l|safe }}
+            </ul>
+        </div>
+
+        <div class="col-lg-4">
+            <h3>Done</h3>
+            <ul>
+                {{ todo.done_as_l|safe }}
+            </ul>
+        </div>
     </div>
-</div>
-
-{% endblock %}
+{% endblock main_col %}

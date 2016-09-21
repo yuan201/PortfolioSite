@@ -1,0 +1,5 @@
+{% for ptf in portfolios %}
+    <li><a href="{%  url 'portfolios:detail' ptf.id %}">{{ ptf.name }}</a></li>
+{% endfor %}
+
+

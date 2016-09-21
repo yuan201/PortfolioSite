@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
 
 from .models import BuyTransaction, SellTransaction,DividendTransaction, SplitTransaction
-from portfolio.models import Portfolio
+from portfolios.models import Portfolio
 from .forms import BuyTxnCreateForm, SellTxnCreateForm, SplitTxnCreateForm, DividendTxnCreateForm
 from .forms import BuyTxnUpdateForm, SellTxnUpdateForm, DividendTxnUpdateForm, SplitTxnUpdateForm
 from core.mixins import TitleHeaderMixin
@@ -16,7 +16,7 @@ class AddTxnView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(AddTxnView, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
-        context['portfolio'] = portfolio
+        context['portfolios'] = portfolio
         return context
 
 
@@ -24,7 +24,7 @@ class TxnCreateMixin(object):
     def get_context_data(self, **kwargs):
         context = super(TxnCreateMixin, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
-        context['portfolio'] = portfolio
+        context['portfolios'] = portfolio
         return context
 
     def form_valid(self, form):
@@ -35,7 +35,7 @@ class TxnCreateMixin(object):
 
     def get_form_kwargs(self):
         kwargs = super(TxnCreateMixin, self).get_form_kwargs()
-        kwargs['portfolio'] = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
+        kwargs['portfolios'] = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         return kwargs
 
 
@@ -50,6 +50,7 @@ class BuyTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, Creat
     def __init__(self):
         self.title = 'Buy'
         self.header = 'New Buy Transaction'
+        super(BuyTxnCreateView, self).__init__()
 
 
 class SellTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
@@ -59,6 +60,7 @@ class SellTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, Crea
     def __init__(self):
         self.title = 'Sell'
         self.header = 'New Sell Transaction'
+        super(SellTxnCreateView, self).__init__()
 
 
 class DividendTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
@@ -68,6 +70,7 @@ class DividendTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, 
     def __init__(self):
         self.title = 'Dividend'
         self.header = 'New Dividend Transaction'
+        super(DividendTxnCreateView, self).__init__()
 
 
 class SplitTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, CreateView):
@@ -77,6 +80,7 @@ class SplitTxnCreateView(TxnCreateMixin, TxnTemplateMixin, TitleHeaderMixin, Cre
     def __init__(self):
         self.title = 'Split'
         self.header = 'New Split Transaction'
+        super(SplitTxnCreateView, self).__init__()
 
 
 class TxnDeleteMixin(object):
@@ -116,6 +120,7 @@ class BuyTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     def __init__(self):
         self.title = 'Buy'
         self.header = 'Update Buy Transaction'
+        super(BuyTxnUpdateView, self).__init__()
 
 
 class SellTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
@@ -125,6 +130,7 @@ class SellTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     def __init__(self):
         self.title = 'Sell'
         self.header = 'Update Sell Transaction'
+        super(SellTxnUpdateView, self).__init__()
 
 
 class DividendTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
@@ -134,6 +140,7 @@ class DividendTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     def __init__(self):
         self.title = 'Dividend'
         self.header = 'Update Dividend Transaction'
+        super(DividendTxnUpdateView, self).__init__()
 
 
 class SplitTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
@@ -143,4 +150,4 @@ class SplitTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
     def __init__(self):
         self.title = 'Split'
         self.header = 'Update Split Transaction'
-
+        super(SplitTxnUpdateView, self).__init__()

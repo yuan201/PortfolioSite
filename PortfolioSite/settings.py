@@ -37,12 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'portfolio',
-    'bootstrap3',
+    'portfolios',
     'transactions',
     'securities',
     'quotes',
     'benchmarks',
+    'crispy_forms',
+    'todos',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -86,7 +87,7 @@ DATABASES = {
         #'ENGINE': 'django.db.backends.sqlite3',
         #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'portfolio',
+        'NAME': 'portfolios',
         'USER': 'yuanyuan',
         'PASSWORD': 'labview',
         'HOST': '',
@@ -134,6 +135,15 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -164,6 +174,15 @@ LOGGING = {
             'handlers': ['unittest'],
             'level': 'DEBUG',
             'propagate': True,
-        }
+        },
+        'securities.test_views': {
+            'handlers': ['unittest'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+CRISPY_FAIL_SILENTLY = not DEBUG

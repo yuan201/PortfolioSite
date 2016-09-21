@@ -13,7 +13,7 @@ class Quote(models.Model):
     """
     In this app, only close quote is used.
     """
-    security = models.ForeignKey(Security, on_delete=models.CASCADE)
+    security = models.ForeignKey(Security, on_delete=models.CASCADE, related_name='quotes')
     date = models.DateField()
     open = PositiveDecimalField()
     close = PositiveDecimalField()

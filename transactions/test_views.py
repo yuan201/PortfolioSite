@@ -6,8 +6,8 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from .models import BuyTransaction, SellTransaction, DividendTransaction
-from .models import SplitTransaction, Holding, Security
-from portfolio.models import Portfolio
+from .models import SplitTransaction, HoldingCls, Security
+from portfolios.models import Portfolio
 
 
 class NewUpdateTxnTestMixin(object):

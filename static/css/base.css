@@ -1,0 +1,25 @@
+.jumbotron h1 {
+    color: #3e8f3e;
+}
+
+section {
+    margin: 10px;
+}
+
+.sec-summary {
+    padding: 20px;
+    height: 140px;
+    background: #eee;
+}
+
+.sec-header {
+    float: left;
+}
+
+.sec-detail-info {
+    float: right;
+}
+
+.todo-done {
+    text-decoration: line-through;
+}

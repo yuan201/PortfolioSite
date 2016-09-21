@@ -1,20 +1,14 @@
-{% extends "base.html" %}
-
-{% load bootstrap3 %}
+{% extends "__l_single_col.html" %}
 
 {% block title %}
     {{ title }}
 {% endblock title %}
 
-{% block content %}
+{% block main_col %}
     <div class="jumbotron">
         <h1>{{ header }}</h1>
     </div>
 
-    <form role="form" method="post">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        {% buttons submit="Get" %}{% endbuttons %}
-    </form>
+    {% include "includes/_form.html" with ok_text="get" %}
 
-{% endblock content %}
+{% endblock main_col %}

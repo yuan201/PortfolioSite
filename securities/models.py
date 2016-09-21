@@ -1,5 +1,10 @@
+import datetime as dt
+import math
+
 from django.db import models
 from django.core.urlresolvers import reverse
+import pandas as pd
+import numpy as np
 
 from core.utils import build_link
 
@@ -26,22 +31,45 @@ class Security(models.Model):
     def get_absolute_url(self):
         return reverse('securities:detail', args=[self.id])
 
-    def __str__(self):
-        return "{}({})".format(self.name, self.symbol)
-
     def as_t(self):
+        last_quote = "<td></td>"
+        if self.quotes.count() > 0:
+            last_quote = "<td>{q:.2f}</td>".format(q=self.quotes.order_by("-date").first().close)
+
         return "<td>{symbol}</td>" \
                 "<td>{name}</td>" \
                 "<td>{currency}</td>" \
-                "<td>{del_link}</td>" \
-                "<td>{update_link}</td>" \
-                "<td>{quote_link}</td>".format(
+                "<td>{quote_count}</td>".format(
                 symbol=build_link(reverse('securities:detail', args=[self.id]), self.symbol),
-                name=self.name, currency=self.currency,
-                del_link=build_link(reverse('securities:del', args=[self.id]), 'Del'),
-                update_link=build_link(reverse('securities:update', args=[self.id]), 'Update'),
-                quote_link=build_link(reverse('quotes:get', args=[self.id]), 'Quote'),
-        )
+                name=self.name, currency=self.currency, quote_count=self.quotes.count()) + last_quote
 
     def as_p(self):
         return str(self)
+
+    def quote_on(self, _date):
+        """return the quote on the specified date or earlier"""
+        return self.quotes.filter(date__lte=_date).first()
+
+    def quote_between(self, start, end):
+        rng = pd.bdate_range(start, end)
+        quotes = pd.DataFrame(index=rng, columns=['open', 'close', 'high', 'low', 'volume'])
+
+        for q in self.quotes.filter(date__gte=start).filter(date__lte=end).all():
+            self.copy_query_to_dataframe(quotes.ix[q.date], q)
+
+        if math.isnan(quotes['close'][0]):
+            # no quote for the start date, try to acquire an older one instead
+            early_quote = self.quote_on(start)
+            if early_quote is None:
+                return None
+            self.copy_query_to_dataframe(quotes.ix[start], early_quote)
+
+        return quotes.fillna(method='ffill')
+
+    @staticmethod
+    def copy_query_to_dataframe(df, query):
+        df['open'] = query.open
+        df['close'] = query.close
+        df['high'] = query.high
+        df['low'] = query.low
+        df['volume'] = query.volume

@@ -1,29 +1,12 @@
-{% extends "base.html" %}
-
-{% load bootstrap3 %}
+{% extends "__l_single_col.html" %}
 
 {% block title %}
     {{ title }}
 {% endblock title %}
 
-{% block content %}
-    <div class="jumbotron">
-        <h1>{{ header }}</h1>
+{% block main_col %}
+    <div class="row col-lg-8">
+        {% include "security/_sec_list.html" with securities=object_list %}
     </div>
 
-    <div class="row">
-        <div>
-            <table class="table table-striped">
-                <thead>
-                    <td>Symbol</td>
-                    <td>Name</td>
-                    <td>Currency</td>
-                </thead>
-                {% for sec in object_list %}
-                    <tr>{{ sec.as_t|safe }}</tr>
-                {% endfor %}
-            </table>
-        </div>
-    </div>
-
-{% endblock content %}
+{% endblock main_col %}
