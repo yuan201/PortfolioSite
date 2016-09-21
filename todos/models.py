@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.html import format_html, mark_safe
 
 
 class Todo(models.Model):
@@ -14,35 +15,43 @@ class Todo(models.Model):
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
-    def get_absolute_url(self):
+    @staticmethod
+    def get_absolute_url():
         return reverse('home')
 
-    def to_table(self, item):
-        result = '<li class=todo-{status}><a href="{link}">{title}</a>'.format(
-            link=reverse('todos:update', args=[item.id]), title=item.title, status=item.status)
+    @staticmethod
+    def to_table(item):
+        result = format_html('<li class=todo-{status}><a href="{link}">{title}</a>',
+                             status=item.status,
+                             link=mark_safe(reverse('todos:update', args=[item.id])),
+                             title=item.title)
         if item.children:
             result += '<ul>'
             for child in item.children.all():
                 if child == item:
                     break
-                result += self.to_table(child)
+                result += Todo.to_table(child)
             result += '</ul>'
         result += '</li>'
         return result
 
-    def inactive_as_l(self):
-        return self.todos_as_l('inactive')
+    @staticmethod
+    def inactive_as_l():
+        return Todo.todos_as_l('inactive')
 
-    def active_as_l(self):
-        return self.todos_as_l('active')
+    @staticmethod
+    def active_as_l():
+        return Todo.todos_as_l('active')
 
-    def done_as_l(self):
-        return self.todos_as_l('done')
+    @staticmethod
+    def done_as_l():
+        return Todo.todos_as_l('done')
 
-    def todos_as_l(self, status):
+    @staticmethod
+    def todos_as_l(status):
         result = ""
         for item in Todo.objects.filter(status=status).filter(parent__isnull=True).all():
-            result += self.to_table(item)
+            result += Todo.to_table(item)
         return result
 
     def __str__(self):

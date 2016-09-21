@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from .models import BuyTransaction, SellTransaction, DividendTransaction
-from .models import SplitTransaction, Holding, Security
+from .models import SplitTransaction, HoldingCls, Security
 from portfolios.models import Portfolio
 
 
