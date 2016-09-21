@@ -3,6 +3,11 @@ from django.core.urlresolvers import reverse
 
 from .models import Portfolio
 from core.mixins import PortfoliosTestMixin
+from todos.models import Todo
+
+
+# todo: add unittests for context
+# todo: add unittests for template
 
 
 class HomePageTest(PortfoliosTestMixin, TestCase):
@@ -14,6 +19,10 @@ class HomePageTest(PortfoliosTestMixin, TestCase):
     def test_home_page_use_proper_template(self):
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'homepage.html')
+
+    def test_home_page_get_all_todos(self):
+        response = self.client.get('/')
+        self.assertEqual(response.context['todo'], Todo)
 
 
 class NewPortfolioPageTest(PortfoliosTestMixin, TestCase):
@@ -40,5 +49,9 @@ class NewPortfolioPageTest(PortfoliosTestMixin, TestCase):
         self.assertContains(response, 'Name')
         self.assertContains(response, 'Description')
 
-
+    def test_can_not_add_portfolio_with_existing_name(self):
+        Portfolio.objects.create(name='value', description='test')
+        response = self.client.post(reverse('portfolios:new'),
+                                    data={'name': 'value', 'description': 'simple value'})
+        self.assertEqual(Portfolio.objects.count(), 1)
 

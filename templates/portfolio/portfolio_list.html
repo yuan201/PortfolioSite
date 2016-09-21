@@ -5,5 +5,5 @@
 {% endblock title %}
 
 {% block main_col %}
-    {% include 'portfolio/_portfolio_list.html' %}
+    {% include 'portfolio/_portfolio_list.html' with portfolios=object_list %}
 {% endblock main_col %}

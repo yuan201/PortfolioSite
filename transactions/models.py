@@ -214,7 +214,7 @@ class SplitTransaction(Transaction):
         return holding
 
 
-class Holding():
+class HoldingCls():
     """
     A Holding is one item in a portfolios. It represents a particular security, how much
     shares has, total cost and any gain/loss, dividend received from this security.
