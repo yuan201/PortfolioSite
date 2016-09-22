@@ -89,6 +89,3 @@ ENV/
 .ropeproject
 
 # Created by .ignore support plugin (hsz.mobi)
-
-# Ignore the PyCharm project folder
-.idea/
