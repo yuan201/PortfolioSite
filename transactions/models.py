@@ -7,7 +7,7 @@ from django.core import validators
 from django.core.validators import ValidationError
 
 from core.utils import build_link
-from .exceptions import SellMoreThanHold
+from .exceptions import SellMoreThanHold, DividendOnEmptyHolding
 
 from core.types import PositiveDecimalField
 from securities.models import Security
@@ -40,7 +40,7 @@ class BuyTransaction(Transaction):
     fee = PositiveDecimalField()
 
     def __str__(self):
-        return "On {} Buy {} share of {}({}) @ {}".format(
+        return "On {} Buy {} shares of {}({}) @ {}".format(
             self.datetime, self.shares, self.security.name, self.security.symbol, self.price
         )
 
@@ -91,7 +91,7 @@ class SellTransaction(Transaction):
     fee = PositiveDecimalField()
 
     def __str__(self):
-        return "On {} Sell {} share of {}({}) @ {}".format(
+        return "On {} Sell {} shares of {}({}) @ {}".format(
             self.datetime, self.shares, self.security.name, self.security.symbol, self.price
         )
 
@@ -145,7 +145,7 @@ class DividendTransaction(Transaction):
     value = PositiveDecimalField()
 
     def __str__(self):
-        return "On {}, {}({}) paid {} dividend".format(
+        return "On {} {}({}) paid {} dividend".format(
             self.datetime, self.security.name, self.security.symbol, self.value
         )
 
@@ -172,6 +172,8 @@ class DividendTransaction(Transaction):
                 )
 
     def transact(self, holding):
+        if holding.shares == 0:
+            raise DividendOnEmptyHolding
         holding.dividend += self.value
         return holding
 
@@ -183,7 +185,7 @@ class SplitTransaction(Transaction):
     ratio = PositiveDecimalField()
 
     def __str__(self):
-        return "On {}, {}({}) split {}".format(
+        return "On {} {}({}) split {}".format(
             self.datetime, self.security.name, self.security.symbol, self.ratio
         )
 

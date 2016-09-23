@@ -63,10 +63,11 @@ class Holding(models.Model):
     security = models.ForeignKey(Security)
     portfolio = models.ForeignKey(Portfolio)
     shares = models.IntegerField(default=0)
-    cost = PositiveDecimalField()
-    gain = PositiveDecimalField()
-    dividend = PositiveDecimalField()
-    value = PositiveDecimalField()
+    cost = PositiveDecimalField(default=0)
+    gain = PositiveDecimalField(default=0)
+    dividend = PositiveDecimalField(default=0)
+    value = PositiveDecimalField(default=0)
+    date = models.DateField()
 
     def transact(self, txn):
         return txn.transact(self)
@@ -74,10 +75,10 @@ class Holding(models.Model):
     def __str__(self):
         return "{name}({symbol}):{shares}shares,cost{cost}\n" \
                 "value={value},dividend={dividend},gain={gain}".format(
-                name=self.security.name, symbol=self.security.symbol,
-                shares=self.shares, cost=self.cost,
-                dividend=self.dividend, gain=self.gain, value=self.value
-        )
+                    name=self.security.name, symbol=self.security.symbol,
+                    shares=self.shares, cost=self.cost,
+                    dividend=self.dividend, gain=self.gain, value=self.value
+                )
 
     def as_t(self):
         return "<td>{name}</td>" \
@@ -89,10 +90,10 @@ class Holding(models.Model):
                "<td>{value:.2f}</td>" \
                "<td>{dividend:.2f}</td>" \
                "<td>{gain:.2f}</td>".format(
-               name=self.security.name, symbol=self.security.symbol,
-               currency=self.security.currency, shares=self.shares,
-               cost=self.cost, cost_s=self.cost_per_share(),
-               dividend=self.dividend, gain=self.gain, value=self.value,
+                   name=self.security.name, symbol=self.security.symbol,
+                   currency=self.security.currency, shares=self.shares,
+                   cost=self.cost, cost_s=self.cost_per_share(),
+                   dividend=self.dividend, gain=self.gain, value=self.value,
                )
 
     def cost_per_share(self):
