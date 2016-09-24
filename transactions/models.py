@@ -263,3 +263,38 @@ class HoldingCls():
         return -self.cost/self.shares
 
 
+def transaction_factory(_type, portfolio, security, _datetime, *args,
+                        price=0, shares=0, fee=0, ratio=0, dividend=0):
+    if _type == 'buy':
+        return BuyTransaction.objects.create(
+            security=security,
+            portfolio=portfolio,
+            datetime=_datetime,
+            price=price,
+            shares=shares,
+            fee=fee,
+        )
+    elif _type == 'sell':
+        return SellTransaction.objects.create(
+            security=security,
+            portfolio=portfolio,
+            datetime=_datetime,
+            price=price,
+            shares=shares,
+            fee=fee,
+        )
+    elif _type == 'split':
+        return SplitTransaction.objects.create(
+            security=security,
+            portfolio=portfolio,
+            datetime=_datetime,
+            ratio=ratio,
+        )
+    elif _type == 'dividend':
+        return DividendTransaction.objects.create(
+            security=security,
+            portfolio=portfolio,
+            datetime=_datetime,
+            value=dividend,
+        )
+    return
