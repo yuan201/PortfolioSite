@@ -11,5 +11,5 @@ def build_link(l, text):
     return "<a href={}>{}</a>".format(l, text)
 
 
-def day_start(datetime):
+def _date(datetime):
     return dt.datetime(datetime.year, datetime.month, datetime.day)

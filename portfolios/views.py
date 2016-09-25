@@ -39,8 +39,9 @@ class PortfolioDetailView(DetailView):
         context['portfolios'] = portfolio
         context['transactions'] = portfolio.transactions()
         # quick test
-        portfolio.update_holdings(pd.Timestamp(dt.date.today()))
-        context['holdings'] = [Holding.objects.filter(portfolio=portfolio).last()]
+        last_day = pd.Timestamp(dt.date.today(), offset='B')-1
+        portfolio.update_holdings(last_day)
+        context['holdings'] = Holding.objects.filter(portfolio=portfolio).filter(date=last_day)
         return context
 
 

@@ -10,7 +10,7 @@ from transactions.models import BuyTransaction, SellTransaction, \
 from transactions.exceptions import FirstTransactionNotBuy
 from benchmarks.models import Benchmark
 from core.types import PositiveDecimalField
-from core.utils import day_start
+from core.utils import _date
 
 
 class WrongTxnType(Exception):
@@ -66,46 +66,68 @@ class Portfolio(models.Model):
 
     @staticmethod
     def insert_holding(hld, date=None):
-        if not date is None:
+        if date is not None:
             hld.date = date
         hld.id = None
         hld.save(force_insert=True)
 
-    def update_holdings(self, end):
-        if Holding.objects.filter(portfolio=self):
-            holding = Holding.objects.filter(portfolio=self).order_by('date').last()
-            cur_date = pd.Timestamp(holding.date, offset='B') + 1
+    def find_last_record(self, security):
+        if Holding.objects.filter(portfolio=self).filter(security=security):
+            return Holding.objects.filter(portfolio=self).filter(security=security).order_by('date').last()
+        return False
+
+    def get_last_record_or_empty(self, txn):
+        last_record = self.find_last_record(txn.security)
+        if last_record:
+            return last_record
         else:
-            holding = None
-            cur_date = pd.Timestamp(day_start(self.transactions()[0].datetime), offset='B')
+            return Holding(security=txn.security, portfolio=self, date=txn.datetime)
+
+    @staticmethod
+    def fill_in_gaps(hld, _range):
+        for d in _range:
+            hld.date = d
+            hld.id = None
+            hld.save(force_insert=True)
+
+    def update_holdings(self, end):
+        if not self.transactions():
+            return
+
+        hlds = dict()
+        dirty = False
 
         for txn in self.transactions():
-            logger.debug('working on ' + str(txn))
-            if txn.datetime < cur_date:  # the transaction has already be processed
+            sym = txn.security.symbol
+            dirty = False
+
+            if sym not in hlds:  # Transaction for a new security
+                hlds[sym] = self.get_last_record_or_empty(txn)
+
+            hld_date = pd.Timestamp(hlds[sym].date, offset='B')
+            txn_date = pd.Timestamp(_date(txn.datetime), offset='B')
+
+            if txn_date < hld_date:  # already processed in the past
                 continue
 
-            if day_start(txn.datetime) > cur_date:  # we'd done all the transactions for cur_date, save it and move on
-                self.insert_holding(holding)
-                logger.debug('save ' + str(holding))
-                cur_date += 1
+            if txn_date > hld_date:  # done with the current date, move on
+                self.insert_holding(hlds[sym])
+                if txn_date > hld_date+1: # there are days without a transaction
+                    self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
+                hlds[sym].date = txn_date
 
-                # fill the gaps
-                while day_start(txn.datetime) > cur_date:
-                    self.insert_holding(holding, cur_date)
-                    logger.debug('save ' + str(holding))
-                    cur_date += 1
+            # since the gap has been filled, the current transaction is now for current date
+            # just process it
+            hlds[sym] = txn.transact(hlds[sym])
+            dirty = True
 
-            if day_start(txn.datetime) == cur_date:  # the transaction is for the current date, process it
-                if not holding:
-                    if not isinstance(txn, BuyTransaction):
-                        raise FirstTransactionNotBuy
-                    holding = Holding(security=txn.security, portfolio=self, date=cur_date)
-                else:
-                    holding.date = cur_date
-                holding = txn.transact(holding)
-        self.insert_holding(holding)
-
-
+        # fill the gaps between last transaction and end
+        for sym, hld in hlds.items():
+            if dirty:
+                self.insert_holding(hld)
+            hld_date = pd.Timestamp(hld.date, offset='B')
+            if hld_date < end:
+                self.fill_in_gaps(hld, pd.bdate_range(start=hld_date+1, end=end))
 
     def rebuild_holdings(self):
         """
@@ -114,7 +136,6 @@ class Portfolio(models.Model):
         :return:
         """
         Holding.objects.filter(portfolio=self).delete()
-
 
 
 class Holding(models.Model):
