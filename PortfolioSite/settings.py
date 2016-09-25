@@ -180,6 +180,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+
+        'portfolios.models': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
 

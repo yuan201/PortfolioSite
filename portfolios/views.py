@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.shortcuts import render
 from django.views.generic import TemplateView
@@ -6,8 +6,9 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from django.views.generic.detail import DetailView
 from django.shortcuts import get_object_or_404
+import pandas as pd
 
-from .models import Portfolio
+from .models import Portfolio, Holding
 from core.mixins import PortfoliosMixin
 from todos.models import Todo
 
@@ -37,7 +38,9 @@ class PortfolioDetailView(DetailView):
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         context['portfolios'] = portfolio
         context['transactions'] = portfolio.transactions()
-        context['holdings'] = portfolio.holdings(datetime.datetime.now()).values()
+        # quick test
+        portfolio.update_holdings(pd.Timestamp(dt.date.today()))
+        context['holdings'] = [Holding.objects.filter(portfolio=portfolio).last()]
         return context
 
 

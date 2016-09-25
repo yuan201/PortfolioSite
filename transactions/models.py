@@ -40,7 +40,7 @@ class BuyTransaction(Transaction):
     fee = PositiveDecimalField()
 
     def __str__(self):
-        return "On {} Buy {} shares of {}({}) @ {}".format(
+        return "On {} Buy {} shares of {}({}) @ {:.2f}".format(
             self.datetime, self.shares, self.security.name, self.security.symbol, self.price
         )
 
@@ -91,7 +91,7 @@ class SellTransaction(Transaction):
     fee = PositiveDecimalField()
 
     def __str__(self):
-        return "On {} Sell {} shares of {}({}) @ {}".format(
+        return "On {} Sell {} shares of {}({}) @ {:.2f}".format(
             self.datetime, self.shares, self.security.name, self.security.symbol, self.price
         )
 
@@ -145,7 +145,7 @@ class DividendTransaction(Transaction):
     value = PositiveDecimalField()
 
     def __str__(self):
-        return "On {} {}({}) paid {} dividend".format(
+        return "On {} {}({}) paid {:.2f} dividend".format(
             self.datetime, self.security.name, self.security.symbol, self.value
         )
 
@@ -185,7 +185,7 @@ class SplitTransaction(Transaction):
     ratio = PositiveDecimalField()
 
     def __str__(self):
-        return "On {} {}({}) split {}".format(
+        return "On {} {}({}) split {:.1f}".format(
             self.datetime, self.security.name, self.security.symbol, self.ratio
         )
 

@@ -1,16 +1,22 @@
 import datetime as dt
+import logging
 
 from django.db import models
 from django.core.urlresolvers import reverse
+import pandas as pd
 
 from transactions.models import BuyTransaction, SellTransaction, \
     SplitTransaction, DividendTransaction, Security, HoldingCls
+from transactions.exceptions import FirstTransactionNotBuy
 from benchmarks.models import Benchmark
 from core.types import PositiveDecimalField
+from core.utils import day_start
 
 
 class WrongTxnType(Exception):
     pass
+
+logger = logging.getLogger(__name__)
 
 
 class Portfolio(models.Model):
@@ -58,6 +64,58 @@ class Portfolio(models.Model):
         """calculate the value of the portfolio for a particular day"""
         pass
 
+    @staticmethod
+    def insert_holding(hld, date=None):
+        if not date is None:
+            hld.date = date
+        hld.id = None
+        hld.save(force_insert=True)
+
+    def update_holdings(self, end):
+        if Holding.objects.filter(portfolio=self):
+            holding = Holding.objects.filter(portfolio=self).order_by('date').last()
+            cur_date = pd.Timestamp(holding.date, offset='B') + 1
+        else:
+            holding = None
+            cur_date = pd.Timestamp(day_start(self.transactions()[0].datetime), offset='B')
+
+        for txn in self.transactions():
+            logger.debug('working on ' + str(txn))
+            if txn.datetime < cur_date:  # the transaction has already be processed
+                continue
+
+            if day_start(txn.datetime) > cur_date:  # we'd done all the transactions for cur_date, save it and move on
+                self.insert_holding(holding)
+                logger.debug('save ' + str(holding))
+                cur_date += 1
+
+                # fill the gaps
+                while day_start(txn.datetime) > cur_date:
+                    self.insert_holding(holding, cur_date)
+                    logger.debug('save ' + str(holding))
+                    cur_date += 1
+
+            if day_start(txn.datetime) == cur_date:  # the transaction is for the current date, process it
+                if not holding:
+                    if not isinstance(txn, BuyTransaction):
+                        raise FirstTransactionNotBuy
+                    holding = Holding(security=txn.security, portfolio=self, date=cur_date)
+                else:
+                    holding.date = cur_date
+                holding = txn.transact(holding)
+        self.insert_holding(holding)
+
+
+
+    def rebuild_holdings(self):
+        """
+        This methold discard all the existing holdings record for this portfolio and
+        rebuild every from scratch
+        :return:
+        """
+        Holding.objects.filter(portfolio=self).delete()
+
+
 
 class Holding(models.Model):
     security = models.ForeignKey(Security)
@@ -73,11 +131,12 @@ class Holding(models.Model):
         return txn.transact(self)
 
     def __str__(self):
-        return "{name}({symbol}):{shares}shares,cost{cost}\n" \
-                "value={value},dividend={dividend},gain={gain}".format(
+        return "@{date}:{name}({symbol}):{shares}=shares,cost={cost:.2f}," \
+                "value={value:.2f},dividend={dividend:.2f},gain={gain:.2f}".format(
                     name=self.security.name, symbol=self.security.symbol,
                     shares=self.shares, cost=self.cost,
-                    dividend=self.dividend, gain=self.gain, value=self.value
+                    dividend=self.dividend, gain=self.gain, value=self.value,
+                    date=self.date,
                 )
 
     def as_t(self):

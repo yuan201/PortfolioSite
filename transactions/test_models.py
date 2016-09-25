@@ -25,7 +25,7 @@ class BuyTransactionTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.txn),
-                         "On 2016-01-01 10:30:00 Buy 100 shares of 民生银行(MSYH) @ 10.1")
+                         "On 2016-01-01 10:30:00 Buy 100 shares of 民生银行(MSYH) @ 10.10")
 
     def test_cash_value(self):
         self.assertAlmostEqual(self.txn.cash_value(), -1015.2)
@@ -81,7 +81,7 @@ class SellTransactionTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.txn),
-                         "On 2016-01-01 09:15:00 Sell 200 shares of 民生银行(MSYH) @ 10.2")
+                         "On 2016-01-01 09:15:00 Sell 200 shares of 民生银行(MSYH) @ 10.20")
 
     def test_as_p(self):
         self.assertEqual(self.txn.as_p(), str(self.txn))
@@ -139,7 +139,7 @@ class DividendTransactionTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.txn),
-                         "On 2016-01-01 14:20:00 民生银行(MSYH) paid 120.0 dividend")
+                         "On 2016-01-01 14:20:00 民生银行(MSYH) paid 120.00 dividend")
 
     def test_as_p(self):
         self.assertEqual(self.txn.as_p(), str(self.txn))
