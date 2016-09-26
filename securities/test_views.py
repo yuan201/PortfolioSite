@@ -15,21 +15,21 @@ class NewSecViewTest(PortfoliosTestMixin, TestCase):
         self.client.post(reverse('securities:new'), data={
             'symbol': 'MSYH',
             'name': '民生银行',
-            'currency': 'RMB',
+            'currency': 'CNY',
         })
 
         sec = Security.objects.first()
         self.assertEqual(sec.symbol, 'MSYH')
         self.assertEqual(sec.name, '民生银行')
-        self.assertEqual(sec.currency, 'RMB')
+        self.assertEqual(sec.currency, 'CNY')
 
     def test_cannot_post_an_existing_sec(self):
-        Security.objects.create(symbol='MSYH', name='民生银行', currency='RMB')
+        Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
 
         response = self.client.post(reverse('securities:new'), data={
             'symbol': 'MSYH',
             'name': '民生银行',
-            'currency': 'RMB',
+            'currency': 'CNY',
         })
 
         self.assertEqual(Security.objects.count(), 1)
@@ -40,7 +40,7 @@ class NewSecViewTest(PortfoliosTestMixin, TestCase):
 class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
 
     def test_can_update_a_sec(self):
-        s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='RMB')
+        s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
 
         self.client.post(reverse('securities:update', args=[s1.id]), data={
             'symbol': 'WKB',
@@ -53,7 +53,7 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
         self.assertEqual(s1, s2)
 
     def test_cannot_update_sec_to_collide_with_existing_one(self):
-        Security.objects.create(symbol='MSYH', name='民生银行', currency='RMB')
+        Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
         s1 = Security.objects.create(symbol='MSH', name='民生银行', currency='HKD')
 
         response = self.client.post(reverse('securities:update', args=[s1.id]), data={
@@ -67,7 +67,7 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
         self.assertEqual(s1.symbol, 'MSH')
 
     def test_update_view_show_proper_info(self):
-        s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='RMB')
+        s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
         response = self.client.get(reverse('securities:update', args=[s1.id]))
         self.assertContains(response, s1.name)
         self.assertContains(response, s1.symbol)
@@ -77,7 +77,7 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
 class DeleteSecViewTest(PortfoliosTestMixin, TestCase):
 
     def setUp(self):
-        self.s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='RMB')
+        self.s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
 
     def test_can_delete_a_sec(self):
         self.client.post(reverse('securities:del', args=[self.s1.id]))
@@ -91,7 +91,7 @@ class DeleteSecViewTest(PortfoliosTestMixin, TestCase):
 class DetailSecViewTest(PortfoliosTestMixin, TestCase):
 
     def setUp(self):
-        self.s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='RMB')
+        self.s1 = Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
 
     def test_detail_view_show_sec_info(self):
         response = self.client.get(reverse('securities:detail', args=[self.s1.id]))

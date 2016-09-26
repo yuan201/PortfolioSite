@@ -65,7 +65,7 @@ class Portfolio(models.Model):
         if last_record:
             return last_record
         else:
-            return Holding(security=txn.security, portfolio=self, date=txn.datetime)
+            return Holding(security=txn.security, portfolio=self, date=date_(txn.datetime))
 
     @staticmethod
     def fill_in_gaps(hld, _range):
@@ -113,7 +113,10 @@ class Portfolio(models.Model):
             if hld_date < end:
                 self.fill_in_gaps(hld, pd.bdate_range(start=hld_date+1, end=end))
 
-    def total_value(self, date=None):
+    def sum_each_currency(self, date=None):
+        if not Holding.objects.filter(portfolio=self):
+            return {}
+
         if date is None:
             date = Holding.objects.filter(portfolio=self).order_by('date').last().date
 
@@ -122,9 +125,11 @@ class Portfolio(models.Model):
 
         for hld in holdings:
             values[hld.security.currency] += hld.value
+        return values
 
+    def sum_currency_as_l(self):
         result = ""
-        for currency, value in values.items():
+        for currency, value in self.sum_each_currency().items():
             result += '<li>{}: {:.2f}</li>'.format(currency, value)
         return result
 
@@ -174,7 +179,9 @@ class Holding(models.Model):
         share is more interesting in absolute terms, the conversion is performed in the func.
         :return cost per share in absolute number:
         """
-        return -self.cost/self.shares
+        if self.shares > 0:
+            return -self.cost/self.shares
+        return 0
 
     def update_value(self):
         quote = Quote.objects.filter(security=self.security).filter(date=self.date)

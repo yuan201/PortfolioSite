@@ -32,4 +32,6 @@ class ExchangeRate(models.Model):
                 if c[0] == BASE_CURRENCY:
                     continue
                 cls.objects.create(date=date_(d), currency=c[0],
-                                   rate=exchange.exchange(1, BASE_CURRENCY, c[0]))
+                                   rate=exchange.exchange(1, c[0], BASE_CURRENCY, rates))
+
+
