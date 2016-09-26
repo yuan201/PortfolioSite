@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 
 from core.utils import build_link
+from core.config import CURRENCY_CHOICES
 
 
 class Security(models.Model):
@@ -16,7 +17,7 @@ class Security(models.Model):
     """
     symbol = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=50)
-    currency = models.CharField(max_length=10, default='')
+    currency = models.CharField(max_length=3, default='CNY', choices=CURRENCY_CHOICES)
     quoter = models.CharField(max_length=20, blank=True)
     isindex = models.BooleanField(default=False)
 

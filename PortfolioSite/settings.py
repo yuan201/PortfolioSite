@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'benchmarks',
     'crispy_forms',
     'todos',
+    'exchangerates',
 ]
 
 MIDDLEWARE_CLASSES = [
