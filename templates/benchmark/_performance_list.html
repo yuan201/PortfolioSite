@@ -1,0 +1,14 @@
+{% load bench_extras %}
+<table class="table table stripped">
+    <thead>
+        <td>Date</td>
+        <td>Change</td>
+    </thead>
+
+    {% for p in performances %}
+        <tr>
+            <td>{{ p.date }}</td>
+            <td>{{ p.change|change }}</td>
+        </tr>
+    {% endfor %}
+</table>

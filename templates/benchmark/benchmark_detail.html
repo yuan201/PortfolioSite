@@ -12,7 +12,15 @@
     </div>
 
     <div class="col-lg-4">
+        <h3>Constitutes:</h3>
+        <p><a href="{% url 'benchmarks:normalize-cst' benchmark.id %}"
+            class="btn btn-default btn-lr" role="button">Normalize and Update</a></p>
         {% include "benchmark/_constitutes_list.html" %}
+    </div>
+
+    <div class="col-lg-4">
+        <h3>Performance</h3>
+        {% include "benchmark/_performance_list.html" %}
     </div>
 
 {% endblock main_col %}

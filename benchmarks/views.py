@@ -1,9 +1,11 @@
+from decimal import Decimal
+
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic import DetailView, ListView, FormView, RedirectView
 
-from .models import Benchmark, BenchmarkConstitute
+from .models import Benchmark, BenchmarkConstitute, BenchmarkPerformance
 from .forms import ConstituteCreateForm
 from core.mixins import TitleHeaderMixin
 
@@ -26,6 +28,7 @@ class BenchmarkDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BenchmarkDetailView, self).get_context_data(**kwargs)
         context['constitutes'] = BenchmarkConstitute.objects.filter(benchmark=self.object)
+        context['performances'] = BenchmarkPerformance.objects.filter(benchmark=self.object)
         return context
 
 
@@ -87,12 +90,15 @@ class ConstituteNormalizeView(RedirectView):
     """Normalize the percent of all constitutes so they add up to 1"""
     def get_redirect_url(self, *args, **kwargs):
         benchmark = get_object_or_404(Benchmark, pk=self.kwargs['pk'])
-        total_percent = .0
+        total_percent = Decimal(0.)
         for cst in benchmark.constitutes.all():
             total_percent += cst.percent
 
         for cst in benchmark.constitutes.all():
             cst.percent = cst.percent/total_percent
             cst.save()
+
+        BenchmarkPerformance.objects.filter(benchmark=benchmark).delete()
+        benchmark.update_performance()
 
         return reverse('benchmarks:detail', args=[benchmark.id])

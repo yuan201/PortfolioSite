@@ -26,14 +26,21 @@ class TxnFormMixin():
             msg = u"Transaction Already Exists"
             self.add_error(None, msg)
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         When creating the transaction, the portfolios the new transaction belongs to is
         already defined. This parameter is passed in through kwargs.
         :param kwargs:
         """
         self.portfolio = kwargs.pop('portfolios')
-        super().__init__(**kwargs)
+        super(TxnFormMixin, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.portfolio.remove_holdings_after(
+            security=self.cleaned_data['security'],
+            date=self.cleaned_data['datetime'],
+        )
+        return super(TxnFormMixin, self).save(*args, **kwargs)
 
 
 class BuyTxnUpdateForm(forms.ModelForm):
