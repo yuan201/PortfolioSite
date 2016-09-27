@@ -19,7 +19,7 @@ class Security(models.Model):
     name = models.CharField(max_length=50)
     currency = models.CharField(max_length=3, default='CNY', choices=CURRENCY_CHOICES)
     quoter = models.CharField(max_length=20, blank=True)
-    isindex = models.BooleanField(default=False)
+    isindex = models.BooleanField(default=False, verbose_name='Is this an Index?')
 
     def __str__(self):
         return "{}({})".format(self.name, self.symbol)

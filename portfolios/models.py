@@ -133,6 +133,10 @@ class Portfolio(models.Model):
             result += '<li>{}: {:.2f}</li>'.format(currency, value)
         return result
 
+    def remove_holdings_after(self, date):
+        """removing holdings after a specific date"""
+        pass
+
 
 class Holding(models.Model):
     security = models.ForeignKey(Security)

@@ -15,11 +15,11 @@ class Quote(models.Model):
     """
     security = models.ForeignKey(Security, on_delete=models.CASCADE, related_name='quotes')
     date = models.DateField()
-    open = PositiveDecimalField()
-    close = PositiveDecimalField()
-    high = PositiveDecimalField()
-    low = PositiveDecimalField()
-    volume = PositiveDecimalField()
+    open = PositiveDecimalField(default=0)
+    close = PositiveDecimalField(default=0)
+    high = PositiveDecimalField(default=0)
+    low = PositiveDecimalField(default=0)
+    volume = PositiveDecimalField(default=0)
 
     def __str__(self):
         return "{name}({symbol})@{date}:[{open:.2f}, {close:.2f}, {high:.2f}, {low:.2f}, {volume:.2f}]".format(

@@ -14,10 +14,11 @@ from quotes.forms import QuotesFormHorizontal
 
 class SecCreateView(TitleHeaderMixin, CreateView):
     template_name = 'security/add_update_sec.html'
-    fields = ['symbol', 'name', 'currency', 'quoter']
+    fields = ['symbol', 'name', 'currency', 'quoter', 'isindex']
     model = Security
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(SecCreateView, self).__init__(*args, **kwargs)
         self.title = 'Security'
         self.header = 'Add New Security'
 
@@ -26,7 +27,8 @@ class SecListView(TitleHeaderMixin, ListView):
     model = Security
     template_name = 'security/sec_list.html'
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(SecListView, self).__init__(*args, **kwargs)
         self.title = 'Securities'
         self.header = 'All Securities'
 
@@ -47,10 +49,11 @@ class SecDelView(DeleteView):
 
 class SecUpdateView(TitleHeaderMixin, UpdateView):
     model = Security
-    fields = ['symbol', 'name', 'currency', 'quoter']
+    fields = ['symbol', 'name', 'currency', 'quoter', 'isindex']
     template_name = 'security/add_update_sec.html'
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(SecUpdateView, self).__init__(*args, **kwargs)
         self.title = 'Security'
         self.header = 'Update Security'
 
@@ -59,7 +62,8 @@ class SecDetailView(TitleHeaderMixin, FormView):
     template_name = 'security/sec_detail.html'
     form_class = QuotesFormHorizontal
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(SecDetailView, self).__init__(*args, **kwargs)
         self.title = 'Security'
         self.header = ''
 
