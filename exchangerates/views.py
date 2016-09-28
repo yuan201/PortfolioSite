@@ -1,3 +1,3 @@
 from django.shortcuts import render
 
-# Create your views here.
+# todo add views to add/remove currency support and others

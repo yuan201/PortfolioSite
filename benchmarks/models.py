@@ -10,6 +10,9 @@ from core.types import positive_validator
 
 logger = logging.getLogger(__name__)
 
+# todo refactor
+# todo add parameters
+
 
 class Benchmark(models.Model):
     """

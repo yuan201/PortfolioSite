@@ -13,6 +13,7 @@ class TitleHeaderMixin(object):
         self.header = None
 
 
+# todo check usage of the following two mixins, if no usage delete
 class PortfoliosMixin(object):
     def get_context_data(self, **kwargs):
         context = super(PortfoliosMixin, self).get_context_data(**kwargs)

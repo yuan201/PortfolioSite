@@ -1,5 +1,6 @@
 import datetime as dt
 
+# todo move config to database (maybe after adding multi-user support)
 INIT_DATE = dt.date(2016, 8, 1)
 
 CURRENCY_CHOICES = (

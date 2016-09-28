@@ -9,6 +9,7 @@ def build_link(l, text):
     return "<a href={}>{}</a>".format(l, text)
 
 
+# todo might move all datetime/date related utility functions to a separate package
 def date_(datetime):
     return dt.datetime(datetime.year, datetime.month, datetime.day)
 

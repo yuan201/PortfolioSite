@@ -2,6 +2,8 @@ from selenium.webdriver.firefox.webdriver import WebDriver
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
+
+# todo a whole lot to do for functional test
 class NewPortfolioTest(StaticLiveServerTestCase):
 
     @classmethod

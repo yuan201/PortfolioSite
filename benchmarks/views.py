@@ -15,8 +15,9 @@ class BenchmarkCreateView(TitleHeaderMixin, CreateView):
     fields = ['name', 'description']
     template_name = 'benchmark/benchmark_create.html'
 
-    def __init__(self):
-        super(BenchmarkCreateView, self).__init__()
+    # todo remove jumbotron in template and probably the title and header stuff
+    def __init__(self, *args, **kwargs):
+        super(BenchmarkCreateView, self).__init__(*args, **kwargs)
         self.title = "Benchmark"
         self.header = "Create Benchmark"
 
@@ -42,8 +43,9 @@ class ConstituteCreateView(TitleHeaderMixin, FormView):
     form_class = ConstituteCreateForm
     template_name = 'benchmark/constitute_create_update.html'
 
-    def __init__(self):
-        super(ConstituteCreateView, self).__init__()
+    # todo remove jumbotron and probably title and header stuff here
+    def __init__(self, *args, **kwargs):
+        super(ConstituteCreateView, self).__init__(*args, **kwargs)
         self.title = 'Constitute'
         self.header = 'Create Constitute'
 
@@ -53,6 +55,7 @@ class ConstituteCreateView(TitleHeaderMixin, FormView):
         context['benchmark'] = benchmark
         return context
 
+    # todo move business logic to form class
     def form_valid(self, form):
         form.save_constitute()
         return super(ConstituteCreateView, self).form_valid(form)
@@ -69,6 +72,7 @@ class ConstituteCreateView(TitleHeaderMixin, FormView):
 
 class ConstituteDeleteView(RedirectView):
 
+    # todo move business logic to model class and call here
     def get_redirect_url(self, *args, **kwargs):
         constitute = get_object_or_404(BenchmarkConstitute, pk=kwargs['pk'])
         benchmark = constitute.benchmark
@@ -81,13 +85,18 @@ class ConstituteUpdateView(TitleHeaderMixin, UpdateView):
     fields = ['security', 'percent']
     template_name = 'benchmark/constitute_create_update.html'
 
-    def __init__(self):
-        super(ConstituteUpdateView, self).__init__()
+    # todo remove jumbotron in template and probably get rid of header stuff
+    def __init__(self, *args, **kwargs):
+        super(ConstituteUpdateView, self).__init__(*args, **kwargs)
         self.header = "Update Constitute"
 
 
 class ConstituteNormalizeView(RedirectView):
-    """Normalize the percent of all constitutes so they add up to 1"""
+    """
+    Normalize the percent of all constitutes so they add up to 1
+    update performance database after normalize
+    """
+    # todo move normalize and update logic to model class and call here
     def get_redirect_url(self, *args, **kwargs):
         benchmark = get_object_or_404(Benchmark, pk=self.kwargs['pk'])
         total_percent = Decimal(0.)

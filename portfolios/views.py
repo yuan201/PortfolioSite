@@ -30,9 +30,10 @@ class PortfolioCreateView(CreateView):
 
 
 class PortfolioDetailView(DetailView):
-    template_name = 'portfolio/portfolio_detail.html'
     model = Portfolio
+    template_name = 'portfolio/portfolio_detail.html'
 
+    # todo remove quick test and implement this properly
     def get_context_data(self, **kwargs):
         context = super(PortfolioDetailView, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
@@ -41,7 +42,7 @@ class PortfolioDetailView(DetailView):
         # quick test
         last_day = pd.Timestamp(dt.date.today(), offset='B')-1
         portfolio.update_holdings(last_day)
-        Holding.update_all_values()
+        Holding.update_all_values(portfolio)
         context['holdings'] = Holding.objects.filter(portfolio=portfolio).filter(date=last_day)
         return context
 
@@ -49,7 +50,3 @@ class PortfolioDetailView(DetailView):
 class PortfolioListView(ListView):
     model = Portfolio
     template_name = 'portfolio/portfolio_list.html'
-
-
-
-

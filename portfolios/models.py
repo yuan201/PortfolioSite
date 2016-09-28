@@ -19,6 +19,7 @@ from quotes.models import Quote
 class WrongTxnType(Exception):
     pass
 
+# todo figure out a proper structure for logging
 logger = logging.getLogger(__name__)
 
 
@@ -44,8 +45,9 @@ class Portfolio(models.Model):
         txns.sort()
         return txns
 
-    def value(self, _date):
-        """calculate the value of the portfolio for a particular day"""
+    # todo implement total value for portfolio
+    def total_value(self, _date):
+        """calculate the total value of the portfolio for a particular day"""
         pass
 
     @staticmethod
@@ -55,11 +57,13 @@ class Portfolio(models.Model):
         hld.id = None
         hld.save(force_insert=True)
 
+    # todo define 'get_latest_by' in model's meta, then call objects.latest()
     def find_last_record(self, security):
         if Holding.objects.filter(portfolio=self).filter(security=security):
             return Holding.objects.filter(portfolio=self).filter(security=security).order_by('date').last()
         return False
 
+    # todo use try block instead
     def get_last_record_or_empty(self, txn):
         last_record = self.find_last_record(txn.security)
         if last_record:
@@ -67,18 +71,16 @@ class Portfolio(models.Model):
         else:
             return Holding(security=txn.security, portfolio=self, date=date_(txn.datetime))
 
-    @staticmethod
-    def fill_in_gaps(hld, _range):
-        for d in _range:
-            hld.date = d
-            hld.id = None
-            hld.save(force_insert=True)
+    def fill_in_gaps(self, hld, gaps):
+        for d in gaps:
+            self.insert_holding(hld, d)
 
+    # todo refactor
     def update_holdings(self, end):
         if not self.transactions():
             return
 
-        hlds = dict()
+        hlds = {}
         dirty = False
 
         for txn in self.transactions():
@@ -117,6 +119,7 @@ class Portfolio(models.Model):
         if not Holding.objects.filter(portfolio=self):
             return {}
 
+        # todo use latest()
         if date is None:
             date = Holding.objects.filter(portfolio=self).order_by('date').last().date
 
@@ -127,12 +130,14 @@ class Portfolio(models.Model):
             values[hld.security.currency] += hld.value
         return values
 
+    # todo try nested array instead
     def sum_currency_as_l(self):
         result = ""
         for currency, value in self.sum_each_currency().items():
             result += '<li>{}: {:.2f}</li>'.format(currency, value)
         return result
 
+    # todo understand whether custom managers should be used
     def remove_holdings_after(self, security, date):
         """removing holdings after a specific date"""
         Holding.objects.filter(portfolio=self).filter(security=security).\
@@ -161,22 +166,23 @@ class Holding(models.Model):
                     date=self.date,
                 )
 
+    # todo add utilities for common links (security, portfolio, currency, etc)
     def as_t(self):
         return "<td>{sec_link}</td>" \
-               "<td>{symbol}</td>" \
-               "<td>{currency}</td>" \
-               "<td>{shares}</td>" \
-               "<td>{cost:.2f}</td>" \
-               "<td>{cost_s:.2f}</td>" \
-               "<td>{value:.2f}</td>" \
-               "<td>{dividend:.2f}</td>" \
-               "<td>{gain:.2f}</td>".format(
-                   sec_link=build_link(reverse('securities:detail', args=[self.security.id]), self.security.name),
-                   symbol=self.security.symbol,
-                   currency=self.security.currency, shares=self.shares,
-                   cost=self.cost, cost_s=self.cost_per_share(),
-                   dividend=self.dividend, gain=self.gain, value=self.value,
-               )
+                "<td>{symbol}</td>" \
+                "<td>{currency}</td>" \
+                "<td>{shares}</td>" \
+                "<td>{cost:.2f}</td>" \
+                "<td>{cost_s:.2f}</td>" \
+                "<td>{value:.2f}</td>" \
+                "<td>{dividend:.2f}</td>" \
+                "<td>{gain:.2f}</td>".format(
+                    sec_link=build_link(reverse('securities:detail', args=[self.security.id]), self.security.name),
+                    symbol=self.security.symbol,
+                    currency=self.security.currency, shares=self.shares,
+                    cost=self.cost, cost_s=self.cost_per_share(),
+                    dividend=self.dividend, gain=self.gain, value=self.value,
+                )
 
     def cost_per_share(self):
         """
@@ -188,6 +194,7 @@ class Holding(models.Model):
             return -self.cost/self.shares
         return 0
 
+    # todo use get() instead, probably within a try block
     def update_value(self):
         quote = Quote.objects.filter(security=self.security).filter(date=self.date)
         if quote:
@@ -195,6 +202,6 @@ class Holding(models.Model):
             self.save()
 
     @classmethod
-    def update_all_values(cls):
-        for hld in cls.objects.all():
+    def update_all_values(cls, portfolio):
+        for hld in cls.objects.filter(portfolio=portfolio).all():
             hld.update_value()

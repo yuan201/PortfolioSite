@@ -6,15 +6,8 @@ from core.mixins import PortfoliosTestMixin
 from todos.models import Todo
 
 
-# todo: add unittests for context
-# todo: add unittests for template
-
-
-class HomePageTest(PortfoliosTestMixin, TestCase):
-
-    def setUp(self):
-        Portfolio.objects.create(name='Value')
-        Portfolio.objects.create(name='Growth')
+# todo still need to figure out what to put on the home page, todo seems fine only for development
+class HomePageTest(TestCase):
 
     def test_home_page_use_proper_template(self):
         response = self.client.get('/')
@@ -25,7 +18,7 @@ class HomePageTest(PortfoliosTestMixin, TestCase):
         self.assertEqual(response.context['todo'], Todo)
 
 
-class NewPortfolioPageTest(PortfoliosTestMixin, TestCase):
+class NewPortfolioPageTest(TestCase):
 
     def test_add_new_portfolio(self):
         self.client.post(reverse('portfolios:new'),
@@ -43,6 +36,7 @@ class NewPortfolioPageTest(PortfoliosTestMixin, TestCase):
         p = Portfolio.objects.first()
         self.assertRedirects(response, reverse('portfolios:detail', args=[p.id]))
 
+    # todo probably should remove these kind of display test in unit test
     def test_new_portfolio_has_prompt(self):
         response = self.client.get(reverse('portfolios:new'))
         self.assertContains(response, 'Basic Information')
@@ -54,4 +48,14 @@ class NewPortfolioPageTest(PortfoliosTestMixin, TestCase):
         response = self.client.post(reverse('portfolios:new'),
                                     data={'name': 'value', 'description': 'simple value'})
         self.assertEqual(Portfolio.objects.count(), 1)
+
+
+# todo add unit test for portfolio detail view
+class PortfolioDetailViewTest(TestCase):
+    pass
+
+
+# todo add unit test for portfolio list view
+class PortfolioListViewTest(TestCase):
+    pass
 

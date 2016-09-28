@@ -3,6 +3,9 @@ from django import forms
 from .models import BenchmarkConstitute, Benchmark
 from securities.models import Security
 
+# todo add js to help select security
+# todo move save logic from view to form (in save method)
+
 
 class ConstituteCreateForm(forms.Form):
     name_symbol = forms.CharField(label='Security Name or Symbol', max_length=50)
