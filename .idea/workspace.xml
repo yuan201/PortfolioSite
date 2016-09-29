@@ -2,24 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d0a3226-d873-4ac5-97db-e2c5bf3d931d" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/benchmarks/test_views.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/exchangerates/test_models.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/exchangerates/test_views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/benchmarks/migrations/0004_benchmarkperformance.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/benchmarks/migrations/0005_auto_20160927_1008.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/exchangerates/migrations/0001_initial.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/securities/migrations/0002_auto_20160926_1002.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/securities/migrations/0003_auto_20160927_0934.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/benchmarks/forms.py" afterPath="$PROJECT_DIR$/benchmarks/forms.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/benchmarks/models.py" afterPath="$PROJECT_DIR$/benchmarks/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/benchmarks/views.py" afterPath="$PROJECT_DIR$/benchmarks/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/config.py" afterPath="$PROJECT_DIR$/core/config.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/mixins.py" afterPath="$PROJECT_DIR$/core/mixins.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/utils.py" afterPath="$PROJECT_DIR$/core/utils.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/exchangerates/views.py" afterPath="$PROJECT_DIR$/exchangerates/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/functional_test/test.py" afterPath="$PROJECT_DIR$/functional_test/test.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/portfolios/models.py" afterPath="$PROJECT_DIR$/portfolios/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/portfolios/test_models.py" afterPath="$PROJECT_DIR$/portfolios/test_models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/portfolios/test_views.py" afterPath="$PROJECT_DIR$/portfolios/test_views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/portfolios/views.py" afterPath="$PROJECT_DIR$/portfolios/views.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/benchmarks/tests.py" afterPath="$PROJECT_DIR$/benchmarks/test_forms.py" />
     </list>
     <ignored path="PortfolioSite.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -310,6 +298,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -358,7 +347,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
     </panes>
   </component>
@@ -755,7 +743,14 @@
       <option name="project" value="LOCAL" />
       <updated>1474951495932</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="code review and add lots of todos">
+      <created>1475106881948</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1475106881948</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -844,7 +839,8 @@
     <MESSAGE value="fixed a few bugs" />
     <MESSAGE value="implement update_performance method for benchmark" />
     <MESSAGE value="modify transaction updates holding&#10;update benchmark detail view to show performance" />
-    <option name="LAST_COMMIT_MESSAGE" value="modify transaction updates holding&#10;update benchmark detail view to show performance" />
+    <MESSAGE value="code review and add lots of todos" />
+    <option name="LAST_COMMIT_MESSAGE" value="code review and add lots of todos" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
