@@ -4,6 +4,7 @@ import pandas as pd
 from .quoter import QuoterTushare, SymbolNotExist
 
 
+# todo use mock in unit test
 class TestQuotersTushare(unittest.TestCase):
 
     def test_quotertushare_can_return_quotes(self):

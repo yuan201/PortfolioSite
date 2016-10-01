@@ -12,6 +12,7 @@ from quotes.models import Quote
 
 class QuotesFormTest(TestCase):
 
+    # todo try factory_boy to build test records
     def setUp(self):
         self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB')
         self.data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '2'}

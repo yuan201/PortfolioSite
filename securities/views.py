@@ -1,10 +1,8 @@
-from django.shortcuts import render
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
 from django.views.generic import FormView
-from django.views.generic.base import ContextMixin
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.shortcuts import get_object_or_404
 
 from core.mixins import TitleHeaderMixin
 from .models import Security
@@ -17,6 +15,7 @@ class SecCreateView(TitleHeaderMixin, CreateView):
     fields = ['symbol', 'name', 'currency', 'quoter', 'isindex']
     model = Security
 
+    # todo need to refactor the templates to get rid of jumbotron
     def __init__(self, *args, **kwargs):
         super(SecCreateView, self).__init__(*args, **kwargs)
         self.title = 'Security'
@@ -36,8 +35,10 @@ class SecListView(TitleHeaderMixin, ListView):
 class SecDelView(DeleteView):
     model = Security
     template_name = 'common/delete_confirm.html'
+    # todo figure out when should use reverse_lazy instead of reverse
     success_url = reverse_lazy('securities:list')
 
+    # todo check admin site for this, nice to have the ability to delete multiple records
     def get_context_data(self, **kwargs):
         context = super(SecDelView, self).get_context_data(**kwargs)
         context['confirm_title'] = 'Delete Security'
@@ -68,25 +69,24 @@ class SecDetailView(TitleHeaderMixin, FormView):
         self.header = ''
 
     def get_success_url(self, **kwargs):
-        sec = Security.objects.get(pk=self.kwargs['pk'])
+        sec = get_object_or_404(Security, pk=self.kwargs['pk'])
         return reverse_lazy('securities:detail', args=[sec.id])
 
     def get_context_data(self, **kwargs):
-        sec = Security.objects.get(pk=self.kwargs['pk'])
         context = super(SecDetailView, self).get_context_data(**kwargs)
+        # todo get all data to view and use js to filter
+        # todo might use AJAX to update data based on user input
+        sec = get_object_or_404(Security, pk=self.kwargs['pk'])
         context['quotes'] = Quote.objects.filter(security=sec).order_by('-date').all()[:5]
         context['security'] = sec
         return context
 
     def get_form_kwargs(self):
-        sec = Security.objects.get(pk=self.kwargs['pk'])
         kwargs = super(SecDetailView, self).get_form_kwargs()
-        kwargs['security'] = sec
+        kwargs['security'] = get_object_or_404(Security, pk=self.kwargs['pk'])
         return kwargs
 
+    # todo move business logic to form class
     def form_valid(self, form):
         form.save_quotes()
         return super(SecDetailView, self).form_valid(form)
-
-
-

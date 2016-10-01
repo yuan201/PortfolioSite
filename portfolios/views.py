@@ -13,14 +13,14 @@ from core.mixins import PortfoliosMixin
 from todos.models import Todo
 
 
-class HomePageView(ListView):
-    model = Portfolio
+class HomePageView(TemplateView):
     template_name = 'homepage.html'
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
         context['todo'] = Todo
         return context
+
 
 
 class PortfolioCreateView(CreateView):

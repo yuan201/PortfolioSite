@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class NewSecViewTest(PortfoliosTestMixin, TestCase):
 
+    # todo set currency default to CNY
     def test_can_post_a_new_sec(self):
         self.client.post(reverse('securities:new'), data={
             'symbol': 'MSYH',
@@ -22,13 +23,15 @@ class NewSecViewTest(PortfoliosTestMixin, TestCase):
         self.assertEqual(sec.symbol, 'MSYH')
         self.assertEqual(sec.name, '民生银行')
         self.assertEqual(sec.currency, 'CNY')
+        self.assertEqual(sec.quoter, '')
+        self.assertEqual(sec.isindex, False)
 
-    def test_cannot_post_an_existing_sec(self):
+    def test_cannot_post_sec_with_same_symbol(self):
         Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
 
         response = self.client.post(reverse('securities:new'), data={
             'symbol': 'MSYH',
-            'name': '民生银行',
+            'name': '民生',
             'currency': 'CNY',
         })
 
@@ -51,6 +54,9 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
         s2 = Security.objects.first()
         self.assertEqual(Security.objects.count(), 1)
         self.assertEqual(s1, s2)
+        self.assertEqual(s2.symbol, 'WKB')
+        self.assertEqual(s2.name, '万科B')
+        self.assertEqual(s2.currency, 'USD')
 
     def test_cannot_update_sec_to_collide_with_existing_one(self):
         Security.objects.create(symbol='MSYH', name='民生银行', currency='CNY')
@@ -100,7 +106,7 @@ class DetailSecViewTest(PortfoliosTestMixin, TestCase):
         self.assertContains(response, self.s1.currency)
 
     def test_detail_view_has_delete_link(self):
-        response = self.client.get(reverse('securities:detail', args=[self.s1.id]))
+        response = self.client.get(reverse('securities:detail', args=[self.s1.id,]))
         # logger.debug(response.rendered_content)
         self.assertIn(reverse('securities:del', args=[self.s1.id]), response.rendered_content)
 

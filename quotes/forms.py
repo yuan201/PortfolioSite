@@ -12,6 +12,7 @@ from quotes.models import Quote
 
 logger = logging.getLogger('quotes_view')
 
+# todo change MODE_CHOICES to use sensible phrase instead of 1,2,3
 MODE_CHOICES = (('1', 'Append'), ('2', 'Overwrite'), ('3', 'Discard Existing'))
 
 
@@ -75,10 +76,14 @@ class QuotesForm(forms.Form):
     def save_quotes(self):
         logger.debug('saving {} quotes to db, mode:{}'.format(
             self.quotes['open'].count(), self.cleaned_data['mode']))
-        mode = self.cleaned_data['mode']
-        Quote.update_quotes(new_quotes_df=self.quotes, security=self.security, mode=mode)
+        Quote.update_quotes(
+            new_quotes_df=self.quotes,
+            security=self.security,
+            mode=self.cleaned_data['mode'],
+        )
 
 
+# todo remove separate view for updating quotes and use the inline form alone
 class QuotesFormHorizontal(QuotesForm):
     mode = forms.ChoiceField(choices=MODE_CHOICES, required=True)
 

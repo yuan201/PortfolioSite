@@ -14,15 +14,12 @@ class TxnFormMixin():
         exists. If another transaction of the same type, for the same security and
         occurs at the same time is found in the system, the new transaction is considered
         a duplicate.
-        :param cleaned_data:
-        :param txn_cls:
-        :return:
         """
         security = cleaned_data.get('security')
         datetime = cleaned_data.get('datetime')
 
         if txn_cls.objects.filter(portfolio=self.portfolio).filter(
-            security=security).filter(datetime=datetime).count() > 0:
+                security=security).filter(datetime=datetime).count() > 0:
             msg = u"Transaction Already Exists"
             self.add_error(None, msg)
 
@@ -30,7 +27,6 @@ class TxnFormMixin():
         """
         When creating the transaction, the portfolios the new transaction belongs to is
         already defined. This parameter is passed in through kwargs.
-        :param kwargs:
         """
         self.portfolio = kwargs.pop('portfolios')
         super(TxnFormMixin, self).__init__(*args, **kwargs)
@@ -59,7 +55,7 @@ class BuyTxnCreateForm(TxnFormMixin, BuyTxnUpdateForm):
     BuyTxnCreateFrom is used to create a new buy transaction.
     """
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super(BuyTxnCreateForm, self).clean()
         self.check_duplicate_txn(cleaned_data, BuyTransaction)
         return cleaned_data
 
@@ -80,7 +76,7 @@ class SellTxnCreateForm(TxnFormMixin, SellTxnUpdateForm):
     SellTxnCreateForm is used to create a new sell transaction.
     """
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super(SellTxnCreateForm, self).clean()
         self.check_duplicate_txn(cleaned_data, SellTransaction)
         return cleaned_data
 
@@ -101,7 +97,7 @@ class DividendTxnCreateForm(TxnFormMixin, DividendTxnUpdateForm):
     DividendTxnCreateForm is used to create a new dividend transaction.
     """
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super(DividendTxnCreateForm, self).clean()
         self.check_duplicate_txn(cleaned_data, DividendTransaction)
         return cleaned_data
 
@@ -122,6 +118,6 @@ class SplitTxnCreateForm(TxnFormMixin, SplitTxnUpdateForm):
     SplitTxnCreateForm is used to create a new split transaction.
     """
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super(SplitTxnCreateForm, self).clean()
         self.check_duplicate_txn(cleaned_data, SplitTransaction)
         return cleaned_data
