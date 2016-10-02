@@ -8,6 +8,9 @@ import numpy as np
 
 from .models import Quote
 from securities.models import Security
+from securities.factories import SecurityFactory
+from .factories import QuoteFactory
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +20,8 @@ class QuoteModelTest(TestCase):
         self.df = pd.DataFrame(np.random.random(25).reshape(5, 5),
                                index=pd.date_range('2016-01-01', periods=5, freq='D'),
                                columns=['open', 'close', 'high', 'low', 'volume'])
-        self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB')
+        # self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB')
+        self.s1 = SecurityFactory()
 
     def test_add_quotes(self):
         Quote.add_quotes(self.df, self.s1)

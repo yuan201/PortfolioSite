@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 
 from .models import Security
 from quotes.models import Quote
+from .factories import SecurityFactory
 
 
 class SecurityModelTest(TestCase):
@@ -17,11 +18,9 @@ class SecurityModelTest(TestCase):
                                     open=close-1.0, close=close, volume=close*100)
 
     def setUp(self):
-        self.s1 = Security.objects.create(name="民生银行", symbol="MSYH", currency="RMB",
-                                          quoter="Tushare", isindex=False)
+        self.s1 = SecurityFactory()
         self.q1 = self.create_quote(self.s1, dt.date(2016, 9, 2), 10)
-        self.s2 = Security.objects.create(name="格力电器", symbol="000651", currency="RMB",
-                                          quoter="Tushare", isindex=False)
+        self.s2 = SecurityFactory()
 
     def test_model_str(self):
         self.assertEqual(str(self.s1), "{}({})".format(self.s1.name, self.s1.symbol))

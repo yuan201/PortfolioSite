@@ -24,10 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 class Portfolio(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     description = models.TextField(default='')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     benchmark = models.ForeignKey(Benchmark, null=True)
+
+    class Meta:
+        unique_together = (('name', 'owner'),)
 
     def __str__(self):
         return self.name

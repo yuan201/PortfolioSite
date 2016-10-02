@@ -22,10 +22,9 @@ class HomePageView(TemplateView):
         return context
 
 
-
 class PortfolioCreateView(CreateView):
     model = Portfolio
-    fields = ['name', 'description']
+    fields = ['name', 'description', 'owner']
     template_name = 'portfolio/new_portfolio.html'
 
 
