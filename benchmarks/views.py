@@ -55,7 +55,6 @@ class ConstituteCreateView(TitleHeaderMixin, FormView):
         context['benchmark'] = benchmark
         return context
 
-    # todo move business logic to form class
     def form_valid(self, form):
         form.save_constitute()
         return super(ConstituteCreateView, self).form_valid(form)
@@ -72,12 +71,11 @@ class ConstituteCreateView(TitleHeaderMixin, FormView):
 
 class ConstituteDeleteView(RedirectView):
 
-    # todo move business logic to model class and call here
     def get_redirect_url(self, *args, **kwargs):
         constitute = get_object_or_404(BenchmarkConstitute, pk=kwargs['pk'])
-        benchmark = constitute.benchmark
+        redirect = reverse('benchmarks:detail', args=[constitute.benchmark.id])
         constitute.delete()
-        return reverse('benchmarks:detail', args=[benchmark.id])
+        return redirect
 
 
 class ConstituteUpdateView(TitleHeaderMixin, UpdateView):
@@ -96,18 +94,7 @@ class ConstituteNormalizeView(RedirectView):
     Normalize the percent of all constitutes so they add up to 1
     update performance database after normalize
     """
-    # todo move normalize and update logic to model class and call here
     def get_redirect_url(self, *args, **kwargs):
         benchmark = get_object_or_404(Benchmark, pk=self.kwargs['pk'])
-        total_percent = Decimal(0.)
-        for cst in benchmark.constitutes.all():
-            total_percent += cst.percent
-
-        for cst in benchmark.constitutes.all():
-            cst.percent = cst.percent/total_percent
-            cst.save()
-
-        BenchmarkPerformance.objects.filter(benchmark=benchmark).delete()
-        benchmark.update_performance()
-
+        benchmark.normalize_and_update()
         return reverse('benchmarks:detail', args=[benchmark.id])
