@@ -4,19 +4,23 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import pandas as pd
 from django.db.utils import IntegrityError
+from django.contrib.auth.models import User
 
 from .models import Portfolio, Holding
 from transactions.models import BuyTransaction, SellMoreThanHold, SplitTransaction, DividendTransaction
 from transactions.models import transaction_factory
 from securities.models import Security
+from .factories import PortfolioFactory
+from securities.factories import SecurityFactory
 
 
 class PortfolioModelTest(TestCase):
 
     def setUp(self):
-        self.p1 = Portfolio.objects.create(name='value', description='testing')
-        self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB')
-        self.s2 = Security.objects.create(name='Google', symbol='GOOG', currency='USD')
+        # self.p1 = Portfolio.objects.create(name='value', description='testing')
+        self.p1 = PortfolioFactory()
+        self.s1 = SecurityFactory()
+        self.s2 = SecurityFactory()
 
     def test_str(self):
         self.assertEqual(str(self.p1), self.p1.name)
@@ -26,10 +30,10 @@ class PortfolioModelTest(TestCase):
 
     def test_reject_duplicated_name(self):
         with self.assertRaises(IntegrityError):
-            Portfolio.objects.create(name='value', description='another value')
+            Portfolio.objects.create(name=self.p1.name, description='another value', owner=self.p1.owner)
 
     def test_all_transactions(self):
-        p2 = Portfolio.objects.create(name='trend', description='trending')
+        p2 = Portfolio.objects.create(name='trend', description='trending', owner=self.p1.owner)
         _dt = [
             dt.datetime(2016, 1, 1, 11, 20),
             dt.datetime(2016, 1, 10, 14, 10),

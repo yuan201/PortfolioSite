@@ -28,4 +28,5 @@ urlpatterns = [
     url(r'^quotes/', include('quotes.urls', namespace='quotes')),
     url(r'^benchmarks/', include('benchmarks.urls', namespace='benchmarks')),
     url(r'^todos/', include('todos.urls', namespace='todos')),
+    url(r'^accounts/', include('users.urls', namespace='accounts')),
 ]

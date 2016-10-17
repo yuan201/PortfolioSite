@@ -1,10 +1,10 @@
-import datetime as dt
 import logging
 from collections import defaultdict
 from decimal import Decimal
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.conf import settings
 import pandas as pd
 
 from transactions.models import BuyTransaction, SellTransaction, \
@@ -24,9 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 class Portfolio(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50)
     description = models.TextField(default='')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     benchmark = models.ForeignKey(Benchmark, null=True)
+
+    class Meta:
+        unique_together = (('name', 'owner'),)
 
     def __str__(self):
         return self.name

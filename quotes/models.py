@@ -11,7 +11,7 @@ logger = logging.getLogger('quotes_model')
 
 class Quote(models.Model):
     """
-    In this app, only close quote is used.
+    In this app, only close quote is used right now
     """
     security = models.ForeignKey(Security, on_delete=models.CASCADE, related_name='quotes')
     date = models.DateField()
@@ -33,6 +33,8 @@ class Quote(models.Model):
             volume=self.volume,
         )
 
+    # todo probably this should go with custom manager
+    # todo refactor update_quotes method
     @classmethod
     def update_quotes(cls, new_quotes_df, security, mode):
         old_quotes = cls.objects.filter(security=security)
@@ -56,6 +58,7 @@ class Quote(models.Model):
             old_quotes.delete()
             cls.add_quotes(new_quotes_df, security)
 
+    # todo check whether this should go with custom manager
     @classmethod
     def add_quotes(cls, quotes_df, security):
         for date, quote in quotes_df.iterrows():
@@ -67,6 +70,7 @@ class Quote(models.Model):
                                low=quote['low'],
                                volume=quote['volume'])
 
+    # todo queryset to dataframe sounds like a general util function
     @classmethod
     def to_DataFrame(cls, qs):
         """

@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from decimal import Decimal
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -32,7 +33,7 @@ class Benchmark(models.Model):
     def get_absolute_url(self):
         return reverse('benchmarks:detail', args=[self.id])
 
-    def update_performance(self):
+    def _update_performance(self):
         last_quotes = {}
         performances = {}
         constitutes = {con.security.symbol: con for con in self.constitutes.all()}
@@ -55,6 +56,26 @@ class Benchmark(models.Model):
         for p in performances.values():
             p.save()
 
+    def normalize_and_update(self):
+        self.normalize()
+        BenchmarkPerformance.objects.filter(benchmark=self).delete()
+        self._update_performance()
+
+    def normalize(self):
+        total_percent = Decimal(0.)
+        for cst in self.constitutes.all():
+            total_percent += cst.percent
+
+        for cst in self.constitutes.all():
+            cst.percent = cst.percent/total_percent
+            cst.save()
+
+    def is_normalized(self):
+        sum = 0
+        for con in self.constitutes.all():
+            sum += con.percent
+        return (sum-1) < 1e-6
+
 
 class BenchmarkConstitute(models.Model):
     security = models.ForeignKey(Security)
@@ -69,6 +90,9 @@ class BenchmarkConstitute(models.Model):
             security=self.security.name,
             percent=self.percent,
         )
+
+    def get_absolute_url(self):
+        return self.benchmark.get_absolute_url()
 
 
 class BenchmarkPerformance(models.Model):

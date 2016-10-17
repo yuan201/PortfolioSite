@@ -7,13 +7,14 @@ from securities.models import Security
 from portfolios.models import Portfolio, Holding
 from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction
 from transactions.exceptions import SellMoreThanHold, DividendOnEmptyHolding
+from portfolios.factories import PortfolioFactory
 
 
 class BuyTransactionTest(TestCase):
 
     def setUp(self):
         self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB', isindex=False)
-        self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        self.p1 = PortfolioFactory()
         self.txn = BuyTransaction.objects.create(
             security=self.s1,
             datetime=dt.datetime(2016, 1, 1, 10, 30),
@@ -69,7 +70,8 @@ class SellTransactionTest(TestCase):
 
     def setUp(self):
         self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB', isindex=False)
-        self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        # self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        self.p1 = PortfolioFactory()
         self.txn = SellTransaction.objects.create(
             security=self.s1,
             datetime=dt.datetime(2016, 1, 1, 9, 15),
@@ -129,7 +131,8 @@ class SellTransactionTest(TestCase):
 class DividendTransactionTest(TestCase):
     def setUp(self):
         self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB', isindex=False)
-        self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        # self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        self.p1 = PortfolioFactory()
         self.txn = DividendTransaction.objects.create(
             security=self.s1,
             datetime=dt.datetime(2016, 1, 1, 14, 20),
@@ -175,7 +178,8 @@ class DividendTransactionTest(TestCase):
 class SplitTransactionTest(TestCase):
     def setUp(self):
         self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB', isindex=False)
-        self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        # self.p1 = Portfolio.objects.create(name='Value', description='Test Value')
+        self.p1 = PortfolioFactory()
         self.txn = SplitTransaction.objects.create(
             security=self.s1,
             datetime=dt.datetime(2016, 1, 1, 11, 20),

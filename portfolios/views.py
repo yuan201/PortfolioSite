@@ -13,8 +13,7 @@ from core.mixins import PortfoliosMixin
 from todos.models import Todo
 
 
-class HomePageView(ListView):
-    model = Portfolio
+class HomePageView(TemplateView):
     template_name = 'homepage.html'
 
     def get_context_data(self, **kwargs):
@@ -25,7 +24,7 @@ class HomePageView(ListView):
 
 class PortfolioCreateView(CreateView):
     model = Portfolio
-    fields = ['name', 'description']
+    fields = ['name', 'description', 'owner']
     template_name = 'portfolio/new_portfolio.html'
 
 

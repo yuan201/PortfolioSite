@@ -4,10 +4,13 @@ from decimal import Decimal
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+import factory
 
 from .models import BuyTransaction, SellTransaction, DividendTransaction
 from .models import SplitTransaction, HoldingCls, Security
 from portfolios.models import Portfolio
+from portfolios.factories import PortfolioFactory
+from securities.factories import SecurityFactory
 
 
 class NewUpdateTxnTestMixin(object):
@@ -15,15 +18,8 @@ class NewUpdateTxnTestMixin(object):
     @classmethod
     def setUpClass(cls):
         super(NewUpdateTxnTestMixin, cls).setUpClass()
-        Security.objects.create(name='Google', symbol='GOOG', currency='USD')
-        Security.objects.create(name='Apple', symbol='APPL', currency='USD')
-        Portfolio.objects.create(name='BigCap', description='Test')
-
-    @classmethod
-    def tearDownClass(cls):
-        Security.objects.all().delete()
-        Portfolio.objects.all().delete()
-        super(NewUpdateTxnTestMixin, cls).tearDownClass()
+        factory.create_batch(SecurityFactory, 2)
+        PortfolioFactory()
 
     def setup_buy_transaction(self):
         txndt = dt.datetime.strptime("2015-01-01 15:00:00", "%Y-%m-%d %H:%M:%S")

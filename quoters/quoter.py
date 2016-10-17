@@ -10,6 +10,7 @@ class UnknownQuoter(Exception):
     pass
 
 
+# todo need to wrap pandas web engine
 class Quoter(object):
     """
     A Quoter give back quotes for a security or index.
