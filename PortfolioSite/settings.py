@@ -90,7 +90,7 @@ DATABASES = {
         #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'portfolios',
-        'USER': 'yuanyuan',
+        'USER': 'yuan',
         'PASSWORD': 'labview',
         'HOST': '',
         'PORT': '5432',

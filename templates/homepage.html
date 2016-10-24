@@ -5,27 +5,29 @@
 {% endblock title %}
 
 {% block main_col %}
-    <div class="row">
-    <h1 class="col-lg-offset-4">Todos</h1>
-        <div class="col-lg-4">
-            <h3>Inactive</h3>
-            <ul>
-                {{ todo.inactive_as_l|safe }}
-            </ul>
-        </div>
+    <div class="container">
+        <div class="row">
+            <h1 class="col-lg-offset-4">Todos</h1>
+            <div class="col-md-4">
+                <h3>Inactive</h3>
+                <ul>
+                    {{ todo.inactive_as_l|safe }}
+                </ul>
+            </div>
 
-        <div class="col-lg-4">
-            <h3>Active</h3>
-            <ul>
-                {{ todo.active_as_l|safe }}
-            </ul>
-        </div>
+            <div class="col-md-4">
+                <h3>Active</h3>
+                <ul>
+                    {{ todo.active_as_l|safe }}
+                </ul>
+            </div>
 
-        <div class="col-lg-4">
-            <h3>Done</h3>
-            <ul>
-                {{ todo.done_as_l|safe }}
-            </ul>
+            <div class="col-md-4">
+                <h3>Done</h3>
+                <ul>
+                    {{ todo.done_as_l|safe }}
+                </ul>
+            </div>
         </div>
     </div>
 {% endblock main_col %}
