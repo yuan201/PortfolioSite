@@ -6,6 +6,8 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from django.views.generic.detail import DetailView
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.urlresolvers import reverse
 import pandas as pd
 
 from .models import Portfolio, Holding
@@ -13,7 +15,7 @@ from core.mixins import PortfoliosMixin
 from todos.models import Todo
 
 
-class HomePageView(TemplateView):
+class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'homepage.html'
 
     def get_context_data(self, **kwargs):

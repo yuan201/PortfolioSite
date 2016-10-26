@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import BuyTxnCreateView, AddTxnView, SellTxnCreateView, DividendTxnCreateView, SplitTxnCreateView
+from .views import BuyTxnCreateView, SellTxnCreateView, DividendTxnCreateView, SplitTxnCreateView
 from .views import BuyTxnDeleteView, SellTxnDeleteView, DividendTxnDeleteView, SplitTxnDeleteView
 from .views import BuyTxnUpdateView, SellTxnUpdateView, DividendTxnUpdateView, SplitTxnUpdateView
 
@@ -21,10 +21,6 @@ urlpatterns = [
     url(regex=r'^(?P<pk>[0-9]+)/add_split$',
         view=SplitTxnCreateView.as_view(),
         name="add_split"),
-
-    url(regex=r'^(?P<pk>[0-9]+)/add$',
-        view=AddTxnView.as_view(),
-        name="add"),
 
     url(regex=r'^(?P<pk>[0-9]+)/del_buy$',
         view=BuyTxnDeleteView.as_view(),

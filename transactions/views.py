@@ -10,16 +10,6 @@ from .forms import BuyTxnUpdateForm, SellTxnUpdateForm, DividendTxnUpdateForm, S
 from core.mixins import TitleHeaderMixin
 
 
-class AddTxnView(TemplateView):
-    template_name = 'transaction/add_txn.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(AddTxnView, self).get_context_data(**kwargs)
-        portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
-        context['portfolios'] = portfolio
-        return context
-
-
 class TxnCreateMixin(object):
     def get_context_data(self, **kwargs):
         context = super(TxnCreateMixin, self).get_context_data(**kwargs)

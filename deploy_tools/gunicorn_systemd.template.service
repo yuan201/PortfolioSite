@@ -1,0 +1,10 @@
+[Unit]
+Description=PortfolioSite gunicorn daemon
+
+[Service]
+Type=simple
+User=yuan
+ExecStart=/home/yuan/gunicorn_start.sh
+
+[Install]
+WantedBy=multi-user.target
