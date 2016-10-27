@@ -12,26 +12,33 @@ import securities.models
 class Command(BaseCommand):
     help = 'Get all securites and their basic infomations'
 
-    @staticmethod
-    def add_or_get_security(symbol):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.sec_added = 0
+        self.info_added = 0
+
+    def add_or_get_security(self, symbol):
         try:
             return Security.objects.get(symbol=symbol)
-        except securities.models.DoesNotExist as e:
+        except securities.models.Security.DoesNotExist as e:
             form = NewSecurityForm({'symbol': symbol,
                                     'currency': 'CNY',
                                     'quoter': 'Tushare',
                                     'isindex': False})
             if form.is_valid():
+                self.sec_added += 1
                 return form.save()
 
     @staticmethod
     def _md(td):
         """convert date from tushare yyyymmdd to yyyy-mm-dd"""
         td = str(td)
-        return td[0:4] + '-' + td[4:6] + '-' + td[6:]
+        if len(td) == 8:
+            return td[0:4] + '-' + td[4:6] + '-' + td[6:]
+        return ""
 
     def handle(self, *args, **options):
-        print("Retrieving security basic info from Tushare")
+        self.stdout.write("Retrieving security basic info from Tushare")
         basics = ts.get_stock_basics()
         for symbol in basics.index:
             sec = self.add_or_get_security(symbol)
@@ -44,5 +51,8 @@ class Command(BaseCommand):
                                         'outstanding_shares': infos['outstanding'],
                                         'list_date': self._md(infos['timeToMarket'])})
             if form.is_valid():
+                self.info_added += 1
                 form.save()
 
+        self.stdout.write(self.style.SUCCESS('Added {} Securities'.format(self.sec_added)))
+        self.stdout.write(self.style.SUCCESS('Added {} Infos'.format(self.info_added)))

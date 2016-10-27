@@ -16,13 +16,11 @@ class NewSecViewTest(PortfoliosTestMixin, TestCase):
     def test_can_post_a_new_sec(self):
         self.client.post(reverse('securities:new'), data={
             'symbol': 'MSYH',
-            'name': '民生银行',
             'currency': 'CNY',
         })
 
         sec = Security.objects.first()
         self.assertEqual(sec.symbol, 'MSYH')
-        self.assertEqual(sec.name, '民生银行')
         self.assertEqual(sec.currency, 'CNY')
         self.assertEqual(sec.quoter, '')
         self.assertEqual(sec.isindex, False)
@@ -32,7 +30,6 @@ class NewSecViewTest(PortfoliosTestMixin, TestCase):
 
         response = self.client.post(reverse('securities:new'), data={
             'symbol': s1.symbol,
-            'name': '民生',
             'currency': 'CNY',
         })
 
@@ -48,7 +45,6 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
 
         self.client.post(reverse('securities:update', args=[s1.id]), data={
             'symbol': 'WKB',
-            'name': '万科B',
             'currency': 'USD',
         })
 
@@ -56,7 +52,6 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
         self.assertEqual(Security.objects.count(), 1)
         self.assertEqual(s1, s2)
         self.assertEqual(s2.symbol, 'WKB')
-        self.assertEqual(s2.name, '万科B')
         self.assertEqual(s2.currency, 'USD')
 
     def test_cannot_update_sec_to_collide_with_existing_one(self):
@@ -66,7 +61,6 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
 
         response = self.client.post(reverse('securities:update', args=[s1.id]), data={
             'symbol': s2.symbol,
-            'name': '民生银行',
             'currency': 'HKD',
         })
 
@@ -77,7 +71,6 @@ class UpdateSecViewTest(PortfoliosTestMixin, TestCase):
     def test_update_view_show_proper_info(self):
         s1 = SecurityFactory()
         response = self.client.get(reverse('securities:update', args=[s1.id]))
-        self.assertContains(response, s1.name)
         self.assertContains(response, s1.symbol)
         self.assertContains(response, s1.currency)
 
@@ -103,7 +96,6 @@ class DetailSecViewTest(PortfoliosTestMixin, TestCase):
 
     def test_detail_view_show_sec_info(self):
         response = self.client.get(reverse('securities:detail', args=[self.s1.id]))
-        self.assertContains(response, self.s1.name)
         self.assertContains(response, self.s1.symbol)
         self.assertContains(response, self.s1.currency)
 

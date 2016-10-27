@@ -23,22 +23,22 @@ class SecurityModelTest(TestCase):
         self.s2 = SecurityFactory()
 
     def test_model_str(self):
-        self.assertEqual(str(self.s1), "{}({})".format(self.s1.name, self.s1.symbol))
+        self.assertEqual(str(self.s1), self.s1.symbol)
 
     def test_model_as_t_with_quote(self):
         self.assertHTMLEqual(self.s1.as_t(),
-                             "<td><a href={link}>{symbol}</a></td><td>{name}</td> \
+                             "<td><a href={link}>{symbol}</a></td> \
                           <td>{currency}</td><td>1</td><td>10.00</td>".format(
                                  link=self.s1.get_absolute_url(), symbol=self.s1.symbol,
-                                 name=self.s1.name, currency=self.s1.currency)
+                                 currency=self.s1.currency)
                              )
 
     def test_model_as_t_without_quote(self):
         self.assertHTMLEqual(self.s2.as_t(),
-                             "<td><a href={link}>{symbol}</a></td><td>{name}</td> \
+                             "<td><a href={link}>{symbol}</a></td> \
                           <td>{currency}</td><td>0</td><td></td>".format(
                                  link=self.s2.get_absolute_url(), symbol=self.s2.symbol,
-                                 name=self.s2.name, currency=self.s2.currency)
+                                 currency=self.s2.currency)
                              )
 
     def test_absolute_url(self):

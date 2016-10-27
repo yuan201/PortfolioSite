@@ -25,8 +25,8 @@ class Security(models.Model):
         return "{}".format(self.symbol)
 
     def __repr__(self):
-        return "Security(name={},symbol={},currency={},quoter={},index={}".format(
-            self.name, self.symbol, self.currency, self.quoter, self.isindex
+        return "Security(symbol={},currency={},quoter={},index={}".format(
+            self.symbol, self.currency, self.quoter, self.isindex
         )
 
     def get_absolute_url(self):
@@ -39,11 +39,10 @@ class Security(models.Model):
             last_quote = "<td>{q:.2f}</td>".format(q=self.quotes.order_by("-date").first().close)
 
         return "<td>{symbol}</td>" \
-            "<td>{name}</td>" \
             "<td>{currency}</td>" \
             "<td>{quote_count}</td>".format(
                 symbol=build_link(reverse('securities:detail', args=[self.id]), self.symbol),
-                name=self.name, currency=self.currency, quote_count=self.quotes.count()) + last_quote
+                currency=self.currency, quote_count=self.quotes.count()) + last_quote
 
     def as_p(self):
         return str(self)
