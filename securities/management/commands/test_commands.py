@@ -76,3 +76,12 @@ class GetBasicInfosTest(TestCase):
         call_command('getbasicinfos')
 
         self.assertEqual(info.name, 'NAME')
+
+    def test_add_another_info(self):
+        sec = SecurityFactory(symbol='600000')
+        info = SecInfoFactory(security=sec, valid_date=dt.date.today()-dt.timedelta(days=1), name='Old')
+
+        call_command('getbasicinfos')
+
+        self.assertEqual(sec.infos.count(), 2)
+        self.assertEqual(sec.infos.latest().name, 'SEC1')

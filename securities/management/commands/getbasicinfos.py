@@ -2,7 +2,7 @@ import datetime as dt
 
 import tushare as ts
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from securities.models import Security, SecurityInfo
 from securities.forms import NewSecurityForm, NewSecurityInfoForm
@@ -43,13 +43,17 @@ class Command(BaseCommand):
         for symbol in basics.index:
             sec = self.add_or_get_security(symbol)
             infos = basics.ix[symbol]
-            form = NewSecurityInfoForm({'security': sec.id,
-                                        'valid_date': dt.date.today(),
-                                        'name': infos['name'],
-                                        'industry': infos['industry'],
-                                        'total_shares': infos['totals'],
-                                        'outstanding_shares': infos['outstanding'],
-                                        'list_date': self._md(infos['timeToMarket'])})
+            data = {'security': sec.id,
+                    'valid_date': dt.date.today(),
+                    'name': infos['name'],
+                    'industry': infos['industry'],
+                    'total_shares': infos['totals'],
+                    'outstanding_shares': infos['outstanding'],
+                    'list_date': self._md(infos['timeToMarket'])}
+            if sec.infos.count() > 0:
+                form = NewSecurityInfoForm(data, last=sec.infos.latest())
+            else:
+                form = NewSecurityInfoForm(data)
             if form.is_valid():
                 self.info_added += 1
                 form.save()
