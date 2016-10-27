@@ -12,7 +12,7 @@ from quotes.forms import QuotesFormHorizontal
 
 class SecCreateView(TitleHeaderMixin, CreateView):
     template_name = 'security/add_update_sec.html'
-    fields = ['symbol', 'name', 'currency', 'quoter', 'isindex']
+    fields = ['symbol', 'currency', 'quoter', 'isindex']
     model = Security
 
     # todo need to refactor the templates to get rid of jumbotron
@@ -50,7 +50,7 @@ class SecDelView(DeleteView):
 
 class SecUpdateView(TitleHeaderMixin, UpdateView):
     model = Security
-    fields = ['symbol', 'name', 'currency', 'quoter', 'isindex']
+    fields = ['symbol', 'currency', 'quoter', 'isindex']
     template_name = 'security/add_update_sec.html'
 
     def __init__(self, *args, **kwargs):

@@ -16,13 +16,13 @@ class Security(models.Model):
     traded on some market.
     """
     symbol = models.CharField(max_length=20, unique=True)
-    name = models.CharField(max_length=50)
+    # name = models.CharField(max_length=50)
     currency = models.CharField(max_length=3, default='CNY', choices=CURRENCY_CHOICES)
     quoter = models.CharField(max_length=20, blank=True)
     isindex = models.BooleanField(default=False, verbose_name='Is this an Index?')
 
     def __str__(self):
-        return "{}({})".format(self.name, self.symbol)
+        return "{}".format(self.symbol)
 
     def __repr__(self):
         return "Security(name={},symbol={},currency={},quoter={},index={}".format(
@@ -75,3 +75,22 @@ class Security(models.Model):
         df['high'] = query.high
         df['low'] = query.low
         df['volume'] = query.volume
+
+
+class SecurityInfo(models.Model):
+    """Information related to a security. Expected to change, but not very often. (e.g. shares outstanding"""
+
+    security = models.ForeignKey(Security, on_delete=models.CASCADE, related_name='infos')
+    valid_date = models.DateField(verbose_name='Valid Date')
+    name = models.CharField(max_length=50, verbose_name='Name')
+    industry = models.CharField(max_length=50, verbose_name='Industry', null=True)
+    total_shares = models.FloatField(verbose_name='Total Shares', null=True)
+    outstanding_shares = models.FloatField(verbose_name='Outstanding Shares', null=True)
+    list_date = models.DateField(verbose_name='Date got Listed', null=True)
+
+    class Meta:
+        unique_together = ("security", "valid_date")
+        get_latest_by = "valid_date"
+
+    def __str__(self):
+        return "{}@{}".format(self.name, self.valid_date)
