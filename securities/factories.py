@@ -1,4 +1,5 @@
 import factory
+import datetime as dt
 
 from .models import Security, SecurityInfo
 
@@ -16,3 +17,4 @@ class SecInfoFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SecurityInfo
 
+    valid_date = dt.date.today()

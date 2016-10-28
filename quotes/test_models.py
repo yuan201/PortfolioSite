@@ -42,7 +42,7 @@ class QuoteModelTest(TestCase):
 
 class QuoteModelUpdateQuotesTest(TestCase):
     def setUp(self):
-        self.s1 = Security.objects.create(name='民生银行', symbol='MSYH', currency='RMB')
+        self.s1 = Security.objects.create(symbol='MSYH', currency='RMB')
         self.q1 = Quote.objects.create(security=self.s1, date=dt.date(2016, 1, 1), open=10.,
                                        close=11., high=12., low=9., volume=100.)
         self.q2 = Quote.objects.create(security=self.s1, date=dt.date(2015, 12, 31), open=5.,

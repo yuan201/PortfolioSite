@@ -63,8 +63,8 @@ class BenchmarkModelTest(TestCase):
 class BenchmarkConstitutesModelTest(TestCase):
 
     def test_str(self):
-        bc = BenchConsFactory(benchmark__name='BK1', percent=1., security__name='民生银行')
-        self.assertEqual(str(bc), "BK1->民生银行:1.00")
+        bc = BenchConsFactory(benchmark__name='BK1', percent=1., security__symbol='MSYH')
+        self.assertEqual(str(bc), "BK1->MSYH:1.00")
 
     def test_normalize(self):
         bk = BenchmarkFactory()

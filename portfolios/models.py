@@ -199,6 +199,7 @@ class Holding(models.Model):
         return 0
 
     # todo use get() instead, probably within a try block
+    # todo decouple all direct access to quote database and use Quoter interface instead
     def update_value(self):
         quote = Quote.objects.filter(security=self.security).filter(date=self.date)
         if quote:

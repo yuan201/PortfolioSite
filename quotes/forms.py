@@ -73,6 +73,9 @@ class QuotesForm(forms.Form):
 
         return cleaned_data
 
+    def save(self):
+        self.save_quotes()
+
     def save_quotes(self):
         logger.debug('saving {} quotes to db, mode:{}'.format(
             self.quotes['open'].count(), self.cleaned_data['mode']))

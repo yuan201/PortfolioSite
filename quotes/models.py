@@ -22,8 +22,7 @@ class Quote(models.Model):
     volume = PositiveDecimalField(default=0)
 
     def __str__(self):
-        return "{name}({symbol})@{date}:[{open:.2f}, {close:.2f}, {high:.2f}, {low:.2f}, {volume:.2f}]".format(
-            name=self.security.name,
+        return "{symbol}@{date}:[{open:.2f}, {close:.2f}, {high:.2f}, {low:.2f}, {volume:.2f}]".format(
             symbol=self.security.symbol,
             date=self.date,
             open=self.open,

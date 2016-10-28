@@ -3,6 +3,7 @@ import math
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 import pandas as pd
 import numpy as np
 
@@ -43,6 +44,13 @@ class Security(models.Model):
             "<td>{quote_count}</td>".format(
                 symbol=build_link(reverse('securities:detail', args=[self.id]), self.symbol),
                 currency=self.currency, quote_count=self.quotes.count()) + last_quote
+
+    @property
+    def name(self):
+        try:
+            return self.infos.latest().name
+        except ObjectDoesNotExist:
+            return ""
 
     def as_p(self):
         return str(self)

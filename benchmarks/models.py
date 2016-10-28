@@ -87,7 +87,7 @@ class BenchmarkConstitute(models.Model):
     def __str__(self):
         return "{benchmark}->{security}:{percent:.2f}".format(
             benchmark=self.benchmark.name,
-            security=self.security.name,
+            security=self.security.symbol,
             percent=self.percent,
         )
 
