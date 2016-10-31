@@ -27,18 +27,18 @@ class SecurityModelTest(TestCase):
 
     def test_model_as_t_with_quote(self):
         self.assertHTMLEqual(self.s1.as_t(),
-                             "<td><a href={link}>{symbol}</a></td> \
-                          <td>{currency}</td><td>1</td><td>10.00</td>".format(
+                             "<td><a href={link}>{symbol}</a></td><td>{name}</td> \
+                          <td>{currency}</td><td>{list_date}</td><td>1</td><td>10.00</td>".format(
                                  link=self.s1.get_absolute_url(), symbol=self.s1.symbol,
-                                 currency=self.s1.currency)
+                                 name=self.s1.name, currency=self.s1.currency, list_date=self.s1.list_date)
                              )
 
     def test_model_as_t_without_quote(self):
         self.assertHTMLEqual(self.s2.as_t(),
-                             "<td><a href={link}>{symbol}</a></td> \
-                          <td>{currency}</td><td>0</td><td></td>".format(
+                             "<td><a href={link}>{symbol}</a></td><td>{name}</td> \
+                          <td>{currency}</td><td>{list_date}</td><td>0</td><td></td>".format(
                                  link=self.s2.get_absolute_url(), symbol=self.s2.symbol,
-                                 currency=self.s2.currency)
+                                 name=self.s2.name, currency=self.s2.currency, list_date=self.s1.list_date)
                              )
 
     def test_absolute_url(self):

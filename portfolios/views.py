@@ -16,6 +16,7 @@ from todos.models import Todo
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
+    # todo figure out a way to test w/ and w/o login user
     template_name = 'homepage.html'
 
     def get_context_data(self, **kwargs):

@@ -6,7 +6,13 @@ from .models import Security, SecurityInfo
 class NewSecurityForm(ModelForm):
     class Meta:
         model = Security
-        fields = ['symbol', 'currency', 'quoter', 'isindex']
+        fields = ['symbol', 'currency', 'quoter', 'isindex', 'list_date']
+
+
+class UpdateSecurityListDateForm(ModelForm):
+    class Meta:
+        model = Security
+        fields = ['list_date']
 
 
 class NewSecurityInfoForm(ModelForm):
@@ -22,16 +28,12 @@ class NewSecurityInfoForm(ModelForm):
             return cleaned_data
 
         if (cleaned_data.get('name') == self.last.name and
-            cleaned_data.get('industry') == self.last.name and
-            cleaned_data.get('total_shares') == self.last.total_shares and
-            cleaned_data.get('outstanding_shares') == self.last.outstanding_shares and
-            cleaned_data.get('list_date') == self.last.list_date):
+            cleaned_data.get('industry') == self.last.name):
             msg = u"Nothing changed"
-            self.add_error(msg)
+            self.add_error(None, msg)
 
         return cleaned_data
 
     class Meta:
         model = SecurityInfo
-        fields = ['security', 'valid_date', 'name', 'industry', 'total_shares', 'outstanding_shares',
-                  'list_date']
+        fields = ['security', 'valid_date', 'name', 'industry']

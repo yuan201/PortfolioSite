@@ -163,7 +163,12 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': 'unittest.log',
-        }
+        },
+        'command': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'command.log',
+        },
     },
     'loggers': {
         'quotes_view': {
@@ -186,9 +191,13 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-
         'portfolios.models': {
             'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'quotes.management.commands': {
+            'handler': ['command'],
             'level': 'DEBUG',
             'propagate': True,
         },

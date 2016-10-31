@@ -3,17 +3,17 @@ from django.contrib import admin
 from .models import Security, SecurityInfo
 
 
+@admin.register(Security)
 class SecurityAdmin(admin.ModelAdmin):
-    list_display = ('symbol', 'currency', 'quoter', 'isindex')
-    search_fields = ['symbol', 'isindex']
+    list_display = ('symbol', 'name', 'currency', 'quoter', 'no_quotes', 'isindex', 'list_date')
+    search_fields = ['symbol']
     ordering = ['symbol']
+    list_filter = ['isindex', 'list_date']
 
 
+@admin.register(SecurityInfo)
 class SecurityInfoAdmin(admin.ModelAdmin):
-    list_display = ('security', 'name', 'valid_date', 'industry', 'total_shares', 'outstanding_shares',
-                    'list_date')
+    list_display = ('security', 'name', 'valid_date', 'industry')
     search_fields = ['name', 'industry']
     ordering = ['-valid_date']
 
-admin.site.register(Security, SecurityAdmin)
-admin.site.register(SecurityInfo, SecurityInfoAdmin)

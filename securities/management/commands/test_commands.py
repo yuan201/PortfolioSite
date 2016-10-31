@@ -30,10 +30,8 @@ class GetBasicInfosTest(TestCase):
         self.assertEqual(sec.symbol, '600000')
         self.assertEqual(sec.infos.latest().name, 'SEC1')
         self.assertEqual(sec.infos.latest().industry, 'IND1')
-        self.assertEqual(sec.infos.latest().total_shares, 1000)
-        self.assertEqual(sec.infos.latest().outstanding_shares, 500)
-        self.assertEqual(sec.infos.latest().list_date, dt.date(1997, 9, 23))
         self.assertEqual(sec.infos.latest().valid_date, dt.date.today())
+        self.assertEqual(sec.list_date, dt.date(1997, 9, 23))
 
     def test_command_console_output(self):
         out = StringIO()
@@ -57,7 +55,6 @@ class GetBasicInfosTest(TestCase):
         call_command('getbasicinfos')
 
         self.assertEqual(sec.infos.latest().name, 'SEC1')
-        self.assertEqual(sec.infos.latest().list_date, dt.date(1997, 9, 23))
 
     def test_update_nothing_output(self):
         sec = SecurityFactory(symbol='600000')

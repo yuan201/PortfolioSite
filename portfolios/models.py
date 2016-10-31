@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from decimal import Decimal
+from itertools import chain
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -42,12 +43,11 @@ class Portfolio(models.Model):
         return reverse('portfolios:detail', args=[self.id])
 
     def transactions(self):
-        txns = list(BuyTransaction.objects.filter(portfolio=self).all())
-        txns += list(SellTransaction.objects.filter(portfolio=self).all())
-        txns += list(DividendTransaction.objects.filter(portfolio=self).all())
-        txns += list(SplitTransaction.objects.filter(portfolio=self).all())
-        txns.sort()
-        return txns
+        txns = chain(BuyTransaction.objects.filter(portfolio=self).all(),
+                     SellTransaction.objects.filter(portfolio=self).all(),
+                     DividendTransaction.objects.filter(portfolio=self).all(),
+                     SplitTransaction.objects.filter(portfolio=self).all())
+        return sorted(txns)
 
     # todo implement total value for portfolio
     def total_value(self, _date):

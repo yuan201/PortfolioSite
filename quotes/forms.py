@@ -47,7 +47,7 @@ class QuotesForm(forms.Form):
             self.add_error('start', msg)
             return cleaned_data
 
-        if self.security.quoter == '':
+        if not self.security.quoter:
             msg = u'Quoter not specified'
             self.add_error(None, msg)
             return cleaned_data

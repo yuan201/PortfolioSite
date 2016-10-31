@@ -21,6 +21,9 @@ class Quote(models.Model):
     low = PositiveDecimalField(default=0)
     volume = PositiveDecimalField(default=0)
 
+    class Meta:
+        get_latest_by = 'date'
+
     def __str__(self):
         return "{symbol}@{date}:[{open:.2f}, {close:.2f}, {high:.2f}, {low:.2f}, {volume:.2f}]".format(
             symbol=self.security.symbol,

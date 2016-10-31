@@ -10,6 +10,9 @@ from quotes.models import Quote
 from quotes.forms import QuotesFormHorizontal
 
 
+ITEMS_PER_PAGE = 15
+
+
 class SecCreateView(TitleHeaderMixin, CreateView):
     template_name = 'security/add_update_sec.html'
     fields = ['symbol', 'currency', 'quoter', 'isindex']
@@ -25,6 +28,7 @@ class SecCreateView(TitleHeaderMixin, CreateView):
 class SecListView(TitleHeaderMixin, ListView):
     model = Security
     template_name = 'security/sec_list.html'
+    paginate_by = ITEMS_PER_PAGE
 
     def __init__(self, *args, **kwargs):
         super(SecListView, self).__init__(*args, **kwargs)

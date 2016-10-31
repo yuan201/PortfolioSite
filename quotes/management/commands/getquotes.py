@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 
 from django.core.management.base import BaseCommand
 
@@ -7,6 +8,8 @@ from quotes.models import Quote
 
 from securities.models import Security
 from quotes.forms import QuotesForm
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -34,6 +37,6 @@ class Command(BaseCommand):
                 form.save()
                 self.stdout.write('.', ending='')
             else:
-                self.stdout.write(form.errors)
+                logger.debug(data)
 
         self.stdout.write('Get quotes for {} securities'.format(count))

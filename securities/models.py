@@ -17,10 +17,13 @@ class Security(models.Model):
     traded on some market.
     """
     symbol = models.CharField(max_length=20, unique=True)
-    # name = models.CharField(max_length=50)
     currency = models.CharField(max_length=3, default='CNY', choices=CURRENCY_CHOICES)
-    quoter = models.CharField(max_length=20, blank=True)
+    quoter = models.CharField(max_length=20, null=True, blank=True)
     isindex = models.BooleanField(default=False, verbose_name='Is this an Index?')
+    list_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['symbol']
 
     def __str__(self):
         return "{}".format(self.symbol)
@@ -36,14 +39,16 @@ class Security(models.Model):
     def as_t(self):
         last_quote = "<td></td>"
         if self.quotes.count() > 0:
-            # todo define meta property in model class to use latest() instead
-            last_quote = "<td>{q:.2f}</td>".format(q=self.quotes.order_by("-date").first().close)
+            last_quote = "<td>{q:.2f}</td>".format(q=self.quotes.latest().close)
 
         return "<td>{symbol}</td>" \
+            "<td>{name}</td>" \
             "<td>{currency}</td>" \
+            "<td>{list_date}</td>" \
             "<td>{quote_count}</td>".format(
                 symbol=build_link(reverse('securities:detail', args=[self.id]), self.symbol),
-                currency=self.currency, quote_count=self.quotes.count()) + last_quote
+                name=self.name, currency=self.currency, list_date=self.list_date,
+                quote_count=self.quotes.count()) + last_quote
 
     @property
     def name(self):
@@ -51,6 +56,10 @@ class Security(models.Model):
             return self.infos.latest().name
         except ObjectDoesNotExist:
             return ""
+
+    @property
+    def no_quotes(self):
+        return self.quotes.count()
 
     def as_p(self):
         return str(self)
@@ -91,9 +100,6 @@ class SecurityInfo(models.Model):
     valid_date = models.DateField(verbose_name='Valid Date')
     name = models.CharField(max_length=50, verbose_name='Name')
     industry = models.CharField(max_length=50, verbose_name='Industry', null=True)
-    total_shares = models.FloatField(verbose_name='Total Shares', null=True)
-    outstanding_shares = models.FloatField(verbose_name='Outstanding Shares', null=True)
-    list_date = models.DateField(verbose_name='Date got Listed', null=True)
 
     class Meta:
         unique_together = ("security", "valid_date")

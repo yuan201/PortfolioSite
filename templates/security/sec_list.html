@@ -5,8 +5,23 @@
 {% endblock title %}
 
 {% block main_col %}
-    <div class="row col-lg-8">
-        {% include "security/_sec_list.html" with securities=object_list %}
+    <div class="container">
+        <div class="row col-lg-12">
+            {% include "security/_sec_list.html" with securities=object_list %}
+        </div>
     </div>
+
+    <nav aria-label="all securities">
+        {% if is_paginated %}
+            <ul class="pager">
+                {% if page_obj.has_previous %}
+                    <li><a href="{% url 'securities:list' %}?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <li><a href="{% url 'securities:list' %}?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        {% endif %}
+    </nav>
 
 {% endblock main_col %}
