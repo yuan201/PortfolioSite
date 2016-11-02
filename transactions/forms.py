@@ -1,4 +1,7 @@
 from django import forms
+from crispy_forms.helper import FormHelper, Layout
+from crispy_forms.bootstrap import StrictButton
+from crispy_forms.layout import Submit
 
 from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction
 from .models import Security
@@ -121,3 +124,17 @@ class SplitTxnCreateForm(TxnFormMixin, SplitTxnUpdateForm):
         cleaned_data = super(SplitTxnCreateForm, self).clean()
         self.check_duplicate_txn(cleaned_data, SplitTransaction)
         return cleaned_data
+
+
+class UploadTransactionsForm(forms.Form):
+    """
+    UploadTransactionForm let user select a file to upload which contains list of transactions.
+    Support file format: CSV
+    """
+    file = forms.FileField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('upload',' Upload'))
