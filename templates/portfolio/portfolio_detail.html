@@ -8,7 +8,7 @@ Portfolio
 {% block extra_head %}
     <link rel="stylesheet" href="{% static "bootstrap/css/fileinput.min.css" %}" type="text/css" />
     <script src="{% static "bootstrap/js/fileinput.min.js" %}"></script>
-    <script src="{% static "js/uploader.js" %}"></script>
+    <script src="{% static "js/portfolio_detail.js" %}"></script>
 {% endblock %}
 
 {% block main_col %}
@@ -25,7 +25,7 @@ Portfolio
         </div>
 
         <div>
-            <table class="table table-striped">
+            <table class="table table-striped" id="holding_table">
                 <thead>
                     <td>Name</td>
                     <td>Symbol</td>
@@ -58,6 +58,8 @@ Portfolio
                class="btn btn-default" role="button">Dividend</a>
             <a href="{% url 'transactions:add_split' portfolio.id %}"
                class="btn btn-default" role="button">Split</a>
+            <a href="{% url 'transactions:add' portfolio.id %}"
+               class="btn btn-default" role="button">Add</a>
         </div>
 
         <div class="col-md-6">
@@ -67,10 +69,10 @@ Portfolio
         </div>
 
         <div>
-            <table class="table table-striped">
+            <table class="table table-striped" id="transaction_table">
                 {% include "includes/_transaction_thead.html" %}
                 {% for txn in transactions %}
-                    <tr>{{ txn.as_t|safe }}</tr>
+                    {{ txn.as_t|safe }}
                 {% endfor %}
             </table>
         </div>

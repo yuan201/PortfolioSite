@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 
 from securities.models import Security
 from portfolios.models import Portfolio, Holding
-from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction
+from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction, Transaction2
 from transactions.exceptions import SellMoreThanHold, DividendOnEmptyHolding
 from portfolios.factories import PortfolioFactory
 
@@ -219,3 +219,22 @@ class SplitTransactionTest(TestCase):
         self.assertEqual(hld.shares, 240)
         self.assertEqual(hld.cost, -1000.)
         self.assertEqual(hld.gain, 100.)
+
+
+class Transaction2Test(TestCase):
+    def setUp(self):
+        self.s1 = SecurityFactory(symbol='MSYH')
+        SecInfoFactory(security=self.s1, name='民生银行')
+        self.p1 = PortfolioFactory()
+        self.txn = Transaction2.objects.create(
+            security = self.s1,
+            datetime = dt.datetime(2016,1 ,1 ,9, 45),
+            portfolio = self.p1,
+            type = 'buy',
+            shares = 100,
+            price = 11.5,
+            fee = 5.8,
+        )
+
+    def test_str(self):
+        self.assertEqual(str(self.txn), 'Buy 100 shares of 民生银行(MSYH) on 2016-01-01 09:45:00 at 11.5/share, fee:5.8')

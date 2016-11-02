@@ -40,7 +40,7 @@ class PortfolioDetailView(DetailView):
         context = super(PortfolioDetailView, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         context['portfolios'] = portfolio
-        context['transactions'] = portfolio.transactions()
+        context['transactions'] = portfolio.transactions.all()
         # quick test
         last_day = pd.Timestamp(dt.date.today(), offset='B')-1
         portfolio.update_holdings(last_day)

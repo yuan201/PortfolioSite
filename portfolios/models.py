@@ -42,12 +42,12 @@ class Portfolio(models.Model):
     def get_absolute_url(self):
         return reverse('portfolios:detail', args=[self.id])
 
-    def transactions(self):
-        txns = chain(BuyTransaction.objects.filter(portfolio=self).all(),
-                     SellTransaction.objects.filter(portfolio=self).all(),
-                     DividendTransaction.objects.filter(portfolio=self).all(),
-                     SplitTransaction.objects.filter(portfolio=self).all())
-        return sorted(txns)
+    # def transactions(self):
+        # txns = chain(BuyTransaction.objects.filter(portfolio=self).all(),
+        #             SellTransaction.objects.filter(portfolio=self).all(),
+        #             DividendTransaction.objects.filter(portfolio=self).all(),
+        #             SplitTransaction.objects.filter(portfolio=self).all())
+        #return sorted(txns)
 
     # todo implement total value for portfolio
     def total_value(self, _date):
@@ -81,13 +81,13 @@ class Portfolio(models.Model):
 
     # todo refactor
     def update_holdings(self, end):
-        if not self.transactions():
+        if not self.transactions.all():
             return
 
         hlds = {}
         dirty = False
 
-        for txn in self.transactions():
+        for txn in self.transactions.all():
             sym = txn.security.symbol
             dirty = False
 

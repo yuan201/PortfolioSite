@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper, Layout
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.layout import Submit
 
-from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction
+from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction, Transaction2
 from .models import Security
 
 
@@ -138,3 +138,17 @@ class UploadTransactionsForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('upload',' Upload'))
+
+
+class TransactionUpdateForm(TxnFormMixin, forms.ModelForm):
+    class Meta:
+        model = Transaction2
+        fields = ('security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio')
+
+
+class TransactonCreateForm(TransactionUpdateForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+        self.check_duplicate_txn(cleaned_data, Transaction2)
+

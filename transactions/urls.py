@@ -3,6 +3,7 @@ from django.conf.urls import url
 from .views import BuyTxnCreateView, SellTxnCreateView, DividendTxnCreateView, SplitTxnCreateView
 from .views import BuyTxnDeleteView, SellTxnDeleteView, DividendTxnDeleteView, SplitTxnDeleteView
 from .views import BuyTxnUpdateView, SellTxnUpdateView, DividendTxnUpdateView, SplitTxnUpdateView
+from .views import TransactionDelView, TransactionUpdateView, TransactionCreateView
 
 
 urlpatterns = [
@@ -53,5 +54,17 @@ urlpatterns = [
     url(regex=r'^(?P<pk>[0-9]+)/update_split$',
         view=SplitTxnUpdateView.as_view(),
         name="update_split"),
+
+    url(regex=r'^(?P<pk>\d+)/update$',
+        view=TransactionUpdateView.as_view(),
+        name="update"),
+
+    url(regex=r'^(?P<pk>\d+)/del$',
+        view=TransactionDelView.as_view(),
+        name='del'),
+
+    url(regex=r'^(?P<pk>\d+)/add$',
+        view=TransactionCreateView.as_view(),
+        name='add'),
 
 ]

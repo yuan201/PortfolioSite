@@ -8,3 +8,7 @@ class DividendOnEmptyHolding(Exception):
 
 class FirstTransactionNotBuy(Exception):
     pass
+
+
+class UnknownTransactionType(Exception):
+    pass

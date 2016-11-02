@@ -3,9 +3,9 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
 
-from .models import BuyTransaction, SellTransaction,DividendTransaction, SplitTransaction
+from .models import BuyTransaction, SellTransaction,DividendTransaction, SplitTransaction, Transaction2
 from portfolios.models import Portfolio
-from .forms import BuyTxnCreateForm, SellTxnCreateForm, SplitTxnCreateForm, DividendTxnCreateForm
+from .forms import BuyTxnCreateForm, SellTxnCreateForm, SplitTxnCreateForm, DividendTxnCreateForm, TransactonCreateForm, TransactionUpdateForm
 from .forms import BuyTxnUpdateForm, SellTxnUpdateForm, DividendTxnUpdateForm, SplitTxnUpdateForm
 from core.mixins import TitleHeaderMixin
 
@@ -141,3 +141,19 @@ class SplitTxnUpdateView(TxnTemplateMixin, TitleHeaderMixin, UpdateView):
         self.title = 'Split'
         self.header = 'Update Split Transaction'
         super(SplitTxnUpdateView, self).__init__()
+
+
+class TransactionUpdateView(TxnTemplateMixin, TxnCreateMixin, UpdateView):
+    model = Transaction2
+    template_name = 'transaction/add_update_txn.html'
+    form_class = TransactionUpdateForm
+
+
+class TransactionDelView(TxnDeleteMixin, DeleteView):
+    model = Transaction2
+    template_name = 'common/delete_confirm.html'
+
+
+class TransactionCreateView(TxnTemplateMixin, TxnCreateMixin, CreateView):
+    model = Transaction2
+    form_class = TransactonCreateForm
