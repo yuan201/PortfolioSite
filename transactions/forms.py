@@ -1,4 +1,5 @@
 from django import forms
+from django.core.urlresolvers import reverse
 from crispy_forms.helper import FormHelper, Layout
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.layout import Submit
@@ -32,7 +33,7 @@ class TxnFormMixin():
         already defined. This parameter is passed in through kwargs.
         """
         self.portfolio = kwargs.pop('portfolios')
-        super(TxnFormMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         self.portfolio.remove_holdings_after(
@@ -42,18 +43,18 @@ class TxnFormMixin():
         return super(TxnFormMixin, self).save(*args, **kwargs)
 
 
-class UploadTransactionsForm(forms.Form):
+class TransactionsUploadForm(TxnFormMixin, forms.Form):
     """
     UploadTransactionForm let user select a file to upload which contains list of transactions.
     Support file format: CSV
     """
-    file = forms.FileField()
+    file = forms.FileField(label='')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('upload',' Upload'))
+        self.helper.form_action = reverse('transactions:upload', args=[self.portfolio.id])
 
 
 class TransactionUpdateForm(forms.ModelForm):
@@ -67,7 +68,3 @@ class TransactonCreateForm(TxnFormMixin ,TransactionUpdateForm):
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, Transaction)
-
-
-class TransactionUploadFileForm(forms.Form):
-    file = forms.FileField()

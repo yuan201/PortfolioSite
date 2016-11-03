@@ -11,6 +11,7 @@ class TransactionAdmin(AdminFormatMixin, admin.ModelAdmin):
     def name(self, obj):
         return obj.security.name
 
+    # todo find a better way to handle this, maybe __getattr__ or something
     def _price(self, obj):
         return self._format_for_print(obj.price)
 

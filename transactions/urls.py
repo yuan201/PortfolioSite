@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import TransactionDelView, TransactionUpdateView, TransactionCreateView
+from .views import TransactionDelView, TransactionUpdateView, TransactionCreateView, TransactionUploadView
 
 
 urlpatterns = [
@@ -16,4 +16,7 @@ urlpatterns = [
         view=TransactionCreateView.as_view(),
         name='add'),
 
+    url(regex=r'^(?P<pk>\d+)/upload$',
+        view=TransactionUploadView.as_view(),
+        name='upload'),
 ]

@@ -1,7 +1,7 @@
 import datetime as dt
 
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView
 from django.views.generic.detail import DetailView
@@ -13,6 +13,7 @@ import pandas as pd
 from .models import Portfolio, Holding
 from core.mixins import PortfoliosMixin
 from todos.models import Todo
+from transactions.forms import TransactionsUploadForm
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
@@ -31,16 +32,16 @@ class PortfolioCreateView(CreateView):
     template_name = 'portfolio/new_portfolio.html'
 
 
-class PortfolioDetailView(DetailView):
-    model = Portfolio
+class PortfolioDetailView(TemplateView):
     template_name = 'portfolio/portfolio_detail.html'
 
     # todo remove quick test and implement this properly
     def get_context_data(self, **kwargs):
         context = super(PortfolioDetailView, self).get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
-        context['portfolios'] = portfolio
+        context['portfolio'] = portfolio
         context['transactions'] = portfolio.transactions.all()
+        context['upload_form'] = TransactionsUploadForm(portfolios=portfolio)
         # quick test
         last_day = pd.Timestamp(dt.date.today(), offset='B')-1
         portfolio.update_holdings(last_day)
@@ -52,3 +53,5 @@ class PortfolioDetailView(DetailView):
 class PortfolioListView(ListView):
     model = Portfolio
     template_name = 'portfolio/portfolio_list.html'
+
+

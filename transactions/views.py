@@ -1,11 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from django.core.urlresolvers import reverse, reverse_lazy
 
 from .models import Transaction
 from portfolios.models import Portfolio
-from .forms import TransactonCreateForm, TransactionUpdateForm
+from .forms import TransactonCreateForm, TransactionUpdateForm, TransactionsUploadForm
 from core.mixins import TitleHeaderMixin
 
 
@@ -64,3 +64,20 @@ class TransactionCreateView(TxnTemplateMixin, TxnCreateMixin, CreateView):
 
 class CreateMultipleTxnView(TemplateView):
     template_name = 'transaction/create_multiple.html'
+
+
+class TransactionUploadView(RedirectView):
+    def post(self, request, *args, **kwargs):
+        portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        form = TransactionsUploadForm(request.POST, request.FILES, portfolios=portfolio)
+        if form.is_valid():
+            self.save_uploaded_file(request.FILES['file'])
+        return super().post(request, *args, **kwargs)
+
+    def save_uploaded_file(self, file):
+        with open('transactions.csv', 'wb') as fout:
+            fout.write(file.read())
+
+    def get_redirect_url(self, *args, **kwargs):
+        portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        return portfolio.get_absolute_url()
