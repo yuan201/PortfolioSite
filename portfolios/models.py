@@ -8,8 +8,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 import pandas as pd
 
-from transactions.models import BuyTransaction, SellTransaction, \
-    SplitTransaction, DividendTransaction, Security, HoldingCls
+from securities.models import Security
 from transactions.exceptions import FirstTransactionNotBuy
 from benchmarks.models import Benchmark
 from core.types import PositiveDecimalField

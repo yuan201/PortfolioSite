@@ -7,9 +7,9 @@ from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
 
 from .models import Portfolio, Holding
-from transactions.models import BuyTransaction, SellMoreThanHold, SplitTransaction, DividendTransaction
-from transactions.models import transaction_factory
+from transactions.models import Transaction2
 from securities.models import Security
+from transactions.factories import transaction_factory
 from .factories import PortfolioFactory
 from securities.factories import SecurityFactory
 
@@ -53,7 +53,7 @@ class PortfolioModelTest(TestCase):
             transaction_factory('dividend', p2, self.s1, _dt[3], dividend=50),
         ]
 
-        all_txn = self.p1.transactions()
+        all_txn = self.p1.transactions.all()
 
         # test only p1 transactions are included
         for s in s1:

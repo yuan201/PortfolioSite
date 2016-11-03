@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper, Layout
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.layout import Submit
 
-from .models import BuyTransaction, SellTransaction, DividendTransaction, SplitTransaction, Transaction2
+from .models import Transaction2
 from .models import Security
 
 
@@ -42,90 +42,6 @@ class TxnFormMixin():
         return super(TxnFormMixin, self).save(*args, **kwargs)
 
 
-class BuyTxnUpdateForm(forms.ModelForm):
-    """
-    BuyTxnUpdateForm is used to update an existing buy transaction
-    """
-    model = BuyTransaction
-
-    class Meta:
-        model = BuyTransaction
-        fields = ('security', 'datetime', 'price', 'shares', 'fee')
-
-
-class BuyTxnCreateForm(TxnFormMixin, BuyTxnUpdateForm):
-    """
-    BuyTxnCreateFrom is used to create a new buy transaction.
-    """
-    def clean(self):
-        cleaned_data = super(BuyTxnCreateForm, self).clean()
-        self.check_duplicate_txn(cleaned_data, BuyTransaction)
-        return cleaned_data
-
-
-class SellTxnUpdateForm(forms.ModelForm):
-    """
-    SellTxnUpdateForm is used to update an existing sell transaction.
-    """
-    model = SellTransaction
-
-    class Meta:
-        model = SellTransaction
-        fields = ('security', 'datetime', 'price', 'shares', 'fee')
-
-
-class SellTxnCreateForm(TxnFormMixin, SellTxnUpdateForm):
-    """
-    SellTxnCreateForm is used to create a new sell transaction.
-    """
-    def clean(self):
-        cleaned_data = super(SellTxnCreateForm, self).clean()
-        self.check_duplicate_txn(cleaned_data, SellTransaction)
-        return cleaned_data
-
-
-class DividendTxnUpdateForm(forms.ModelForm):
-    """
-    DividendTxnUpdateForm is used to update an existing dividend transaction.
-    """
-    model = DividendTransaction
-
-    class Meta:
-        model = DividendTransaction
-        fields = ('security', 'datetime', 'value')
-
-
-class DividendTxnCreateForm(TxnFormMixin, DividendTxnUpdateForm):
-    """
-    DividendTxnCreateForm is used to create a new dividend transaction.
-    """
-    def clean(self):
-        cleaned_data = super(DividendTxnCreateForm, self).clean()
-        self.check_duplicate_txn(cleaned_data, DividendTransaction)
-        return cleaned_data
-
-
-class SplitTxnUpdateForm(forms.ModelForm):
-    """
-    SplitTxnUpdateForm is used to update an existing split transaction.
-    """
-    model = SplitTransaction
-
-    class Meta:
-        model = SplitTransaction
-        fields = ('security', 'datetime', 'ratio')
-
-
-class SplitTxnCreateForm(TxnFormMixin, SplitTxnUpdateForm):
-    """
-    SplitTxnCreateForm is used to create a new split transaction.
-    """
-    def clean(self):
-        cleaned_data = super(SplitTxnCreateForm, self).clean()
-        self.check_duplicate_txn(cleaned_data, SplitTransaction)
-        return cleaned_data
-
-
 class UploadTransactionsForm(forms.Form):
     """
     UploadTransactionForm let user select a file to upload which contains list of transactions.
@@ -140,15 +56,18 @@ class UploadTransactionsForm(forms.Form):
         self.helper.add_input(Submit('upload',' Upload'))
 
 
-class TransactionUpdateForm(TxnFormMixin, forms.ModelForm):
+class TransactionUpdateForm(forms.ModelForm):
     class Meta:
         model = Transaction2
         fields = ('security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio')
 
 
-class TransactonCreateForm(TransactionUpdateForm):
+class TransactonCreateForm(TxnFormMixin ,TransactionUpdateForm):
 
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, Transaction2)
 
+
+class TransactionUploadFileForm(forms.Form):
+    file = forms.FileField()

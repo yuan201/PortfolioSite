@@ -13,209 +13,6 @@ from core.types import PositiveDecimalField
 from securities.models import Security
 
 
-class Transaction(models.Model):
-    """
-    The Transactions model is a base model for all types of transactions
-    """
-    security = models.ForeignKey(Security)
-    datetime = models.DateTimeField()
-    portfolio = models.ForeignKey("portfolios.Portfolio", on_delete=models.CASCADE)
-
-    class Meta:
-        abstract = True
-
-    def __lt__(self, other_txn):
-        return self.datetime < other_txn.datetime
-
-    def get_absolute_url(self):
-        return reverse('portfolios:detail', args=[self.portfolio.id])
-
-
-class BuyTransaction(Transaction):
-    """
-    A BuyTransaction represents a buy.
-    """
-    price = PositiveDecimalField()
-    shares = models.PositiveIntegerField()
-    fee = PositiveDecimalField()
-
-    def __str__(self):
-        return "On {} Buy {} shares of {}({}) @ {:.2f}".format(
-            self.datetime, self.shares, self.security.name, self.security.symbol, self.price
-        )
-
-    def cash_value(self):
-        return -self.price * self.shares - self.fee
-
-    def as_p(self):
-        return str(self)
-
-    def as_t(self):
-        return "<td>{type}</td>" \
-                "<td>{date:%Y-%m-%d}</td>" \
-                "<td>{name}</td>" \
-                "<td>{symbol}</td>" \
-                "<td>{shares}</td>" \
-                "<td>{price:.2f}</td>" \
-                "<td>{fee:.2f}</td>" \
-                "<td>{cash_value:.2f}</td>" \
-                "<td>{ratio}</td>" \
-                "<td>{del_link}</td>" \
-                "<td>{update_link}</td>".format(
-                type="Buy",date=self.datetime, name=self.security.name,
-                symbol=self.security.symbol, shares=self.shares,
-                price=self.price, fee=self.fee, cash_value=self.cash_value(),
-                ratio='',
-                del_link=build_link(reverse('transactions:del_buy', args=[self.id]), 'Del'),
-                update_link=build_link(reverse('transactions:update_buy', args=[self.id]), 'Update'),
-        )
-
-    def transact(self, holding):
-        """
-        the transact function operate on a holding according to the transaction and
-        return the new holding
-        :param holding:
-        :return holding:
-        """
-        holding.shares += self.shares
-        holding.cost += self.cash_value()
-        return holding
-
-
-class SellTransaction(Transaction):
-    """
-    A SellTransaction represents a sell.
-    """
-    price = PositiveDecimalField()
-    shares = models.PositiveIntegerField()
-    fee = PositiveDecimalField()
-
-    def __str__(self):
-        return "On {} Sell {} shares of {}({}) @ {:.2f}".format(
-            self.datetime, self.shares, self.security.name, self.security.symbol, self.price
-        )
-
-    def cash_value(self):
-        return self.price * self.shares - self.fee
-
-    def as_p(self):
-        return str(self)
-
-    def as_t(self):
-        return "<td>{type}</td>" \
-                "<td>{date:%Y-%m-%d}</td>" \
-                "<td>{name}</td>" \
-                "<td>{symbol}</td>" \
-                "<td>{shares}</td>" \
-                "<td>{price:.2f}</td>" \
-                "<td>{fee:.2f}</td>" \
-                "<td>{cash_value:.2f}</td>" \
-                "<td>{ratio}</td>" \
-                "<td>{del_link}</td>" \
-                "<td>{update_link}</td>".format(
-                type="Sell",date=self.datetime, name=self.security.name,
-                symbol=self.security.symbol, shares=self.shares,
-                price=self.price, fee=self.fee, cash_value=self.cash_value(),
-                ratio='',
-                del_link=build_link(reverse('transactions:del_sell', args=[self.id]), 'Del'),
-                update_link=build_link(reverse('transactions:update_sell', args=[self.id]), 'Update'),
-                )
-
-    def transact(self, holding):
-        """
-        the transact function operate on a holding, raise SellMoreThanHold if the holding
-        doesn't have enough shares to sell. Otherwise, it removes the shares from the holding,
-        calculate the gain/loss based on average cost and return new holding.
-        :param holding:
-        :return holding:
-        """
-        if self.shares > holding.shares:
-            raise SellMoreThanHold
-        cost_s = holding.cost_per_share()
-        holding.shares -= self.shares
-        holding.cost += cost_s * self.shares
-        holding.gain += (self.price - cost_s) * self.shares - self.fee
-        return holding
-
-
-class DividendTransaction(Transaction):
-    """
-    A DividendTransaction represents dividend from the security.
-    """
-    value = PositiveDecimalField()
-
-    def __str__(self):
-        return "On {} {}({}) paid {:.2f} dividend".format(
-            self.datetime, self.security.name, self.security.symbol, self.value
-        )
-
-    def as_p(self):
-        return str(self)
-
-    def as_t(self):
-        return "<td>{type}</td>" \
-                "<td>{date:%Y-%m-%d}</td>" \
-                "<td>{name}</td>" \
-                "<td>{symbol}</td>" \
-                "<td>{shares}</td>" \
-                "<td>{price}</td>" \
-                "<td>{fee}</td>" \
-                "<td>{cash_value:.2f}</td>" \
-                "<td>{ratio}</td>" \
-                "<td>{del_link}</td>" \
-                "<td>{update_link}</td>".format(
-                type="Dividend", date=self.datetime, name=self.security.name,
-                symbol=self.security.symbol, shares='', price='', fee='',
-                cash_value=self.value, ratio='',
-                del_link=build_link(reverse('transactions:del_dividend', args=[self.id]), 'Del'),
-                update_link=build_link(reverse('transactions:update_dividend', args=[self.id]), 'Update'),
-                )
-
-    def transact(self, holding):
-        if holding.shares == 0:
-            raise DividendOnEmptyHolding
-        holding.dividend += self.value
-        return holding
-
-
-class SplitTransaction(Transaction):
-    """
-    A SplitTransaction represents split/reverse split of a security.
-    """
-    ratio = PositiveDecimalField()
-
-    def __str__(self):
-        return "On {} {}({}) split {:.1f}".format(
-            self.datetime, self.security.name, self.security.symbol, self.ratio
-        )
-
-    def as_p(self):
-        return str(self)
-
-    def as_t(self):
-        return "<td>{type}</td>" \
-                "<td>{date:%Y-%m-%d}</td>" \
-                "<td>{name}</td>" \
-                "<td>{symbol}</td>" \
-                "<td>{shares}</td>" \
-                "<td>{price}</td>" \
-                "<td>{fee}</td>" \
-                "<td>{cash_value}</td>" \
-                "<td>{ratio:.2f}</td>" \
-                "<td>{del_link}</td>" \
-                "<td>{update_link}</td>".format(
-                type="Split", date=self.datetime, name=self.security.name,
-                symbol=self.security.symbol, shares='', price='', fee='',
-                cash_value='', ratio=self.ratio,
-                del_link=build_link(reverse('transactions:del_split', args=[self.id]), 'Del'),
-                update_link=build_link(reverse('transactions:update_split', args=[self.id]), 'Update'),
-                )
-
-    def transact(self, holding):
-        holding.shares = int(holding.shares * self.ratio)
-        return holding
-
-
 class HoldingCls():
     """
     A Holding is one item in a portfolios. It represents a particular security, how much
@@ -263,46 +60,9 @@ class HoldingCls():
         return -self.cost/self.shares
 
 
-def transaction_factory(_type, portfolio, security, _datetime, *args,
-                        price=0, shares=0, fee=0, ratio=0, dividend=0):
-    if _type == 'buy':
-        return BuyTransaction.objects.create(
-            security=security,
-            portfolio=portfolio,
-            datetime=_datetime,
-            price=price,
-            shares=shares,
-            fee=fee,
-        )
-    elif _type == 'sell':
-        return SellTransaction.objects.create(
-            security=security,
-            portfolio=portfolio,
-            datetime=_datetime,
-            price=price,
-            shares=shares,
-            fee=fee,
-        )
-    elif _type == 'split':
-        return SplitTransaction.objects.create(
-            security=security,
-            portfolio=portfolio,
-            datetime=_datetime,
-            ratio=ratio,
-        )
-    elif _type == 'dividend':
-        return DividendTransaction.objects.create(
-            security=security,
-            portfolio=portfolio,
-            datetime=_datetime,
-            value=dividend,
-        )
-    return
-
-
 TXN_TYPE = [('buy', 'Buy'),
             ('sell', 'Sell'),
-            ('div', 'Dividend'),
+            ('dividend', 'Dividend'),
             ('split', 'Split')]
 
 
@@ -318,20 +78,21 @@ class Transaction2(models.Model):
     ratio = PositiveDecimalField(default=0, null=True, blank=True)
 
     class Meta:
-        ordering = ['-datetime']
+        ordering = ['datetime']
         get_latest_by = ('datetime')
 
-    STR_TMP = {'buy': 'Buy {shares} shares of {name}({symbol}) on {datetime} at {price}/share, fee:{fee}',
-               'sell': 'Sell {shares} shares of {name}({symbol}) on {datetime} at {price}/share, fee:{fee}',
-               'div': '{name}({symbol}) pays dividend {dividend} on {datetime}',
-               'split': '{name}({symbol}) split 1:{ratio} on {datetime}'}
+    STR_TMP = {'buy': 'On {datetime} Buy {shares} shares of {name}({symbol}) at {price:.2f}/share, fee:{fee:.2f}',
+               'sell': 'On {datetime} Sell {shares} shares of {name}({symbol}) at {price:.2f}/share, fee:{fee:.2f}',
+               'dividend': 'On {datetime} {name}({symbol}) pays dividend {dividend:.2f}',
+               'split': 'On {datetime} {name}({symbol}) split 1:{ratio:.2f}'}
 
+    @property
     def cash_value(self):
         if self.type=='buy':
             return -self.price * self.shares - self.fee
         elif self.type=='sell':
             return self.price * self.shares - self.fee
-        elif self.type=='div' or self.type=='split':
+        elif self.type=='dividend' or self.type=='split':
             return 0
         else:
             raise UnknownTransactionType
@@ -340,9 +101,10 @@ class Transaction2(models.Model):
         d = self.__dict__
         d['name'] = self.security.name
         d['symbol'] = self.security.symbol
-        d['cash_value'] = self.cash_value()
+        d['cash_value'] = self.cash_value
         d['del_link'] = build_link(reverse('transactions:del', args=[self.id]), 'Del')
         d['update_link'] = build_link(reverse('transactions:update', args=[self.id]), 'Update')
+        d['type_cap'] = self.type.capitalize()
         return d
 
     def __str__(self):
@@ -352,8 +114,8 @@ class Transaction2(models.Model):
         return str(self)
 
     def as_t(self):
-        return "<tr class='{type}'> \
-               <td>{type}</td> \
+        result = "<tr class='{type}'> \
+               <td>{type_cap}</td> \
                <td>{datetime:%Y-%m-%d}</td> \
                <td>{name}</td> \
                <td>{symbol}</td> \
@@ -365,6 +127,7 @@ class Transaction2(models.Model):
                <td>{ratio:.2f}</td> \
                <td>{del_link}</td> \
                <td>{update_link}</td></tr>".format(**self._format_dict())
+        return result.replace('<td>0.00</td>', '<td></td>').replace('<td>0</td>', '<td></td>')
 
     def transact(self, holding):
         if self.type=='buy':
@@ -377,7 +140,7 @@ class Transaction2(models.Model):
             holding.shares -= self.shares
             holding.cost += cost_s * self.shares
             holding.gain += (self.price - cost_s) * self.shares - self.fee
-        elif self.type=='div':
+        elif self.type=='dividend':
             if holding.shares==0:
                 raise DividendOnEmptyHolding
             holding.dividend += self.dividend

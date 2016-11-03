@@ -8,7 +8,7 @@ Portfolio
 {% block extra_head %}
     <link rel="stylesheet" href="{% static "bootstrap/css/fileinput.min.css" %}" type="text/css" />
     <script src="{% static "bootstrap/js/fileinput.min.js" %}"></script>
-    <script src="{% static "js/portfolio_detail.js" %}"></script>
+    <script src="{% static "js/portfolio_detail.js"%}"></script>
 {% endblock %}
 
 {% block main_col %}
@@ -48,16 +48,7 @@ Portfolio
         <div class="page-header">
             <h3>Transactions</h3>
         </div>
-        <div class="col-md-6">
-            Add:
-            <a href="{% url 'transactions:add_buy' portfolio.id %}"
-               class="btn btn-default" role="button">Buy</a>
-            <a href="{% url 'transactions:add_sell' portfolio.id %}"
-               class="btn btn-default" role="button">Sell</a>
-            <a href="{% url 'transactions:add_dividend' portfolio.id %}"
-               class="btn btn-default" role="button">Dividend</a>
-            <a href="{% url 'transactions:add_split' portfolio.id %}"
-               class="btn btn-default" role="button">Split</a>
+        <div class="col-md-1">
             <a href="{% url 'transactions:add' portfolio.id %}"
                class="btn btn-default" role="button">Add</a>
         </div>
