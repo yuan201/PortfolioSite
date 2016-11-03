@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from portfolios.models import Holding
-from .models import Transaction2
+from .models import Transaction
 from transactions.exceptions import SellMoreThanHold, DividendOnEmptyHolding
 from portfolios.factories import PortfolioFactory
 
@@ -230,7 +230,7 @@ class Transaction2Test(TestCase):
         self.s1 = SecurityFactory(symbol='MSYH')
         SecInfoFactory(security=self.s1, name='民生银行')
         self.p1 = PortfolioFactory()
-        self.txn = Transaction2.objects.create(
+        self.txn = Transaction.objects.create(
             security = self.s1,
             datetime = dt.datetime(2016,1 ,1 ,9, 45),
             portfolio = self.p1,

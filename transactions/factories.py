@@ -1,10 +1,10 @@
 import factory
-from .models import Transaction2
+from .models import Transaction
 
 
 class TransactionFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Transaction2
+        model = Transaction
 
 
 def transaction_factory(type, portfolio, security, datetime, **kwargs):

@@ -31,3 +31,8 @@ class PortfoliosTestMixin(object):
         for ptf in Portfolio.objects.all():
             self.assertContains(response, ptf.name)
 
+
+class AdminFormatMixin(object):
+    @staticmethod
+    def _format_for_print(value):
+        return '{:.2f}'.format(value)

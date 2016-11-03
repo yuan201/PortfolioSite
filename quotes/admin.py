@@ -1,16 +1,13 @@
 from django.contrib import admin
 
 from .models import Quote
+from core.mixins import AdminFormatMixin
 
 
 @admin.register(Quote)
-class QuoteAdmin(admin.ModelAdmin):
+class QuoteAdmin(AdminFormatMixin, admin.ModelAdmin):
     list_display = ('security', 'date', '_open', '_close', '_high', '_low', '_volume')
     ordering = ['security', '-date']
-
-    @staticmethod
-    def _format_for_print(value):
-        return '{:.2f}'.format(value)
 
     def _open(self, obj):
         return self._format_for_print(obj.open)

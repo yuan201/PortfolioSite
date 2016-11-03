@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
 
 from .models import Portfolio, Holding
-from transactions.models import Transaction2
+from transactions.models import Transaction
 from securities.models import Security
 from transactions.factories import transaction_factory
 from .factories import PortfolioFactory

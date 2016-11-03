@@ -66,7 +66,7 @@ TXN_TYPE = [('buy', 'Buy'),
             ('split', 'Split')]
 
 
-class Transaction2(models.Model):
+class Transaction(models.Model):
     security = models.ForeignKey(Security)
     datetime = models.DateTimeField()
     portfolio = models.ForeignKey("portfolios.Portfolio", on_delete=models.CASCADE, related_name='transactions')
@@ -108,7 +108,7 @@ class Transaction2(models.Model):
         return d
 
     def __str__(self):
-        return Transaction2.STR_TMP[self.type].format(**self._format_dict())
+        return Transaction.STR_TMP[self.type].format(**self._format_dict())
 
     def as_p(self):
         return str(self)

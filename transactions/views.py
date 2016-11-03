@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
 
-from .models import Transaction2
+from .models import Transaction
 from portfolios.models import Portfolio
 from .forms import TransactonCreateForm, TransactionUpdateForm
 from core.mixins import TitleHeaderMixin
@@ -47,18 +47,18 @@ class TxnDeleteMixin(object):
 
 
 class TransactionUpdateView(TxnTemplateMixin, UpdateView):
-    model = Transaction2
+    model = Transaction
     template_name = 'transaction/add_update_txn.html'
     form_class = TransactionUpdateForm
 
 
 class TransactionDelView(TxnDeleteMixin, DeleteView):
-    model = Transaction2
+    model = Transaction
     template_name = 'common/delete_confirm.html'
 
 
 class TransactionCreateView(TxnTemplateMixin, TxnCreateMixin, CreateView):
-    model = Transaction2
+    model = Transaction
     form_class = TransactonCreateForm
 
 

@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 import factory
 
-from .models import Transaction2
+from .models import Transaction
 from portfolios.models import Portfolio
 from securities.models import Security
 from portfolios.factories import PortfolioFactory
@@ -58,7 +58,7 @@ class BuyTxnCreateViewTest(NewUpdateTxnTestMixin, TestCase):
             'fee': '10.1',
         })
 
-        txn = Transaction2.objects.first()
+        txn = Transaction.objects.first()
         self.assertEqual(txn.security, s1)
         self.assertEqual(txn.portfolio, p1)
         self.assertEqual(txn.datetime, dt.datetime(2015, 1, 1, 15, 0, 0))
@@ -98,7 +98,7 @@ class SellTxnCreateViewTest(NewUpdateTxnTestMixin, TestCase):
             'fee': '25.4'
         })
 
-        txn = Transaction2.objects.first()
+        txn = Transaction.objects.first()
         self.assertEqual(txn.security, s1)
         self.assertEqual(txn.portfolio, p1)
         self.assertEqual(txn.datetime, dt.datetime(2015, 7, 6, 9, 30, 0))
@@ -136,7 +136,7 @@ class SplitTxnCreateViewTest(NewUpdateTxnTestMixin, TestCase):
             'ratio': '1.5',
         })
 
-        txn = Transaction2.objects.first()
+        txn = Transaction.objects.first()
         self.assertEqual(txn.security, s2)
         self.assertEqual(txn.portfolio, p1)
         self.assertEqual(txn.datetime, dt.datetime(2015, 5, 3, 10, 24, 0))
@@ -156,7 +156,7 @@ class DividendTxnCreateViewTest(NewUpdateTxnTestMixin, TestCase):
              'dividend': '120',
         })
 
-        txn = Transaction2.objects.first()
+        txn = Transaction.objects.first()
         self.assertEqual(txn.security, s2)
         self.assertEqual(txn.portfolio, p1)
         self.assertEqual(txn.datetime, dt.datetime(2015, 3, 2, 11, 30, 0))
@@ -178,8 +178,8 @@ class BuyTransactionUpdateViewTest(NewUpdateTxnTestMixin, TestCase):
             'fee': '21.2',
         })
 
-        txn = Transaction2.objects.first()
-        self.assertEqual(Transaction2.objects.count(), 1)
+        txn = Transaction.objects.first()
+        self.assertEqual(Transaction.objects.count(), 1)
         self.assertAlmostEqual(txn.price, Decimal(16.2))
         self.assertAlmostEqual(txn.shares, Decimal(200))
         self.assertAlmostEqual(txn.fee, Decimal(21.2))
@@ -201,8 +201,8 @@ class SellTransactionUpdateViewTest(NewUpdateTxnTestMixin, TestCase):
             'fee': '5.2',
         })
 
-        txn = Transaction2.objects.first()
-        self.assertEqual(Transaction2.objects.count(), 1)
+        txn = Transaction.objects.first()
+        self.assertEqual(Transaction.objects.count(), 1)
         self.assertEqual(txn.security, s1)
         self.assertEqual(txn.datetime, dt.datetime(2015, 2, 2, 14, 20, 0))
         self.assertAlmostEqual(txn.price, Decimal(14.3))
@@ -223,8 +223,8 @@ class DividendTransactionUpdateViewTest(NewUpdateTxnTestMixin, TestCase):
             'dividend': '98.2',
         })
 
-        txn = Transaction2.objects.first()
-        self.assertEqual(Transaction2.objects.count(), 1)
+        txn = Transaction.objects.first()
+        self.assertEqual(Transaction.objects.count(), 1)
         self.assertEqual(txn.security, s2)
         self.assertEqual(txn.datetime, dt.datetime(2015, 4, 5, 10, 21, 10))
         self.assertAlmostEqual(txn.dividend, Decimal(98.2))
