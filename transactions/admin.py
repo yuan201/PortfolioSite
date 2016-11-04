@@ -3,10 +3,12 @@ from django.contrib import admin
 from .models import Transaction
 from core.mixins import AdminFormatMixin
 
+
 @admin.register(Transaction)
 class TransactionAdmin(AdminFormatMixin, admin.ModelAdmin):
-    list_display = ('type', 'datetime', 'security', 'name', 'shares', '_price', '_fee', '_dividend', '_ratio')
+    list_display = ('type', 'datetime', 'portfolio', 'security', 'name', 'shares', '_price', '_fee', '_dividend', '_ratio')
     ordering = ['-datetime']
+    list_filter = ['portfolio']
 
     def name(self, obj):
         return obj.security.name

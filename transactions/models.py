@@ -71,11 +71,11 @@ class Transaction(models.Model):
     datetime = models.DateTimeField()
     portfolio = models.ForeignKey("portfolios.Portfolio", on_delete=models.CASCADE, related_name='transactions')
     type = models.CharField(max_length=10, choices=TXN_TYPE)
-    price = PositiveDecimalField(default=0, null=True, blank=True)
-    shares = models.PositiveIntegerField(default=0, null=True, blank=True)
-    fee = PositiveDecimalField(default=0, null=True, blank=True)
-    dividend = PositiveDecimalField(default=0, null=True, blank=True)
-    ratio = PositiveDecimalField(default=0, null=True, blank=True)
+    price = PositiveDecimalField(default=0, blank=True)
+    shares = models.PositiveIntegerField(default=0, blank=True)
+    fee = PositiveDecimalField(default=0, blank=True)
+    dividend = PositiveDecimalField(default=0, blank=True)
+    ratio = PositiveDecimalField(default=0, blank=True)
 
     class Meta:
         ordering = ['datetime']

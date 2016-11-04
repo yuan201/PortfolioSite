@@ -35,4 +35,7 @@ class PortfoliosTestMixin(object):
 class AdminFormatMixin(object):
     @staticmethod
     def _format_for_print(value):
-        return '{:.2f}'.format(value)
+        if value:
+            return '{:.2f}'.format(value)
+        else:
+            return ""

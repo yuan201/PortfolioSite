@@ -5,6 +5,10 @@
     {{ title }}
 {% endblock title %}
 
+{% block extra_head %}
+    <script src="{% static "js/new_update_transaction.js" %}"></script>
+{% endblock %}
+
 {% block main_col %}
     {% include "includes/_jumbotron_header.html" %}
 

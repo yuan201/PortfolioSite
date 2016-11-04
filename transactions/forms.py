@@ -1,5 +1,7 @@
 from django import forms
 from django.core.urlresolvers import reverse
+from django.forms.models import formset_factory
+
 from crispy_forms.helper import FormHelper, Layout
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.layout import Submit
@@ -40,7 +42,9 @@ class TxnFormMixin():
             security=self.cleaned_data['security'],
             date=self.cleaned_data['datetime'],
         )
-        return super(TxnFormMixin, self).save(*args, **kwargs)
+        txn = super().save(*args, commit=False, **kwargs)
+        txn.portfolio = self.portfolio
+        return super().save(*args, **kwargs)
 
 
 class TransactionsUploadForm(TxnFormMixin, forms.Form):
@@ -60,11 +64,30 @@ class TransactionsUploadForm(TxnFormMixin, forms.Form):
 class TransactionUpdateForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ('security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio')
+        fields = ['security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio']
 
 
-class TransactonCreateForm(TxnFormMixin ,TransactionUpdateForm):
+class TransactionCreateForm(TxnFormMixin , TransactionUpdateForm):
 
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, Transaction)
+
+
+class TransactionCreateMultipleForm(TxnFormMixin, forms.ModelForm):
+    class Meta:
+        model = Transaction
+        fields = ['security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio']
+
+
+class TransactionCreateMultipleHelper(FormHelper):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form_method = 'post'
+        self.form_class = 'form_inline'
+        self.add_input(Submit('submit', 'Save'))
+        self.template = 'bootstrap/table_inline_formset.html'
+
+
+TransactionFormSet = formset_factory(TransactionCreateMultipleForm, extra=0)

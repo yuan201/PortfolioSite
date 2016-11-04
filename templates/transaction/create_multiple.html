@@ -1,4 +1,5 @@
 {% extends "__l_single_col.html" %}
+{% load crispy_forms_tags %}
 
 {% block title %}
 Portfolios
@@ -6,5 +7,8 @@ Portfolios
 
 {% block main_col %}
 
+    <div class="col-lg-12">
+        {% crispy formset helper %}
+    </div>
 
 {% endblock main_col %}
