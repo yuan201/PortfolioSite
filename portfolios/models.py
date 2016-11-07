@@ -36,17 +36,10 @@ class Portfolio(models.Model):
         return self.name
 
     def __repr__(self):
-        return 'Portfolio({})'.format(self.name)
+        return 'Portfolio({})'.format(self.__dict__)
 
     def get_absolute_url(self):
         return reverse('portfolios:detail', args=[self.id])
-
-    # def transactions(self):
-        # txns = chain(BuyTransaction.objects.filter(portfolio=self).all(),
-        #             SellTransaction.objects.filter(portfolio=self).all(),
-        #             DividendTransaction.objects.filter(portfolio=self).all(),
-        #             SplitTransaction.objects.filter(portfolio=self).all())
-        #return sorted(txns)
 
     # todo implement total value for portfolio
     def total_value(self, _date):
@@ -60,18 +53,10 @@ class Portfolio(models.Model):
         hld.id = None
         hld.save(force_insert=True)
 
-    # todo define 'get_latest_by' in model's meta, then call objects.latest()
-    def find_last_record(self, security):
-        if Holding.objects.filter(portfolio=self).filter(security=security):
-            return Holding.objects.filter(portfolio=self).filter(security=security).order_by('date').last()
-        return False
-
-    # todo use try block instead
     def get_last_record_or_empty(self, txn):
-        last_record = self.find_last_record(txn.security)
-        if last_record:
-            return last_record
-        else:
+        try:
+            return self.holdings.filter(security=txn.security).latest()
+        except Holding.DoesNotExist:
             return Holding(security=txn.security, portfolio=self, date=date_(txn.datetime))
 
     def fill_in_gaps(self, hld, gaps):
@@ -119,12 +104,11 @@ class Portfolio(models.Model):
                 self.fill_in_gaps(hld, pd.bdate_range(start=hld_date+1, end=end))
 
     def sum_each_currency(self, date=None):
-        if not Holding.objects.filter(portfolio=self):
+        if not self.holdings:
             return {}
 
-        # todo use latest()
         if date is None:
-            date = Holding.objects.filter(portfolio=self).order_by('date').last().date
+            date = self.holdings.latest().date
 
         values = defaultdict(Decimal)
         holdings = Holding.objects.filter(portfolio=self).filter(date=date).all()
@@ -141,21 +125,23 @@ class Portfolio(models.Model):
         return result
 
     # todo understand whether custom managers should be used
-    def remove_holdings_after(self, security, date):
+    def remove_holdings_after(self, security, datetime):
         """removing holdings after a specific date"""
-        Holding.objects.filter(portfolio=self).filter(security=security).\
-            filter(date__gte=date).delete()
+        self.holdings.filter(security=security).filter(date__gte=datetime).delete()
 
 
 class Holding(models.Model):
     security = models.ForeignKey(Security)
-    portfolio = models.ForeignKey(Portfolio)
+    portfolio = models.ForeignKey(Portfolio, related_name='holdings')
     shares = models.IntegerField(default=0)
     cost = PositiveDecimalField(default=0)
     gain = PositiveDecimalField(default=0)
     dividend = PositiveDecimalField(default=0)
     value = PositiveDecimalField(default=0)
     date = models.DateField()
+
+    class Meta:
+        get_latest_by = 'date'
 
     def transact(self, txn):
         return txn.transact(self)

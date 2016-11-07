@@ -1,3 +1,6 @@
+import datetime as dt
+import pandas as pd
+
 from django import forms
 from django.core.urlresolvers import reverse
 from django.forms.models import formset_factory
@@ -10,10 +13,8 @@ from .models import Transaction
 from .models import Security
 
 
-class TxnFormMixin():
-    """
-    Mixin class for all transactions create forms. Provide a few common functions.
-    """
+class TxnCheckingMixin(object):
+
     def check_duplicate_txn(self, cleaned_data, txn_cls):
         """
         Use the form message system to report if the transaction to add already
@@ -29,25 +30,68 @@ class TxnFormMixin():
             msg = u"Transaction Already Exists"
             self.add_error(None, msg)
 
+    def check_split_transaction(self, cleaned_data):
+        if cleaned_data['type'] == 'split' and cleaned_data['ratio'] <= 0:
+            msg = u"Ratio must be >0 for Split Transaction"
+            self.add_error('ratio', msg)
+
+    def check_dividend_transaction(self, cleaned_data):
+        if cleaned_data['type'] == 'dividend' and cleaned_data['dividend'] <= 0:
+            msg = u"Dividend must be >0 for Dividend Transaction"
+            self.add_error('ratio', msg)
+
+    def check_buy_sell_transaction(self, cleaned_data):
+        type = cleaned_data['type']
+        if type == 'buy' or type == 'sell':
+            if cleaned_data['price'] <= 0:
+                msg = u"Price must be >0 for {} Transaction".format(type.capitalize())
+                self.add_error('price', msg)
+            if cleaned_data['shares'] <= 0:
+                msg = u"Price must be >0 for {} Transaction".format(type.capitalize())
+                self.add_error('shares', msg)
+            if cleaned_data['fee'] < 0:
+                msg = u"Fee must be >=0 for {} Transaction".format(type.capitalize())
+                self.add_error('fee', msg)
+
+
+class TxnCreateMixin(object):
+    """
+    Mixin class for all transactions create forms. Provide a few common functions.
+    """
     def __init__(self, *args, **kwargs):
         """
         When creating the transaction, the portfolios the new transaction belongs to is
         already defined. This parameter is passed in through kwargs.
         """
-        self.portfolio = kwargs.pop('portfolios')
+        self.portfolio = kwargs.pop('portfolios', None)
         super().__init__(*args, **kwargs)
 
+
     def save(self, *args, **kwargs):
-        self.portfolio.remove_holdings_after(
-            security=self.cleaned_data['security'],
-            date=self.cleaned_data['datetime'],
-        )
-        txn = super().save(*args, commit=False, **kwargs)
-        txn.portfolio = self.portfolio
-        return super().save(*args, **kwargs)
+        txn = super().save(commit=False)
+
+        if self.portfolio:
+            txn.portfolio = self.portfolio
+        txn.fill_in_defaults()
+
+        txn.portfolio.remove_holdings_after(
+            security = self.cleaned_data['security'],
+            datetime = self.cleaned_data['datetime'])
+
+        if txn.id:
+            original = Transaction.objects.get(pk=txn.id)
+            txn.portfolio.remove_holdings_after(
+                security=original.security,
+                datetime=original.datetime
+            )
+
+        txn = super().save(commit=True)
+        last_day = pd.Timestamp(dt.date.today(), offset='B') - 1
+        txn.portfolio.update_holdings(last_day)
+        return txn
 
 
-class TransactionsUploadForm(TxnFormMixin, forms.Form):
+class TransactionsUploadForm(TxnCreateMixin, forms.Form):
     """
     UploadTransactionForm let user select a file to upload which contains list of transactions.
     Support file format: CSV
@@ -61,23 +105,19 @@ class TransactionsUploadForm(TxnFormMixin, forms.Form):
         self.helper.form_action = reverse('transactions:upload', args=[self.portfolio.id])
 
 
-class TransactionUpdateForm(forms.ModelForm):
+class TransactionCreateUpdateForm(TxnCheckingMixin, TxnCreateMixin, forms.ModelForm):
+
     class Meta:
         model = Transaction
-        fields = ['security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio']
-
-
-class TransactionCreateForm(TxnFormMixin , TransactionUpdateForm):
+        exclude = ['portfolio']
+        #fields = ['security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio']
 
     def clean(self):
         cleaned_data = super().clean()
         self.check_duplicate_txn(cleaned_data, Transaction)
-
-
-class TransactionCreateMultipleForm(TxnFormMixin, forms.ModelForm):
-    class Meta:
-        model = Transaction
-        fields = ['security', 'datetime', 'type', 'price', 'shares', 'fee', 'dividend', 'ratio']
+        self.check_buy_sell_transaction(cleaned_data)
+        self.check_dividend_transaction(cleaned_data)
+        self.check_split_transaction(cleaned_data)
 
 
 class TransactionCreateMultipleHelper(FormHelper):
@@ -89,5 +129,3 @@ class TransactionCreateMultipleHelper(FormHelper):
         self.add_input(Submit('submit', 'Save'))
         self.template = 'bootstrap/table_inline_formset.html'
 
-
-TransactionFormSet = formset_factory(TransactionCreateMultipleForm, extra=0)

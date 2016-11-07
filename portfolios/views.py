@@ -43,8 +43,7 @@ class PortfolioDetailView(TemplateView):
         context['transactions'] = portfolio.transactions.all()
         context['upload_form'] = TransactionsUploadForm(portfolios=portfolio)
         # quick test
-        last_day = pd.Timestamp(dt.date.today(), offset='B')-1
-        portfolio.update_holdings(last_day)
+        last_day = pd.Timestamp(dt.date.today(), offset='B') - 1
         Holding.update_all_values(portfolio)
         context['holdings'] = Holding.objects.filter(portfolio=portfolio).filter(date=last_day)
         return context

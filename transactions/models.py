@@ -150,3 +150,16 @@ class Transaction(models.Model):
 
     def get_absolute_url(self):
         return reverse('portfolios:detail', args=[self.portfolio.id])
+
+    def fill_in_defaults(self):
+        if self.type == 'buy' or self.type == 'sell':
+            self.dividend = 0.
+            self.ratio = 0.
+        else:
+            self.price = 0.
+            self.shares = 0
+            self.fee = 0
+        if self.type == 'dividend':
+            self.ratio = 0
+        if self.type == 'split':
+            self.dividend = 0

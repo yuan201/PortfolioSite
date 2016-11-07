@@ -12,8 +12,7 @@ from extra_views import FormSetView
 from .models import Transaction
 from portfolios.models import Portfolio
 from securities.models import Security
-from .forms import TransactionCreateForm, TransactionUpdateForm, TransactionsUploadForm
-from .forms import TransactionFormSet, TransactionCreateMultipleHelper, TransactionCreateMultipleForm
+from .forms import TransactionCreateUpdateForm, TransactionsUploadForm, TransactionCreateMultipleHelper
 from core.mixins import TitleHeaderMixin
 
 
@@ -52,9 +51,10 @@ class TxnDeleteMixin(object):
 class TransactionUpdateView(TxnTemplateMixin, UpdateView):
     model = Transaction
     template_name = 'transaction/add_update_txn.html'
-    form_class = TransactionUpdateForm
+    form_class = TransactionCreateUpdateForm
 
 
+# todo update holdings after removal
 class TransactionDelView(TxnDeleteMixin, DeleteView):
     model = Transaction
     template_name = 'common/delete_confirm.html'
@@ -62,7 +62,7 @@ class TransactionDelView(TxnDeleteMixin, DeleteView):
 
 class TransactionCreateView(TxnTemplateMixin, TxnCreateMixin, CreateView):
     model = Transaction
-    form_class = TransactionCreateForm
+    form_class = TransactionCreateUpdateForm
 
 
 class CreateMultipleTxnView(TemplateView):
@@ -74,6 +74,7 @@ class TransactionUploadView(RedirectView):
         portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
         form = TransactionsUploadForm(request.POST, request.FILES, portfolios=portfolio)
         if form.is_valid():
+            # todo support more file format and convert to JSON
             self.save_uploaded_file(request.FILES['file'])
         return super().post(request, *args, **kwargs)
 
@@ -87,8 +88,7 @@ class TransactionUploadView(RedirectView):
 
 
 class TransactionCreateMultipleView(TxnCreateMixin, FormSetView):
-    formset_class = TransactionFormSet
-    form_class = TransactionCreateMultipleForm
+    form_class = TransactionCreateUpdateForm
     template_name = 'transaction/create_multiple.html'
     extra = 0
 
@@ -106,6 +106,7 @@ class TransactionCreateMultipleView(TxnCreateMixin, FormSetView):
                 except ObjectDoesNotExist:
                     continue
 
+                # todo use JSON format here
                 transactions.append({
                     'type': row['Type'],
                     'datetime': row['Date'],
