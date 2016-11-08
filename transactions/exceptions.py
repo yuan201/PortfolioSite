@@ -12,3 +12,5 @@ class FirstTransactionNotBuy(Exception):
 
 class UnknownTransactionType(Exception):
     pass
+
+

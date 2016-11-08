@@ -1,4 +1,6 @@
 import csv
+import json
+import tempfile
 
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -14,6 +16,7 @@ from portfolios.models import Portfolio
 from securities.models import Security
 from .forms import TransactionCreateUpdateForm, TransactionsUploadForm, TransactionCreateMultipleHelper
 from core.mixins import TitleHeaderMixin
+from .exceptions import UnknownTransactionType
 
 
 class TxnCreateMixin(object):
@@ -79,8 +82,39 @@ class TransactionUploadView(RedirectView):
         return super().post(request, *args, **kwargs)
 
     def save_uploaded_file(self, file):
-        with open('transactions.csv', 'wb') as fout:
+        if file.name.endswith('csv'):
+            self._save_to_temp(file, 'upload_temp.csv')
+            with open('temp/upload_temp.csv', 'r') as fin:
+                with open('temp/transactions.json', 'w') as fout:
+                    csv_reader = csv.DictReader(fin)
+                    for row in csv_reader:
+                        fout.write(self._csv_to_json(row) + '\n')
+        elif file.name.endswith('json'):
+            with open('temp/transactions.json', 'wb') as fout:
+                fout.write(file.read())
+
+    @staticmethod
+    def _save_to_temp(file, tempfile):
+        with open('temp/' + tempfile, 'wb') as fout:
             fout.write(file.read())
+
+    @staticmethod
+    def _csv_to_json(row):
+        txn = {}
+        txn['type'] = row['Type']
+        txn['datetime'] = row['Date'].strip()
+        txn['security'] = row['Symbol'][:6]
+        if txn['type']=='buy' or txn['type']=='sell':
+            txn['price'] = row['Price'].strip()
+            txn['shares'] = row['Shares'].strip()
+            txn['fee'] = row['Fee'].strip()
+        elif txn['type']=='dividend':
+            txn['dividend'] = row['Dividend'].strip()
+        elif txn['type']=='split':
+            txn['ratio'] = row['Ratio'].strip()
+        else:
+            raise UnknownTransactionType
+        return json.dumps(txn)
 
     def get_redirect_url(self, *args, **kwargs):
         portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
@@ -98,25 +132,12 @@ class TransactionCreateMultipleView(TxnCreateMixin, FormSetView):
 
     def prepare_transactions(self):
         transactions = []
-        with open('transactions.csv') as file:
-            txn_reader = csv.DictReader(file)
-            for row in txn_reader:
-                try:
-                    security = Security.objects.get(symbol=row['Symbol'][:6])
-                except ObjectDoesNotExist:
-                    continue
-
-                # todo use JSON format here
-                transactions.append({
-                    'type': row['Type'],
-                    'datetime': row['Date'],
-                    'security': security,
-                    'price': row['Price'],
-                    'shares': row['Shares'],
-                    'fee': row['Fee'],
-                    'dividend': row['Dividend'],
-                    'ratio': row['Ratio'],
-                })
+        with open('temp/transactions.json') as file:
+            for row in file:
+                txn = json.loads(row)
+                print(txn)
+                txn['security'] = get_object_or_404(Security, symbol=txn['security'])
+                transactions.append(txn)
         return transactions
 
     def post(self, request, *args, **kwargs):

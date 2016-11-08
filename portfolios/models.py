@@ -53,7 +53,7 @@ class Portfolio(models.Model):
         hld.id = None
         hld.save(force_insert=True)
 
-    def get_last_record_or_empty(self, txn):
+    def get_latest_record_or_empty(self, txn):
         try:
             return self.holdings.filter(security=txn.security).latest()
         except Holding.DoesNotExist:
@@ -69,14 +69,11 @@ class Portfolio(models.Model):
             return
 
         hlds = {}
-        dirty = False
-
         for txn in self.transactions.all():
             sym = txn.security.symbol
-            dirty = False
 
             if sym not in hlds:  # Transaction for a new security
-                hlds[sym] = self.get_last_record_or_empty(txn)
+                hlds[sym] = self.get_latest_record_or_empty(txn)
 
             hld_date = pd.Timestamp(hlds[sym].date, offset='B')
             txn_date = pd.Timestamp(date_(txn.datetime), offset='B')
@@ -85,7 +82,6 @@ class Portfolio(models.Model):
                 continue
 
             if txn_date > hld_date:  # done with the current date, move on
-                self.insert_holding(hlds[sym])
                 if txn_date > hld_date+1: # there are days without a transaction
                     self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
                 hlds[sym].date = txn_date
@@ -93,12 +89,10 @@ class Portfolio(models.Model):
             # since the gap has been filled, the current transaction is now for current date
             # just process it
             hlds[sym] = txn.transact(hlds[sym])
-            dirty = True
+            hlds[sym].save()
 
         # fill the gaps between last transaction and end
         for sym, hld in hlds.items():
-            if dirty:
-                self.insert_holding(hld)
             hld_date = pd.Timestamp(hld.date, offset='B')
             if hld_date < end:
                 self.fill_in_gaps(hld, pd.bdate_range(start=hld_date+1, end=end))
@@ -142,6 +136,7 @@ class Holding(models.Model):
 
     class Meta:
         get_latest_by = 'date'
+        unique_together = ('security', 'portfolio', 'date')
 
     def transact(self, txn):
         return txn.transact(self)

@@ -1,0 +1,14 @@
+{"datetime": "2010-01-07", "fee": "82.00", "shares": "2000", "security": "000651", "price": "25.64", "type": "buy"}
+{"datetime": "2010-06-07", "fee": "45.69", "shares": "3000", "security": "600660", "price": "8.90", "type": "buy"}
+{"dividend": "600.00", "datetime": "2010-07-12", "security": "000651", "type": "dividend"}
+{"ratio": "1.50", "datetime": "2010-07-13", "security": "000651", "type": "split"}
+{"datetime": "2010-10-11", "fee": "33.13", "shares": "1400", "security": "000651", "price": "14.80", "type": "buy"}
+{"datetime": "2010-12-08", "fee": "37.21", "shares": "2000", "security": "600660", "price": "11.01", "type": "buy"}
+{"dividend": "1800.00", "datetime": "2012-07-05", "security": "600660", "type": "dividend"}
+{"dividend": "1777.50", "datetime": "2012-07-05", "security": "000651", "type": "dividend"}
+{"datetime": "2013-02-18", "fee": "9.10", "shares": "200", "security": "000869", "price": "41.00", "type": "buy"}
+{"dividend": "2090.00", "datetime": "2013-07-15", "security": "000869", "type": "dividend"}
+{"dividend": "27217.50", "datetime": "2015-07-02", "security": "000651", "type": "dividend"}
+{"ratio": "2.00", "datetime": "2015-07-02", "security": "000651", "type": "split"}
+{"dividend": "847.76", "datetime": "2015-07-15", "security": "000869", "type": "dividend"}
+{"datetime": "2015-10-29", "fee": "5.00", "shares": "100", "security": "000786", "price": "13.58", "type": "buy"}
