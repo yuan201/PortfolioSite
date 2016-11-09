@@ -17,3 +17,6 @@ def date_(datetime):
 def last_business_day():
     return pd.Timestamp(dt.date.today(), offset='B')-1
 
+
+def to_business_timestamp(datetime):
+    return pd.Timestamp(datetime, offset='B')

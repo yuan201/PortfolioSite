@@ -13,6 +13,7 @@ from transactions.exceptions import FirstTransactionNotBuy
 from benchmarks.models import Benchmark
 from core.types import PositiveDecimalField
 from core.utils import date_, build_link
+from core.utils import to_business_timestamp
 from quotes.models import Quote
 
 
@@ -63,7 +64,11 @@ class Portfolio(models.Model):
         for d in gaps:
             self.insert_holding(hld, d)
 
-    # todo refactor
+    @staticmethod
+    def _transact_and_save(hld, txn):
+        hld = txn.transact(hld)
+        hld.save()
+
     def update_holdings(self, end):
         if not self.transactions.all():
             return
@@ -73,29 +78,30 @@ class Portfolio(models.Model):
             sym = txn.security.symbol
 
             if sym not in hlds:  # Transaction for a new security
+                # find the latest holding record for this symbol
+                # if found, the current transaction must has been processed in the past and will
+                # be skipped below
+                # if not found, start an empty holding record here
                 hlds[sym] = self.get_latest_record_or_empty(txn)
 
-            hld_date = pd.Timestamp(hlds[sym].date, offset='B')
-            txn_date = pd.Timestamp(date_(txn.datetime), offset='B')
+            # convert date into pandas timestamp with business offset to automatically skip holidays
+            # note holding record is kept for every business day, so detail time of the transaction
+            # is stripped off.
+            hld_date = to_business_timestamp(hlds[sym].date)
+            txn_date = to_business_timestamp(date_(txn.datetime))
 
             if txn_date < hld_date:  # already processed in the past
                 continue
-
-            if txn_date > hld_date:  # done with the current date, move on
-                if txn_date > hld_date+1: # there are days without a transaction
-                    self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
-                hlds[sym].date = txn_date
-
-            # since the gap has been filled, the current transaction is now for current date
-            # just process it
-            hlds[sym] = txn.transact(hlds[sym])
-            hlds[sym].save()
+            elif txn_date == hld_date: # there might be multiple transactions for a day
+                self._transact_and_save(hlds[sym], txn)
+            else: # txn_date > hld_date
+                self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
+                self.insert_holding(hlds[sym], txn_date)
+                self._transact_and_save(hlds[sym], txn)
 
         # fill the gaps between last transaction and end
         for sym, hld in hlds.items():
-            hld_date = pd.Timestamp(hld.date, offset='B')
-            if hld_date < end:
-                self.fill_in_gaps(hld, pd.bdate_range(start=hld_date+1, end=end))
+            self.fill_in_gaps(hld, pd.bdate_range(start=to_business_timestamp(hld.date)+1, end=end))
 
     def sum_each_currency(self, date=None):
         if not self.holdings:
