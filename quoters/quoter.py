@@ -1,10 +1,3 @@
-import pandas as pd
-import tushare as ts
-from time import sleep
-
-from quotes.models import Quote
-
-
 class SymbolNotExist(Exception):
     pass
 
@@ -14,62 +7,43 @@ class UnknownQuoter(Exception):
 
 
 # todo need to wrap pandas web engine
+# todo find a source for all HK listed stocks
 class Quoter(object):
     """
     A Quoter give back quotes for a security or index.
     """
     # todo replace symbol with security
     def get_quotes(self, symbol, start, end):
+        """return quotes in DataFrame"""
         raise NotImplemented
 
     def get_last_close(self, symbol):
         raise NotImplemented
 
-    def get_close(self, symbol, start, end):
+    def get_closes(self, symbol, start, end):
+        """return closes in Series"""
         raise NotImplemented
 
-    def get_adjusted_close(self):
+    def get_adjusted_closes(self):
         raise NotImplemented
 
+    def get_close(self, symbol, date):
+        raise NotImplemented
 
-class QuoterTushare(Quoter):
-    """
-    Use the TuShare library to get quote. This should work fine for all securities listed
-    in China.
-    """
-    # todo implement other methods
-    def get_quotes(self, symbol, start, end):
-        for count in range(3):
-            try:
-                quotes = ts.get_h_data(symbol, start=start, end=end, autype=None, pause=1)
-            except IOError as e:
-                sleep(10)
-            else:
-                break
-
-        if quotes is not None:
-            # convert string based index to  DatatimeIndex
-            dt_index = [pd.to_datetime(i) for i in quotes.index]
-            quotes.index = dt_index
-            return quotes[['open', 'close', 'high', 'low', 'volume']]
+    @classmethod
+    def quoter_factory(cls, quoter):
+        from .quoterlocal import QuoterLocal
+        from .quotertushare import QuoterTushare
+        from .quoterxueqiu import QuoterXueqiu
+        from .quoterpandas import QuoterPandas
+        if quoter == "Tushare":
+            return QuoterTushare()
+        elif quoter == "Local":
+            return QuoterLocal()
+        elif quoter == "Xueqiu":
+            return QuoterXueqiu()
+        elif quoter == "pandas":
+            return QuoterPandas()
         else:
-            raise SymbolNotExist()
+            raise UnknownQuoter
 
-    def get_last_close(self, symbol):
-        pass
-
-
-class QuoterLocal(Quoter):
-    """
-    Use the data stored in local database
-    """
-    # todo implement all methods
-    def get_quotes(self, symbol, start, end):
-        quotes = Quote.objects.filter(symbol=symbol).filter(date__gte=start).filter(date__lte=end)
-
-
-def quoter_factory(quoter):
-    if quoter == "Tushare":
-        return QuoterTushare()
-    else:
-        raise UnknownQuoter

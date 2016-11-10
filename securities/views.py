@@ -15,7 +15,7 @@ ITEMS_PER_PAGE = 15
 
 class SecCreateView(TitleHeaderMixin, CreateView):
     template_name = 'security/add_update_sec.html'
-    fields = ['symbol', 'currency', 'quoter', 'isindex']
+    fields = ['symbol', 'currency', 'exchange', 'isindex']
     model = Security
 
     # todo need to refactor the templates to get rid of jumbotron
@@ -54,7 +54,7 @@ class SecDelView(DeleteView):
 
 class SecUpdateView(TitleHeaderMixin, UpdateView):
     model = Security
-    fields = ['symbol', 'currency', 'quoter', 'isindex']
+    fields = ['symbol', 'currency', 'exchange', 'isindex']
     template_name = 'security/add_update_sec.html'
 
     def __init__(self, *args, **kwargs):

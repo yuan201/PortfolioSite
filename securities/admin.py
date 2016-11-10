@@ -5,7 +5,7 @@ from .models import Security, SecurityInfo
 
 @admin.register(Security)
 class SecurityAdmin(admin.ModelAdmin):
-    list_display = ('symbol', 'name', 'currency', 'quoter', 'no_quotes', 'isindex', 'list_date')
+    list_display = ('symbol', 'name', 'currency', 'exchange', 'no_quotes', 'isindex', 'list_date')
     search_fields = ['symbol']
     ordering = ['symbol']
     list_filter = ['isindex', 'list_date']

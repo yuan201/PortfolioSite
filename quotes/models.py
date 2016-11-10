@@ -75,11 +75,7 @@ class Quote(models.Model):
     # todo queryset to dataframe sounds like a general util function
     @classmethod
     def to_DataFrame(cls, qs):
-        """
-        convert QuerySet to DataFrame
-        :param qs:
-        :return DataFrame:
-        """
+        """convert QuerySet to DataFrame"""
         dates = [pd.to_datetime(x[0]) for x in qs.values_list('date')]
         data = qs.values('open', 'close', 'high', 'low', 'volume')
         df = pd.DataFrame.from_records(data, index=dates)

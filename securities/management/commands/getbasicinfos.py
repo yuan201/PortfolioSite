@@ -23,7 +23,6 @@ class Command(BaseCommand):
         except securities.models.Security.DoesNotExist as e:
             form = NewSecurityForm({'symbol': symbol,
                                     'currency': 'CNY',
-                                    'quoter': 'Tushare',
                                     'isindex': False,
                                     'list_date': ""})
             if form.is_valid():

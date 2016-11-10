@@ -15,6 +15,7 @@ from core.types import PositiveDecimalField
 from core.utils import date_, build_link
 from core.utils import to_business_timestamp
 from quotes.models import Quote
+from quoters.quoter import Quoter
 
 
 class WrongTxnType(Exception):
@@ -148,12 +149,12 @@ class Holding(models.Model):
         return txn.transact(self)
 
     def __str__(self):
-        return "@{date}:{name}({symbol}):{shares}=shares,cost={cost:.2f}," \
+        return "@{date}:{portfolio} has {name}({symbol}):shares={shares},cost={cost:.2f}," \
                 "value={value:.2f},dividend={dividend:.2f},gain={gain:.2f}".format(
                     name=self.security.name, symbol=self.security.symbol,
                     shares=self.shares, cost=self.cost,
                     dividend=self.dividend, gain=self.gain, value=self.value,
-                    date=self.date,
+                    date=self.date, portfolio=self.portfolio.name,
                 )
 
     # todo add utilities for common links (security, portfolio, currency, etc)
@@ -187,9 +188,13 @@ class Holding(models.Model):
     # todo use get() instead, probably within a try block
     # todo decouple all direct access to quote database and use Quoter interface instead
     def update_value(self):
-        quote = Quote.objects.filter(security=self.security).filter(date=self.date)
-        if quote:
-            self.value = quote.first().close * self.shares
+        quoter = Quoter.quoter_factory('Local')
+        try:
+            close = quoter.get_close(self.security.symbol, self.date)
+        except Quote.DoesNotExist:
+            pass
+        else:
+            self.value = close * self.shares
             self.save()
 
     @classmethod

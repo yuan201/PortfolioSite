@@ -7,7 +7,7 @@ from crispy_forms.bootstrap import StrictButton
 from crispy_forms.layout import Submit
 from django.core.urlresolvers import reverse_lazy
 
-from quoters.quoter import quoter_factory, SymbolNotExist, UnknownQuoter
+from quoters.quoter import SymbolNotExist, UnknownQuoter, Quoter
 from quotes.models import Quote
 
 logger = logging.getLogger('quotes_view')
@@ -47,13 +47,13 @@ class QuotesForm(forms.Form):
             self.add_error('start', msg)
             return cleaned_data
 
-        if not self.security.quoter:
-            msg = u'Quoter not specified'
+        if not self.security.exchange:
+            msg = u'Exchange not specified'
             self.add_error(None, msg)
             return cleaned_data
 
         try:
-            qtr = quoter_factory(self.security.quoter)
+            qtr = Quoter.quoter_factory()
         except UnknownQuoter:
             msg = u'Unknown Quoter'
             self.add_error(None, msg)

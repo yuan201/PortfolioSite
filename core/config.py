@@ -10,3 +10,10 @@ CURRENCY_CHOICES = (
 )
 
 BASE_CURRENCY = 'CNY'
+
+STOCK_EXCHANGES = (
+    ('SSE', 'Shanghai Stock Exchange'),
+    ('SZSE', 'Shenzhen Stock Exchange'),
+    ('NYSE', 'Newyork Stock Exchange'),
+    ('NASDAQ', 'Nasdaq Stock Market'),
+)

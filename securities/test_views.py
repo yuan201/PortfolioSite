@@ -22,7 +22,6 @@ class NewSecViewTest(PortfoliosTestMixin, TestCase):
         sec = Security.objects.first()
         self.assertEqual(sec.symbol, 'MSYH')
         self.assertEqual(sec.currency, 'CNY')
-        self.assertEqual(sec.quoter, '')
         self.assertEqual(sec.isindex, False)
 
     def test_cannot_post_sec_with_same_symbol(self):

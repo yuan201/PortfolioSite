@@ -8,7 +8,9 @@ import pandas as pd
 import numpy as np
 
 from core.utils import build_link
-from core.config import CURRENCY_CHOICES
+from core.config import CURRENCY_CHOICES, STOCK_EXCHANGES
+
+
 
 
 class Security(models.Model):
@@ -18,7 +20,7 @@ class Security(models.Model):
     """
     symbol = models.CharField(max_length=20, unique=True)
     currency = models.CharField(max_length=3, default='CNY', choices=CURRENCY_CHOICES)
-    quoter = models.CharField(max_length=20, null=True, blank=True)
+    exchange = models.CharField(max_length=20, null=True, blank=True, choices=STOCK_EXCHANGES)
     isindex = models.BooleanField(default=False, verbose_name='Is this an Index?')
     list_date = models.DateField(null=True, blank=True)
 
@@ -29,8 +31,8 @@ class Security(models.Model):
         return "{}".format(self.symbol)
 
     def __repr__(self):
-        return "Security(symbol={},currency={},quoter={},index={}".format(
-            self.symbol, self.currency, self.quoter, self.isindex
+        return "Security(symbol={},currency={},exchange={},index={}".format(
+            self.symbol, self.currency, self.exchange, self.isindex
         )
 
     def get_absolute_url(self):

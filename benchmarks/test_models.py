@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from .models import Benchmark, BenchmarkConstitute, BenchmarkPerformance
 from securities.models import Security
 from quotes.models import Quote
+from quotes.factories import QuoteFactory
 from .factories import BenchConsFactory, BenchmarkFactory, BenchPermFactory
 from securities.factories import SecurityFactory
 
@@ -25,12 +26,12 @@ class BenchmarkModelTest(TestCase):
         s1, s2 = SecurityFactory.create_batch(2)
         BenchConsFactory(benchmark=bk, percent=percents[0], security=s1)
         BenchConsFactory(benchmark=bk, percent=percents[1], security=s2)
-        Quote.objects.create(security=s1, date=dt.date(2016, 1, 1), close=100)
-        Quote.objects.create(security=s1, date=dt.date(2016, 1, 4), close=110)
-        Quote.objects.create(security=s1, date=dt.date(2016, 1, 5), close=132)
-        Quote.objects.create(security=s2, date=dt.date(2016, 1, 5), close=12.96)
-        Quote.objects.create(security=s2, date=dt.date(2016, 1, 4), close=14.4)
-        Quote.objects.create(security=s2, date=dt.date(2016, 1, 1), close=12)
+        QuoteFactory(security=s1, date=dt.date(2016, 1, 1), close=100)
+        QuoteFactory(security=s1, date=dt.date(2016, 1, 4), close=110)
+        QuoteFactory(security=s1, date=dt.date(2016, 1, 5), close=132)
+        QuoteFactory(security=s2, date=dt.date(2016, 1, 5), close=12.96)
+        QuoteFactory(security=s2, date=dt.date(2016, 1, 4), close=14.4)
+        QuoteFactory(security=s2, date=dt.date(2016, 1, 1), close=12)
         return bk
 
     def test_model_update_performance(self):

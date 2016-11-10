@@ -6,7 +6,7 @@ from .models import Security, SecurityInfo
 class NewSecurityForm(ModelForm):
     class Meta:
         model = Security
-        fields = ['symbol', 'currency', 'quoter', 'isindex', 'list_date']
+        fields = ['symbol', 'currency', 'exchange', 'isindex', 'list_date']
 
 
 class UpdateSecurityListDateForm(ModelForm):

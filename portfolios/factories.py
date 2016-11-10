@@ -9,3 +9,9 @@ class PortfolioFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: 'value{}'.format(n))
     owner = factory.SubFactory(UserFactory)
+
+
+class HoldingFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Holding
+

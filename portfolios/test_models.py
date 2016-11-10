@@ -1,3 +1,4 @@
+from decimal import Decimal
 import datetime as dt
 
 from django.core.urlresolvers import reverse
@@ -10,8 +11,9 @@ from .models import Portfolio, Holding
 from transactions.models import Transaction
 from securities.models import Security
 from transactions.factories import transaction_factory
-from .factories import PortfolioFactory
-from securities.factories import SecurityFactory
+from .factories import PortfolioFactory, HoldingFactory
+from securities.factories import SecurityFactory, SecInfoFactory
+from quotes.factories import QuoteFactory
 
 
 class PortfolioModelTest(TestCase):
@@ -30,10 +32,10 @@ class PortfolioModelTest(TestCase):
 
     def test_reject_duplicated_name(self):
         with self.assertRaises(IntegrityError):
-            Portfolio.objects.create(name=self.p1.name, description='another value', owner=self.p1.owner)
+            PortfolioFactory(name=self.p1.name, description='another value', owner=self.p1.owner)
 
     def test_all_transactions(self):
-        p2 = Portfolio.objects.create(name='trend', description='trending', owner=self.p1.owner)
+        p2 = PortfolioFactory(name='trend', description='trending', owner=self.p1.owner)
         _dt = [
             dt.datetime(2016, 1, 1, 11, 20),
             dt.datetime(2016, 1, 10, 14, 10),
@@ -68,14 +70,14 @@ class PortfolioModelTest(TestCase):
         self.assertEqual(all_txn[3].datetime, _dt[1])
 
     def test_update_holdings(self):
-        days = pd.bdate_range(start='2016-01-01', periods=5)
+        days = pd.bdate_range(start='2016-01-01', periods=5, freq='B')
         transaction_factory('buy', self.p1, self.s1, days[0], price=10, shares=200, fee=100)
         transaction_factory('sell', self.p1, self.s1, days[1], price=8, shares=100, fee=50)
         transaction_factory('dividend', self.p1, self.s1, days[2], dividend=35)
         transaction_factory('split', self.p1, self.s1, days[3], ratio=1.5)
         transaction_factory('sell', self.p1, self.s1, days[4], price=12, shares=100, fee=90)
 
-        self.p1.update_holdings(days[4]+1)
+        self.p1.update_holdings(days[-1]+1)
 
         hlds = list(Holding.objects.all())
 
@@ -162,19 +164,35 @@ class PortfolioModelTest(TestCase):
 class HoldingModelTest(TestCase):
 
     def setUp(self):
-        pass
+        p1 = PortfolioFactory(name='value')
+        s1 = SecurityFactory(symbol='MSYH')
+        SecInfoFactory(security=s1, name='民生银行')
+        self.hld = HoldingFactory(portfolio=p1, security=s1, shares=1000, cost=-15000, date=dt.date(2016, 1, 1))
+
+    def tearDown(self):
+        self.hld.delete()
 
     def test_str(self):
-        pass
+        self.assertEqual(str(self.hld), "@2016-01-01:value has 民生银行(MSYH):shares=1000,cost=-15000.00,"
+                                        "value=0.00,dividend=0.00,gain=0.00")
 
     def test_cost_per_share_proper_value(self):
-        pass
+        self.assertEqual(self.hld.cost_per_share(), Decimal(15.0))
 
     def test_cost_per_share_zero_share(self):
-        pass
+        self.hld.shares = 0
+        self.assertEqual(self.hld.cost_per_share(), Decimal(0))
 
     def test_as_table(self):
-        pass
+        self.hld.dividend = 25.
+        self.hld.gain = 120.
+        QuoteFactory(security=self.hld.security, date=self.hld.date, close=22.)
+        self.hld.update_value()
+        self.assertHTMLEqual(self.hld.as_t(), "<td><a href={sec_link}>民生银行</a></td>"
+                                              "<td>MSYH</td><td>CNY</td><td>1000</td>"
+                                              "<td>-15000.00</td><td>15.00</td><td>22000.00</td>"
+                                              "<td>25.00</td><td>120.00</td>".format(
+            sec_link=reverse('securities:detail', args=[self.hld.security.id])))
 
     def test_update_value(self):
         pass

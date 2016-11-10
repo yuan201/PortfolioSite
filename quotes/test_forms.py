@@ -6,7 +6,7 @@ import numpy as np
 
 from .forms import QuotesForm
 from securities.models import Security
-from quoters.quoter import QuoterTushare, SymbolNotExist
+from quoters.quoter import Quoter, SymbolNotExist
 from quotes.models import Quote
 
 
@@ -37,7 +37,7 @@ class QuotesFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['__all__'], ["Unknown Quoter"])
 
-    @patch('quoters.quoter.QuoterTushare.get_quotes')
+    @patch('quoters.quotertushare.QuoterTushare.get_quotes')
     def test_error_on_wrong_symbol(self, mock_quoter):
         mock_quoter.side_effect = SymbolNotExist()
         self.s1.quoter = "Tushare"
@@ -46,7 +46,7 @@ class QuotesFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['__all__'], ["symbol not found on this quoter"])
 
-    @patch('quoters.quoter.QuoterTushare.get_quotes')
+    @patch('quoters.quotertushare.QuoterTushare.get_quotes')
     def test_save_quotes_to_db(self, mock_quoter):
         mock_quoter.return_value = pd.DataFrame(np.random.random(25).reshape(5, 5),
                                                 index=pd.date_range('2016-01-01', periods=5, freq='D'),
