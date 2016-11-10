@@ -9,10 +9,22 @@ class NewSecurityForm(ModelForm):
         fields = ['symbol', 'currency', 'exchange', 'isindex', 'list_date']
 
 
-class UpdateSecurityListDateForm(ModelForm):
+class UpdateSecListDateForm(ModelForm):
     class Meta:
         model = Security
         fields = ['list_date']
+
+
+class UpdateSecCurrencyForm(ModelForm):
+    class Meta:
+        model = Security
+        fields = ['currency']
+
+
+class UpdateSecExchangeForm(ModelForm):
+    class Meta:
+        model = Security
+        fields = ['exchange']
 
 
 class NewSecurityInfoForm(ModelForm):

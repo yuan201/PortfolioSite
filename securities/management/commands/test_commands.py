@@ -23,7 +23,7 @@ class GetBasicInfosTest(TestCase):
         )
 
     def test_command_empty_database_update_both_tables(self):
-        call_command('getbasicinfos')
+        call_command('getbasicinfos', 'Tushare')
 
         sec = Security.objects.first()
         self.assertEqual(Security.objects.count(), 1)
@@ -35,7 +35,7 @@ class GetBasicInfosTest(TestCase):
 
     def test_command_console_output(self):
         out = StringIO()
-        call_command('getbasicinfos', stdout=out)
+        call_command('getbasicinfos', 'Tushare', stdout=out)
 
         self.assertIn('Added 1 Securities', out.getvalue())
         self.assertIn('Added 1 Infos', out.getvalue())
@@ -44,7 +44,7 @@ class GetBasicInfosTest(TestCase):
         SecurityFactory(symbol='600000')
 
         out = StringIO()
-        call_command('getbasicinfos', stdout=out)
+        call_command('getbasicinfos', 'Tushare', stdout=out)
 
         self.assertIn('Added 0 Securities', out.getvalue())
         self.assertIn('Added 1 Infos', out.getvalue())
@@ -52,7 +52,7 @@ class GetBasicInfosTest(TestCase):
     def test_update_info_only_result(self):
         sec = SecurityFactory(symbol='600000')
 
-        call_command('getbasicinfos')
+        call_command('getbasicinfos', 'Tushare')
 
         self.assertEqual(sec.infos.latest().name, 'SEC1')
 
@@ -61,7 +61,7 @@ class GetBasicInfosTest(TestCase):
         info = SecInfoFactory(security=sec, valid_date=dt.date.today(), name='NAME')
 
         out = StringIO()
-        call_command('getbasicinfos', stdout=out)
+        call_command('getbasicinfos', 'Tushare', stdout=out)
 
         self.assertIn('Added 0 Securities', out.getvalue())
         self.assertIn('Added 0 Securities', out.getvalue())
@@ -70,7 +70,7 @@ class GetBasicInfosTest(TestCase):
         sec = SecurityFactory(symbol='600000')
         info = SecInfoFactory(security=sec, valid_date=dt.date.today(), name='NAME')
 
-        call_command('getbasicinfos')
+        call_command('getbasicinfos', 'Tushare')
 
         self.assertEqual(info.name, 'NAME')
 
@@ -78,7 +78,7 @@ class GetBasicInfosTest(TestCase):
         sec = SecurityFactory(symbol='600000')
         info = SecInfoFactory(security=sec, valid_date=dt.date.today()-dt.timedelta(days=1), name='Old')
 
-        call_command('getbasicinfos')
+        call_command('getbasicinfos', 'Tushare')
 
         self.assertEqual(sec.infos.count(), 2)
         self.assertEqual(sec.infos.latest().name, 'SEC1')

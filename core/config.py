@@ -16,4 +16,5 @@ STOCK_EXCHANGES = (
     ('SZSE', 'Shenzhen Stock Exchange'),
     ('NYSE', 'Newyork Stock Exchange'),
     ('NASDAQ', 'Nasdaq Stock Market'),
+    ('HKEX', 'Hongkong Stock Exchange')
 )

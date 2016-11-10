@@ -101,7 +101,7 @@ class SecurityInfo(models.Model):
     security = models.ForeignKey(Security, on_delete=models.CASCADE, related_name='infos')
     valid_date = models.DateField(verbose_name='Valid Date')
     name = models.CharField(max_length=50, verbose_name='Name')
-    industry = models.CharField(max_length=50, verbose_name='Industry', null=True)
+    industry = models.CharField(max_length=50, verbose_name='Industry', null=True, blank=True)
 
     class Meta:
         unique_together = ("security", "valid_date")
