@@ -2,6 +2,7 @@ import datetime as dt
 import logging
 
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from securities.models import Security
 from quotes.models import Quote
@@ -24,14 +25,14 @@ class Command(BaseCommand):
         self.stdout.write('Getting quotes from {}\nFrom {} to {}'.format(
             options['quoter'], options['start'][0], options['end'][0]))
 
-        all_secs = Security.objects.filter(quoter=options['quoter'])
+        all_secs = Security.objects.filter(Q(exchange='SSE') | Q(exchange='SZSE'))
 
         count = 0
         for sec in all_secs:
             data = {'start': options['start'][0],
                     'end': options['end'][0],
                     'mode': '1'}
-            form = QuotesForm(data=data, security=sec)
+            form = QuotesForm(data=data, security=sec, quoter=options['quoter'])
             if form.is_valid():
                 count += 1
                 form.save()

@@ -29,6 +29,7 @@ class QuotesForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.security = kwargs.pop('security')
+        self.quoter = kwargs.pop('quoter')
         super(QuotesForm, self).__init__(*args, **kwargs)
         self.quotes = pd.DataFrame()
         self.helper = FormHelper()
@@ -53,7 +54,7 @@ class QuotesForm(forms.Form):
             return cleaned_data
 
         try:
-            qtr = Quoter.quoter_factory()
+            qtr = Quoter.quoter_factory(self.quoter)
         except UnknownQuoter:
             msg = u'Unknown Quoter'
             self.add_error(None, msg)

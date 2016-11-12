@@ -8,7 +8,7 @@ class SecurityAdmin(admin.ModelAdmin):
     list_display = ('symbol', 'name', 'currency', 'exchange', 'no_quotes', 'isindex', 'list_date')
     search_fields = ['symbol']
     ordering = ['symbol']
-    list_filter = ['isindex', 'list_date']
+    list_filter = ['isindex', 'exchange']
 
 
 @admin.register(SecurityInfo)

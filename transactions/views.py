@@ -1,6 +1,7 @@
 import csv
 import json
 import tempfile
+from collections import OrderedDict
 
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -100,7 +101,7 @@ class TransactionUploadView(RedirectView):
 
     @staticmethod
     def _csv_to_json(row):
-        txn = {}
+        txn = OrderedDict()
         txn['type'] = row['Type']
         txn['datetime'] = row['Date'].strip()
         txn['security'] = row['Symbol'][:6]
