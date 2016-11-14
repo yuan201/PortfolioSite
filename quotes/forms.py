@@ -9,12 +9,14 @@ from django.core.urlresolvers import reverse_lazy
 
 from quoters.quoter import SymbolNotExist, UnknownQuoter, Quoter
 from quotes.models import Quote
+from quotes.tasks import task_get_quote
+
 
 logger = logging.getLogger('quotes_view')
 
 # todo change MODE_CHOICES to use sensible phrase instead of 1,2,3
 MODE_CHOICES = (('1', 'Append'), ('2', 'Overwrite'), ('3', 'Discard Existing'))
-
+QUOTERS = (('Tushare', 'Tushare'), ('Xueqiu', 'Xueqiu'))
 
 class QuotesForm(forms.Form):
     start = forms.DateField(
@@ -25,11 +27,12 @@ class QuotesForm(forms.Form):
         widget=forms.TextInput(attrs={'placeholder': 'End Date'}),
         required=True,)
 
+    quoter = forms.ChoiceField(choices=QUOTERS, required=True)
+
     mode = forms.ChoiceField(widget=forms.RadioSelect, choices=MODE_CHOICES, required=True)
 
     def __init__(self, *args, **kwargs):
         self.security = kwargs.pop('security')
-        self.quoter = kwargs.pop('quoter')
         super(QuotesForm, self).__init__(*args, **kwargs)
         self.quotes = pd.DataFrame()
         self.helper = FormHelper()
@@ -54,16 +57,14 @@ class QuotesForm(forms.Form):
             return cleaned_data
 
         try:
-            qtr = Quoter.quoter_factory(self.quoter)
+            quoter = Quoter.quoter_factory(cleaned_data['quoter'])
         except UnknownQuoter:
-            msg = u'Unknown Quoter'
-            self.add_error(None, msg)
-            return cleaned_data
+            msg = u'Unknow Quoter'
+            self.add_error('quoter', msg)
 
         try:
-            self.quotes = qtr.get_quotes(self.security.symbol,
-                                         start=start.isoformat(),
-                                         end=end.isoformat())
+            self.quotes = task_get_quote(security=self.security, quoter=quoter,
+                                         start=start.isoformat(), end=end.isoformat())
             logger.debug('getting quotes for {}, from {} to {}'.format(
                 self.security.symbol, start.isoformat(), end.isoformat())
             )

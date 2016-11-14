@@ -36,7 +36,7 @@ class Command(BaseCommand):
             if form.is_valid():
                 count += 1
                 form.save()
-                self.stdout.write('.', ending='')
+                self.stdout.write('{}/{}'.format(count, all_secs.count()))
             else:
                 logger.debug(data)
 

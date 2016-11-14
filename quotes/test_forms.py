@@ -6,6 +6,7 @@ import numpy as np
 
 from .forms import QuotesForm
 from securities.models import Security
+from securities.factories import SecurityFactory
 from quoters.quoter import Quoter, SymbolNotExist
 from quotes.models import Quote
 
@@ -14,33 +15,26 @@ class QuotesFormTest(TestCase):
 
     # todo try factory_boy to build test records
     def setUp(self):
-        self.s1 = Security.objects.create(symbol='MSYH', currency='RMB')
-        self.data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '2'}
+        self.s1 = SecurityFactory(symbol='MSYH', currency='RMB', exchange='SSE')
+        self.data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '2', 'quoter': 'Tushare'}
 
     def test_error_on_wrong_date(self):
-        data = {'start': '2016-01-01', 'end': '2015-12-31', 'mode': '2'}
+        data = {'start': '2016-01-01', 'end': '2015-12-31', 'mode': '2', 'quoter': 'Tushare'}
         form = QuotesForm(data, security=self.s1)
 
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['start'],["end date before start date"])
 
-    def test_error_on_empty_quoter(self):
+    def test_error_on_empty_exchange(self):
+        self.s1.exchange = None
         form = QuotesForm(self.data, security=self.s1)
 
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['__all__'], ["Quoter not specified"])
-
-    def test_error_on_wrong_quoter(self):
-        self.s1.quoter = "Wrong"
-        form = QuotesForm(self.data, security=self.s1)
-
-        self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['__all__'], ["Unknown Quoter"])
+        self.assertEqual(form.errors['__all__'], ["Exchange not specified"])
 
     @patch('quoters.quotertushare.QuoterTushare.get_quotes')
     def test_error_on_wrong_symbol(self, mock_quoter):
         mock_quoter.side_effect = SymbolNotExist()
-        self.s1.quoter = "Tushare"
         form = QuotesForm(self.data, security=self.s1)
 
         self.assertFalse(form.is_valid())
@@ -52,7 +46,7 @@ class QuotesFormTest(TestCase):
                                                 index=pd.date_range('2016-01-01', periods=5, freq='D'),
                                                 columns=['open', 'close', 'high', 'low', 'volume'])
         self.s1.quoter = "Tushare"
-        data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '3'}
+        data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '3', 'quoter': 'Tushare'}
         form = QuotesForm(data, security=self.s1)
 
         self.assertTrue(form.is_valid())

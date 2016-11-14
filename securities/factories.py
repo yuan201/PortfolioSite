@@ -10,7 +10,7 @@ class SecurityFactory(factory.django.DjangoModelFactory):
 
     symbol = factory.Sequence(lambda n: '600{:03d}'.format(n))
     currency = 'CNY'
-    exchange = 'Shanghai'
+    exchange = 'SSE'
     list_date = dt.date(1998, 10, 25)
 
 

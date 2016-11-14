@@ -190,7 +190,7 @@ class Holding(models.Model):
     def update_value(self):
         quoter = Quoter.quoter_factory('Local')
         try:
-            close = quoter.get_close(self.security.symbol, self.date)
+            close = quoter.get_close(self.security, self.date)
         except Quote.DoesNotExist:
             pass
         else:

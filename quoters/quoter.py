@@ -13,21 +13,21 @@ class Quoter(object):
     A Quoter give back quotes for a security or index.
     """
     # todo replace symbol with security
-    def get_quotes(self, symbol, start, end):
+    def get_quotes(self, security, start, end):
         """return quotes in DataFrame"""
         raise NotImplemented
 
-    def get_last_close(self, symbol):
+    def get_last_close(self, security):
         raise NotImplemented
 
-    def get_closes(self, symbol, start, end):
+    def get_closes(self, security, start, end):
         """return closes in Series"""
         raise NotImplemented
 
     def get_adjusted_closes(self):
         raise NotImplemented
 
-    def get_close(self, symbol, date):
+    def get_close(self, security, date):
         raise NotImplemented
 
     @classmethod

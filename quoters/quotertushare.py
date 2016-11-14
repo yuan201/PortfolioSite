@@ -11,10 +11,10 @@ class QuoterTushare(Quoter):
     in China.
     """
     # todo implement other methods
-    def get_quotes(self, symbol, start, end):
+    def get_quotes(self, security, start, end):
         for count in range(3):
             try:
-                quotes = ts.get_h_data(symbol, start=start, end=end, autype=None, pause=1)
+                quotes = ts.get_h_data(security.symbol, start=start, end=end, autype=None, pause=1)
             except IOError as e:
                 sleep(10)
             else:
