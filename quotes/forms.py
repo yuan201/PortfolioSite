@@ -64,7 +64,7 @@ class QuotesForm(forms.Form):
 
         try:
             self.quotes = task_get_quote(security=self.security, quoter=quoter,
-                                         start=start.isoformat(), end=end.isoformat())
+                                       start=start.isoformat(), end=end.isoformat())
             logger.debug('getting quotes for {}, from {} to {}'.format(
                 self.security.symbol, start.isoformat(), end.isoformat())
             )

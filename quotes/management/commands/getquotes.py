@@ -31,8 +31,9 @@ class Command(BaseCommand):
         for sec in all_secs:
             data = {'start': options['start'][0],
                     'end': options['end'][0],
-                    'mode': '1'}
-            form = QuotesForm(data=data, security=sec, quoter=options['quoter'])
+                    'mode': '1',
+                    'quoter': options['quoter']}
+            form = QuotesForm(data=data, security=sec)
             if form.is_valid():
                 count += 1
                 form.save()
