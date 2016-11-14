@@ -17,7 +17,7 @@ from core.utils import to_business_timestamp
 from quotes.models import Quote
 from quoters.quoter import Quoter
 
-
+# todo define a root exception for all other exceptions, and move exception inside classes
 class WrongTxnType(Exception):
     pass
 
@@ -96,13 +96,13 @@ class Portfolio(models.Model):
             elif txn_date == hld_date: # there might be multiple transactions for a day
                 self._transact_and_save(hlds[sym], txn)
             else: # txn_date > hld_date
-                self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
+                # self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
                 self.insert_holding(hlds[sym], txn_date)
                 self._transact_and_save(hlds[sym], txn)
 
         # fill the gaps between last transaction and end
-        for sym, hld in hlds.items():
-            self.fill_in_gaps(hld, pd.bdate_range(start=to_business_timestamp(hld.date)+1, end=end))
+        # for sym, hld in hlds.items():
+        #    self.fill_in_gaps(hld, pd.bdate_range(start=to_business_timestamp(hld.date)+1, end=end))
 
     def sum_each_currency(self, date=None):
         if not self.holdings:
@@ -129,6 +129,10 @@ class Portfolio(models.Model):
     def remove_holdings_after(self, security, datetime):
         """removing holdings after a specific date"""
         self.holdings.filter(security=security).filter(date__gte=datetime).delete()
+
+    def holdings_on(self, date):
+        return [self.holdings.filter(security=hld.security).filter(date__lte=date).latest()
+                    for hld in self.holdings.all().distinct('security')]
 
 
 class Holding(models.Model):
