@@ -9,6 +9,7 @@ class QuoteAdmin(AdminFormatMixin, admin.ModelAdmin):
     list_display = ('security', 'date', '_open', '_close', '_high', '_low', '_volume')
     ordering = ['security', '-date']
 
+    # TODO find a universal way to solve this formatting problem
     def _open(self, obj):
         return self._format_for_print(obj.open)
 

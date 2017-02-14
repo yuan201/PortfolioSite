@@ -16,10 +16,10 @@ class QuotesFormTest(TestCase):
     # todo try factory_boy to build test records
     def setUp(self):
         self.s1 = SecurityFactory(symbol='MSYH', currency='RMB', exchange='SSE')
-        self.data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '2', 'quoter': 'Tushare'}
+        self.data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': 'overwrite', 'quoter': 'Tushare'}
 
     def test_error_on_wrong_date(self):
-        data = {'start': '2016-01-01', 'end': '2015-12-31', 'mode': '2', 'quoter': 'Tushare'}
+        data = {'start': '2016-01-01', 'end': '2015-12-31', 'mode': 'overwrite', 'quoter': 'Tushare'}
         form = QuotesForm(data, security=self.s1)
 
         self.assertFalse(form.is_valid())
@@ -46,7 +46,7 @@ class QuotesFormTest(TestCase):
                                                 index=pd.date_range('2016-01-01', periods=5, freq='D'),
                                                 columns=['open', 'close', 'high', 'low', 'volume'])
         self.s1.quoter = "Tushare"
-        data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': '3', 'quoter': 'Tushare'}
+        data = {'start': '2016-01-01', 'end': '2016-01-10', 'mode': 'discard', 'quoter': 'Tushare'}
         form = QuotesForm(data, security=self.s1)
 
         self.assertTrue(form.is_valid())

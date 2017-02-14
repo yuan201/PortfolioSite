@@ -4,3 +4,4 @@ from .models import Portfolio, Holding
 
 admin.site.register(Portfolio)
 admin.site.register(Holding)
+

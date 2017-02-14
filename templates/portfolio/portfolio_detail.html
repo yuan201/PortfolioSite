@@ -22,7 +22,12 @@ Portfolio
     <div class="row">
         <div class="page-header">
             <h3>Holdings</h3>
-            <ul>{{ portfolio.sum_currency_as_l|safe }}</ul>
+            <h4>
+                Total Value: {{ portfolio.total_value|floatformat:2 }}
+            </h4>
+            <ul>
+                {{ portfolio.sum_currency|unordered_list }}
+            </ul>
         </div>
 
         <div>

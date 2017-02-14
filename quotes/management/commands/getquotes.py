@@ -17,9 +17,10 @@ class Command(BaseCommand):
     help = 'Get quote from specified quoter'
 
     def add_arguments(self, parser):
-        parser.add_argument('quoter',)
-        parser.add_argument('--start', nargs=1)
-        parser.add_argument('--end', nargs=1)
+        # TODO add more info for add_argument
+        parser.add_argument('quoter', help='choose which quoter to get quotes from')
+        parser.add_argument('--start', nargs=1, help='start date')
+        parser.add_argument('--end', nargs=1, help='end date')
 
     def handle(self, *args, **options):
         self.stdout.write('Getting quotes from {}\nFrom {} to {}'.format(
@@ -31,7 +32,7 @@ class Command(BaseCommand):
         for sec in all_secs:
             data = {'start': options['start'][0],
                     'end': options['end'][0],
-                    'mode': '1',
+                    'mode': 'append',
                     'quoter': options['quoter']}
             form = QuotesForm(data=data, security=sec)
             if form.is_valid():

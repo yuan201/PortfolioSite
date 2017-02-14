@@ -52,14 +52,14 @@ class QuoteModelUpdateQuotesTest(TestCase):
                                columns=['open', 'close', 'high', 'low', 'volume'])
 
     def test_update_quotes_discard_existing_mode(self):
-        Quote.update_quotes(self.df, self.s1, '3')
+        Quote.update_quotes(self.df, self.s1, 'discard')
 
         self.assertEqual(Quote.objects.count(), 2)
         df_new = Quote.to_DataFrame(Quote.objects.all())
         self.assertTrue(df_new.astype(float).eq(self.df.astype(float)).all().all())
 
     def test_update_quotes_overwrite_mode(self):
-        Quote.update_quotes(self.df, self.s1, '2')
+        Quote.update_quotes(self.df, self.s1, 'overwrite')
 
         self.assertEqual(Quote.objects.count(), 3)
         df_new = Quote.to_DataFrame(Quote.objects.filter(date__gte=dt.date(2016, 1, 1)).all())
@@ -69,7 +69,7 @@ class QuoteModelUpdateQuotesTest(TestCase):
         self.assertEqual(q, self.q2)
 
     def test_update_quotes_append_mode(self):
-        Quote.update_quotes(self.df, self.s1, '1')
+        Quote.update_quotes(self.df, self.s1, 'append')
 
         self.assertEqual(Quote.objects.count(), 3)
         q1_2 = Quote.objects.filter(date=dt.date(2016, 1, 2)).first()
@@ -82,18 +82,18 @@ class QuoteModelUpdateQuotesTest(TestCase):
         self.assertAlmostEqual(q1_2.volume, 100.)
 
     def test_empty_df_discard_existing_mode(self):
-        Quote.update_quotes(pd.DataFrame(), self.s1, '3')
+        Quote.update_quotes(pd.DataFrame(), self.s1, 'discard')
 
         self.assertEqual(Quote.objects.count(), 0)
 
     def test_empty_df_overwrite_mode(self):
-        Quote.update_quotes(pd.DataFrame(), self.s1, '2')
+        Quote.update_quotes(pd.DataFrame(), self.s1, 'overwrite')
 
         self.assertEqual(Quote.objects.filter(date=dt.date(2016, 1, 1)).first(), self.q1)
         self.assertEqual(Quote.objects.filter(date=dt.date(2015, 12, 31)).first(), self.q2)
 
     def test_empty_df_append_mode(self):
-        Quote.update_quotes(pd.DataFrame(), self.s1, '1')
+        Quote.update_quotes(pd.DataFrame(), self.s1, 'append')
 
         self.assertEqual(Quote.objects.filter(date=dt.date(2016, 1, 1)).first(), self.q1)
         self.assertEqual(Quote.objects.filter(date=dt.date(2015, 12, 31)).first(), self.q2)

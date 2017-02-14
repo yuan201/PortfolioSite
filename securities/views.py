@@ -64,6 +64,12 @@ class SecUpdateView(TitleHeaderMixin, UpdateView):
 
 
 class SecDetailView(TitleHeaderMixin, FormView):
+    """
+    View to display security details including:
+    1. basic info such as name, symbol, currency, etc
+    2. recent quotes
+    3. an inline form to update quotes
+    """
     template_name = 'security/sec_detail.html'
     form_class = QuotesFormHorizontal
 

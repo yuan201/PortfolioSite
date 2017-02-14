@@ -45,11 +45,12 @@
 
 8. Gunicorn Setup
 	1. Install gunicorn using pip (so it's under virtualenv)
-	2. gunicorn portfoliosite.wsgi:application
+	2. test gunicorn with "gunicorn portfoliosite.wsgi:application"
 	3. with Whitenoise support, all the static files should work properly
 	4. update nginx conf file to use socket under /tmp
-    5. copy .service tempalte to /lib/systemd/system
+    5. copy .service tempalte to /etc/systemd/system
     6. copy gunicorn_start.sh to ~/
-    7. reboot and test
+    7. systemctl start gunicorn_systemd.service to enable the service
+    8. reboot and test
  
 

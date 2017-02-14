@@ -7,18 +7,22 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.conf import settings
 import pandas as pd
+import numpy as np
 
 from securities.models import Security
 from transactions.exceptions import FirstTransactionNotBuy
 from benchmarks.models import Benchmark
 from core.types import PositiveDecimalField
 from core.utils import date_, build_link
-from core.utils import to_business_timestamp
+from core.utils import to_business_timestamp, last_business_day
 from quotes.models import Quote
 from quoters.quoter import Quoter
+from core.exceptions import PortfolioException
+from exchangerates.models import ExchangeRate
+from core.config import BASE_CURRENCY, CURRENCY_CHOICES
 
-# todo define a root exception for all other exceptions, and move exception inside classes
-class WrongTxnType(Exception):
+
+class WrongTxnType(PortfolioException):
     pass
 
 # todo figure out a proper structure for logging
@@ -26,6 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 class Portfolio(models.Model):
+    """
+    Class for managing portfolios
+    """
     name = models.CharField(max_length=50)
     description = models.TextField(default='')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -44,9 +51,20 @@ class Portfolio(models.Model):
         return reverse('portfolios:detail', args=[self.id])
 
     # todo implement total value for portfolio
-    def total_value(self, _date):
+    def total_value(self, date=None):
         """calculate the total value of the portfolio for a particular day"""
-        pass
+        if date is None:
+            date = last_business_day()
+
+        summary_currency = self.sum_each_currency(date)
+        total = Decimal()
+        for currency, value in summary_currency.items():
+            if currency == BASE_CURRENCY:
+                total += value
+            else:
+                rate = ExchangeRate.filter(currency=currency).filter(date__lte=date).latest().rate
+                total += value * rate
+        return total
 
     @staticmethod
     def insert_holding(hld, date=None):
@@ -69,6 +87,8 @@ class Portfolio(models.Model):
     def _transact_and_save(hld, txn):
         hld = txn.transact(hld)
         hld.save()
+        txn.processed = True
+        txn.save()
 
     def update_holdings(self, end):
         if not self.transactions.all():
@@ -86,15 +106,14 @@ class Portfolio(models.Model):
                 hlds[sym] = self.get_latest_record_or_empty(txn)
 
             # convert date into pandas timestamp with business offset to automatically skip holidays
-            # note holding record is kept for every business day, so detail time of the transaction
-            # is stripped off.
             hld_date = to_business_timestamp(hlds[sym].date)
             txn_date = to_business_timestamp(date_(txn.datetime))
 
             if txn_date < hld_date:  # already processed in the past
                 continue
             elif txn_date == hld_date: # there might be multiple transactions for a day
-                self._transact_and_save(hlds[sym], txn)
+                if not txn.processed:
+                    self._transact_and_save(hlds[sym], txn)
             else: # txn_date > hld_date
                 # self.fill_in_gaps(hlds[sym], pd.bdate_range(start=hld_date+1, end=txn_date-1))
                 self.insert_holding(hlds[sym], txn_date)
@@ -105,37 +124,67 @@ class Portfolio(models.Model):
         #    self.fill_in_gaps(hld, pd.bdate_range(start=to_business_timestamp(hld.date)+1, end=end))
 
     def sum_each_currency(self, date=None):
+        """Summary the value of the portfolio for each currency at a particular date"""
         if not self.holdings:
             return {}
 
         if date is None:
-            date = self.holdings.latest().date
+            date = last_business_day()
 
+        # there are gaps in the holding database when there is no transaction.
+        # so we need to find all the securities in the portfolio first and then
+        # find their last holding info before the date
         values = defaultdict(Decimal)
-        holdings = Holding.objects.filter(portfolio=self).filter(date=date).all()
+        holdings = self.holdings_on(date)
 
         for hld in holdings:
             values[hld.security.currency] += hld.value
         return values
 
-    # todo try nested array instead
-    def sum_currency_as_l(self):
-        result = ""
+    def sum_currency(self):
+        """
+        function to build the string array for html output. The 'unordered_list' tag is required to turn
+        the string array to html list.
+        """
+        result = []
         for currency, value in self.sum_each_currency().items():
-            result += '<li>{}: {:.2f}</li>'.format(currency, value)
+            result.append("{}: {:.2f}".format(currency, value))
         return result
 
-    # todo understand whether custom managers should be used
     def remove_holdings_after(self, security, datetime):
         """removing holdings after a specific date"""
         self.holdings.filter(security=security).filter(date__gte=datetime).delete()
 
     def holdings_on(self, date):
-        return [self.holdings.filter(security=hld.security).filter(date__lte=date).latest()
-                    for hld in self.holdings.all().distinct('security')]
+        holdings = [self.holdings.filter(security=hld.security).filter(date__lte=date).latest()
+                       for hld in self.holdings.all().distinct('security')]
+
+        for hld in holdings:
+            hld.date = date
+            hld.update_value()
+        return holdings
+
+    def values(self, year=None):
+        if year is None:
+            return self._value_all()
+        else:
+            return self._value_year(year)
+
+    def _value_all(self):
+        date_range = pd.date_range(
+            start=self.holdings.first().date,
+            end=last_business_day(),
+            freq='B'
+        )
+        values = pd.DataFrame(index=date_range,
+                              data=np.zeros([len(date_range),2]),
+                              columns=['values', 'cashflow'])
 
 
 class Holding(models.Model):
+    """
+    Security holdings for a portfolio, only record for those days there is at least one transaction
+    """
     security = models.ForeignKey(Security)
     portfolio = models.ForeignKey(Portfolio, related_name='holdings')
     shares = models.IntegerField(default=0)
@@ -189,14 +238,13 @@ class Holding(models.Model):
             return -self.cost/self.shares
         return 0
 
-    # todo use get() instead, probably within a try block
-    # todo decouple all direct access to quote database and use Quoter interface instead
     def update_value(self):
         quoter = Quoter.quoter_factory('Local')
         try:
             close = quoter.get_close(self.security, self.date)
         except Quote.DoesNotExist:
             pass
+            # TODO add feature to enable auto quotes update when missing
         else:
             self.value = close * self.shares
             self.save()
@@ -205,3 +253,6 @@ class Holding(models.Model):
     def update_all_values(cls, portfolio):
         for hld in cls.objects.filter(portfolio=portfolio).all():
             hld.update_value()
+
+
+

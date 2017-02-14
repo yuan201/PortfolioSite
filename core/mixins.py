@@ -39,3 +39,4 @@ class AdminFormatMixin(object):
             return '{:.2f}'.format(value)
         else:
             return ""
+

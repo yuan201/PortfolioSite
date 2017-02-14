@@ -7,7 +7,6 @@ class QuoterLocal(Quoter):
     """
     Use the data stored in local database
     """
-    # todo implement all methods
     def get_quotes(self, security, start, end):
         quotes = Quote.objects.filter(symbol=security.symbol).filter(date__gte=start).filter(date__lte=end)
         return Quote.to_DataFrame(quotes)

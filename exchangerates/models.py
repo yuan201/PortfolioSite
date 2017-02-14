@@ -14,13 +14,16 @@ class ExchangeRate(models.Model):
     currency = models.CharField(max_length=3, unique_for_date=date)
     rate = PositiveDecimalField()
 
+    class Meta:
+        get_latest_by = 'date'
+
     def __str__(self):
         return "@{}, '{}':{:.4f}".format(self.date, self.currency, self.rate)
 
     @classmethod
     def update_db(cls):
         last_db_date = INIT_DATE
-        exchange = Exchange()
+        exchange = Exchange(app_id='4bb87881a98e4945b0284ff5dec07ea7')
 
         if ExchangeRate.objects.all():
             last_db_date = ExchangeRate.objects.order_by('date').last().date

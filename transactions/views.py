@@ -2,6 +2,7 @@ import csv
 import json
 import tempfile
 from collections import OrderedDict
+import io
 
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -59,6 +60,7 @@ class TransactionUpdateView(TxnTemplateMixin, UpdateView):
 
 
 # todo update holdings after removal
+# todo fix! not working right now
 class TransactionDelView(TxnDeleteMixin, DeleteView):
     model = Transaction
     template_name = 'common/delete_confirm.html'
@@ -84,20 +86,14 @@ class TransactionUploadView(RedirectView):
 
     def save_uploaded_file(self, file):
         if file.name.endswith('csv'):
-            self._save_to_temp(file, 'upload_temp.csv')
-            with open('temp/upload_temp.csv', 'r') as fin:
-                with open('temp/transactions.json', 'w') as fout:
-                    csv_reader = csv.DictReader(fin)
-                    for row in csv_reader:
-                        fout.write(self._csv_to_json(row) + '\n')
+            fin = io.TextIOWrapper(file.file)
+            with open('temp/transactions.json', 'w') as fout:
+                csv_reader = csv.DictReader(fin)
+                for row in csv_reader:
+                    fout.write(self._csv_to_json(row) + '\n')
         elif file.name.endswith('json'):
             with open('temp/transactions.json', 'wb') as fout:
                 fout.write(file.read())
-
-    @staticmethod
-    def _save_to_temp(file, tempfile):
-        with open('temp/' + tempfile, 'wb') as fout:
-            fout.write(file.read())
 
     @staticmethod
     def _csv_to_json(row):

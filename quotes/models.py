@@ -35,8 +35,6 @@ class Quote(models.Model):
             volume=self.volume,
         )
 
-    # todo probably this should go with custom manager
-    # todo refactor update_quotes method
     @classmethod
     def update_quotes(cls, new_quotes_df, security, mode):
         old_quotes = cls.objects.filter(security=security)
@@ -45,22 +43,21 @@ class Quote(models.Model):
         new_dates = new_quotes_df.index
         # logger.debug('old_dates:{}'.format(old_dates))
         # logger.debug('new_dates:{}'.format(new_dates))
-        if mode == '1': # append new quotes
+        if mode == 'append':
             append_dates = new_dates.difference(old_dates)
             # logger.debug('append_dates:{}'.format(append_dates))
             cls.add_quotes(new_quotes_df.ix[append_dates], security)
-        elif mode == '2': # overwrite old quotes
+        elif mode == 'overwrite':
             intersection = new_dates.intersection(old_dates)
             if intersection.size > 0:
                 overwrite_qs = cls.objects.filter(security=security).\
                                    filter(date__gte=intersection.min()).\
                                    filter(date__lte=intersection.max()).delete()
             cls.add_quotes(new_quotes_df, security)
-        elif mode == '3': # discard all existing quotes
+        elif mode == 'discard':
             old_quotes.delete()
             cls.add_quotes(new_quotes_df, security)
 
-    # todo check whether this should go with custom manager
     @classmethod
     def add_quotes(cls, quotes_df, security):
         for date, quote in quotes_df.iterrows():

@@ -12,7 +12,6 @@ class Quoter(object):
     """
     A Quoter give back quotes for a security or index.
     """
-    # todo replace symbol with security
     def get_quotes(self, security, start, end):
         """return quotes in DataFrame"""
         raise NotImplemented

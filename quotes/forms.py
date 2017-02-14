@@ -14,9 +14,9 @@ from quotes.tasks import task_get_quote
 
 logger = logging.getLogger('quotes_view')
 
-# todo change MODE_CHOICES to use sensible phrase instead of 1,2,3
-MODE_CHOICES = (('1', 'Append'), ('2', 'Overwrite'), ('3', 'Discard Existing'))
+MODE_CHOICES = (('append', 'Append'), ('overwrite', 'Overwrite'), ('discard', 'Discard Existing'))
 QUOTERS = (('Tushare', 'Tushare'), ('Xueqiu', 'Xueqiu'))
+
 
 class QuotesForm(forms.Form):
     start = forms.DateField(
@@ -88,7 +88,6 @@ class QuotesForm(forms.Form):
         )
 
 
-# todo remove separate view for updating quotes and use the inline form alone
 class QuotesFormHorizontal(QuotesForm):
     mode = forms.ChoiceField(choices=MODE_CHOICES, required=True)
 
