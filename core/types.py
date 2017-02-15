@@ -16,6 +16,14 @@ class PositiveDecimalField(models.DecimalField):
     default_validators = [positive_validator]
 
     def __init__(self, *args, **kwargs):
-        super(PositiveDecimalField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.max_digits = MAXD
+        self.decimal_places = PREC
+
+
+class DecimalField(models.DecimalField):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.max_digits = MAXD
         self.decimal_places = PREC
