@@ -20,6 +20,7 @@ from quoters.quoter import Quoter
 from core.exceptions import PortfolioException
 from exchangerates.models import ExchangeRate
 from core.config import BASE_CURRENCY, CURRENCY_CHOICES
+from .position import Position
 
 
 class WrongTxnType(PortfolioException):
@@ -50,21 +51,12 @@ class Portfolio(models.Model):
     def get_absolute_url(self):
         return reverse('portfolios:detail', args=[self.id])
 
-    # todo implement total value for portfolio
     def total_value(self, date=None):
         """calculate the total value of the portfolio for a particular day"""
         if date is None:
             date = last_business_day()
 
-        summary_currency = self.sum_each_currency(date)
-        total = Decimal()
-        for currency, value in summary_currency.items():
-            if currency == BASE_CURRENCY:
-                total += value
-            else:
-                rate = ExchangeRate.filter(currency=currency).filter(date__lte=date).latest().rate
-                total += value * rate
-        return total
+        return self.position(date).total_value()
 
     @staticmethod
     def insert_holding(hld, date=None):
@@ -73,15 +65,15 @@ class Portfolio(models.Model):
         hld.id = None
         hld.save(force_insert=True)
 
-    def get_latest_record_or_empty(self, txn):
+    def _get_latest_record_or_empty(self, txn):
         try:
             return self.holdings.filter(security=txn.security).latest()
         except Holding.DoesNotExist:
             return Holding(security=txn.security, portfolio=self, date=date_(txn.datetime))
 
-    def fill_in_gaps(self, hld, gaps):
-        for d in gaps:
-            self.insert_holding(hld, d)
+    #def fill_in_gaps(self, hld, gaps):
+    #    for d in gaps:
+    #        self.insert_holding(hld, d)
 
     @staticmethod
     def _transact_and_save(hld, txn):
@@ -103,7 +95,7 @@ class Portfolio(models.Model):
                 # if found, the current transaction must has been processed in the past and will
                 # be skipped below
                 # if not found, start an empty holding record here
-                hlds[sym] = self.get_latest_record_or_empty(txn)
+                hlds[sym] = self._get_latest_record_or_empty(txn)
 
             # convert date into pandas timestamp with business offset to automatically skip holidays
             hld_date = to_business_timestamp(hlds[sym].date)
@@ -131,15 +123,7 @@ class Portfolio(models.Model):
         if date is None:
             date = last_business_day()
 
-        # there are gaps in the holding database when there is no transaction.
-        # so we need to find all the securities in the portfolio first and then
-        # find their last holding info before the date
-        values = defaultdict(Decimal)
-        holdings = self.holdings_on(date)
-
-        for hld in holdings:
-            values[hld.security.currency] += hld.value
-        return values
+        return self.position(date).sum_each_currency()
 
     def sum_currency(self):
         """
@@ -155,30 +139,17 @@ class Portfolio(models.Model):
         """removing holdings after a specific date"""
         self.holdings.filter(security=security).filter(date__gte=datetime).delete()
 
-    def holdings_on(self, date):
-        holdings = [self.holdings.filter(security=hld.security).filter(date__lte=date).latest()
-                       for hld in self.holdings.all().distinct('security')]
+    def position(self, date):
+        # there are gaps in the holding database when there is no transaction.
+        # so we need to find all the securities in the portfolio first and then
+        # find their last holding info before the date
+        pos = Position(self.holdings.filter(security=hld.security).filter(date__lte=date).latest()
+                       for hld in self.holdings.all().distinct('security'))
 
-        for hld in holdings:
+        for hld in pos:
             hld.date = date
             hld.update_value()
-        return holdings
-
-    def values(self, year=None):
-        if year is None:
-            return self._value_all()
-        else:
-            return self._value_year(year)
-
-    def _value_all(self):
-        date_range = pd.date_range(
-            start=self.holdings.first().date,
-            end=last_business_day(),
-            freq='B'
-        )
-        values = pd.DataFrame(index=date_range,
-                              data=np.zeros([len(date_range),2]),
-                              columns=['values', 'cashflow'])
+        return pos
 
 
 class Holding(models.Model):
@@ -253,6 +224,8 @@ class Holding(models.Model):
     def update_all_values(cls, portfolio):
         for hld in cls.objects.filter(portfolio=portfolio).all():
             hld.update_value()
+
+
 
 
 

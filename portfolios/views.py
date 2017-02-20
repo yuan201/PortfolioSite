@@ -45,7 +45,7 @@ class PortfolioDetailView(TemplateView):
         # quick test
         last_day = pd.Timestamp(dt.date.today(), offset='B') - 1
         Holding.update_all_values(portfolio)
-        context['holdings'] = portfolio.holdings_on(date=last_day)
+        context['holdings'] = portfolio.position(date=last_day)
         return context
 
 

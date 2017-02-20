@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'todos',
     'exchangerates',
     'users',
+    'performances',
 ]
 
 MIDDLEWARE_CLASSES = [

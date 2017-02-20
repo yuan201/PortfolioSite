@@ -23,6 +23,7 @@ class PortfolioModelTest(TestCase):
         self.p1 = PortfolioFactory()
         self.s1 = SecurityFactory()
         self.s2 = SecurityFactory()
+        self.s3 = SecurityFactory(currency='USD')
 
     def test_str(self):
         self.assertEqual(str(self.p1), self.p1.name)
@@ -81,7 +82,7 @@ class PortfolioModelTest(TestCase):
 
         hlds = list(Holding.objects.all())
 
-        self.assertEqual(len(hlds), 6)
+        self.assertEqual(len(hlds), 5)
         self.assertEqual(hlds[0].shares, 200)
         self.assertAlmostEqual(hlds[0].cost, -2100)
         self.assertEqual(hlds[0].gain, 0)
@@ -103,8 +104,6 @@ class PortfolioModelTest(TestCase):
         self.assertAlmostEqual(hlds[4].gain, 110)
         self.assertEqual(hlds[4].dividend, 35)
 
-        self.assertEqual(hlds[5].shares, 50)
-
     def test_update_holdings_for_2_security(self):
         days = pd.bdate_range(start='2016-08-01', periods=3)
         transaction_factory('buy', self.p1, self.s1, days[0], price=10., shares=200, fee=100.)
@@ -117,7 +116,7 @@ class PortfolioModelTest(TestCase):
         hld1 = list(Holding.objects.filter(security=self.s1).all())
         hld2 = list(Holding.objects.filter(security=self.s2).all())
 
-        self.assertEqual(len(hld1), 3)
+        self.assertEqual(len(hld1), 2)
         self.assertEqual(len(hld2), 2)
 
     def test_update_with_old_transactions_no_update(self):
@@ -141,23 +140,47 @@ class PortfolioModelTest(TestCase):
         self.p1.update_holdings(day+2)
 
         hlds = list(Holding.objects.all())
-        self.assertEqual(len(hlds), 2)
+        self.assertEqual(len(hlds), 1)
         self.assertEqual(hlds[0].shares, 500)
         self.assertEqual(hlds[0].cost, -1000)
         self.assertEqual(hlds[0].date, dt.date(2016, 9, 6))
-
-        self.assertEqual(hlds[1].shares, 500)
-        self.assertEqual(hlds[1].date, dt.date(2016, 9, 7))
 
     # todo complete the following unit test
     def test_remove_holdings_after(self):
         pass
 
     def test_sum_each_currency(self):
-        pass
+        days = pd.bdate_range(start='2016-08-01', periods=3)
+        transaction_factory('buy', self.p1, self.s1, days[0], price=10., shares=200, fee=100.)
+        transaction_factory('sell', self.p1, self.s1, days[1], price=8., shares=100, fee=50.)
+        transaction_factory('buy', self.p1, self.s3, days[1], price=80., shares=500, fee=120.)
+        transaction_factory('sell', self.p1, self.s3, days[2], price=95, shares=200, fee=40.)
+        QuoteFactory(security=self.s1, date=days[2], close=12.)
+        QuoteFactory(security=self.s3, date=days[2], close=15.)
+
+        self.p1.update_holdings(days[2])
+
+        values = self.p1.sum_each_currency(days[2])
+        self.assertAlmostEqual(values['CNY'], 1200)
+        self.assertAlmostEqual(values['USD'], 4500)
 
     def test_sum_currency_as_l(self):
         pass
+
+    def test_position_on_date_wo_transaction(self):
+        days = pd.bdate_range(start='2016-08-01', periods=3)
+        transaction_factory('buy', self.p1, self.s1, days[0], price=10., shares=200, fee=100.)
+        transaction_factory('sell', self.p1, self.s1, days[1], price=8., shares=100, fee=50.)
+        transaction_factory('buy', self.p1, self.s2, days[1], price=80., shares=500, fee=120.)
+        transaction_factory('sell', self.p1, self.s2, days[2], price=95, shares=200, fee=40.)
+        QuoteFactory(security=self.s1, date=days[2], close=12.)
+        QuoteFactory(security=self.s2, date=days[2], close=15.)
+
+        self.p1.update_holdings(days[2])
+
+        hlds = self.p1.position(days[2])
+        self.assertEqual(len(hlds), 2)
+        self.assertAlmostEqual(self.p1.total_value(), 5700)
 
 
 # todo implement unit tests for Holding model

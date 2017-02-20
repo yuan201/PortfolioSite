@@ -1,4 +1,5 @@
 from portfolios.models import Portfolio
+from core.utils import last_business_day, next_business_day, to_business_timestamp
 
 
 class TitleHeaderMixin(object):
@@ -39,4 +40,22 @@ class AdminFormatMixin(object):
             return '{:.2f}'.format(value)
         else:
             return ""
+
+
+class DateUtilMixin(object):
+    """
+    Date related utilities for models.
+    Assuming there is a field called date in the model and the model is sorted on this field
+    """
+    def first_date(self):
+        return to_business_timestamp(self.earliest().date)
+
+    def last_date(self):
+        return to_business_timestamp(self.latest().date)
+
+    def append_date(self):
+        return self.last_date()+1
+
+    def date_range(self):
+        pass
 
