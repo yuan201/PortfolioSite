@@ -46,6 +46,7 @@ class PortfolioDetailView(TemplateView):
         last_day = pd.Timestamp(dt.date.today(), offset='B') - 1
         Holding.update_all_values(portfolio)
         context['holdings'] = portfolio.position(date=last_day)
+        context['performance'] = portfolio.performance.order_by('-date').all()[:10]
         return context
 
 
@@ -54,3 +55,12 @@ class PortfolioListView(ListView):
     template_name = 'portfolio/portfolio_list.html'
 
 
+class PortfolioUpdatePerfView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        return portfolio.get_absolute_url()
+
+    def get(self, request, *args, **kwargs):
+        portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        portfolio.update_performance()
+        return super().get(request, *args, **kwargs)

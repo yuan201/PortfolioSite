@@ -1,0 +1,16 @@
+<table class="table table-striped" id="performance_table">
+    <thead>
+        <td>Date</td>
+        <td>Value</td>
+        <td>Cash Flow</td>
+        <td>Gain</td>
+    </thead>
+    {% for item in performance %}
+        <tr>
+            <td>{{ item.date }}</td>
+            <td>{{ item.value|floatformat:2 }}</td>
+            <td>{{ item.cashflow|floatformat:2 }}</td>
+            <td>{{ item.gain|floatformat:2 }}%</td>
+        </tr>
+    {% endfor %}
+</table>

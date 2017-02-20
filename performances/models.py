@@ -7,7 +7,7 @@ from securities.models import Security
 from benchmarks.models import Benchmark
 from core.types import PositiveDecimalField, DecimalField
 from core.mixins import DateUtilMixin
-from core.utils import last_business_day
+from core.utils import last_business_day, to_business_timestamp
 from core.exceptions import PortfolioException
 
 
@@ -38,26 +38,35 @@ class BenchmarkPerformance(Performance):
 
 
 class PortPerfManager(models.Manager):
-    def append(self, portfolio, end_date=None):
-        if end_date is None:
-            end_date = last_business_day()
+    def update(self, portfolio, end_date, append=False):
+        performances = self.filter(portfolio=portfolio)
+        if append and performances.count()>0:
+            base_record = performances.latest()
+            start_date = to_business_timestamp(base_record.date)+1
+        else:
+            base_record = PortfolioPerformance(portfolio=portfolio, value=0)
+            start_date = portfolio.transactions.earliest().datetime
 
-        try:
-            base_record = self.filter(portfolio=portfolio).earliest()
-        except Performance.DoesNotExist:
-            raise AppendEmptyDatabaseException
-
-        for d in pd.date_range(start=self.append_date(), end=end_date, freq='B'):
-            hld = portfolio.position(d)
+        for d in pd.date_range(start=start_date, end=end_date, freq='B'):
+            pos = portfolio.position(d)
             cf = portfolio.cash_flow(d)
+            if base_record.value > 0:
+                gain = ((pos.total_value()-cf)/base_record.value-1)*100
+            else:
+                gain = 0
+
             new_record = PortfolioPerformance(
-                             date=d,
-                             value=hld.total_value(),
-                             gain=(hld.total_value() - cf)/base_record.total_value(),
-                             cash_flow=cf
-                             )
+                portfolio=portfolio,
+                date=d,
+                value=pos.total_value(),
+                cash_flow=cf,
+                gain=gain,
+            )
             new_record.save()
             base_record = new_record
+
+    def remove_after(self, date):
+        self.filter(date__gte=date).delete()
 
 
 class PortfolioPerformance(Performance):
@@ -66,6 +75,13 @@ class PortfolioPerformance(Performance):
                                   related_name='performance')
     objects = PortPerfManager()
 
+    class Meta:
+        unique_together = ('portfolio', 'date')
+        get_latest_by = 'date'
+
+    def __str__(self):
+        return "{}@{}(value={}, cashflow={}, gain={:.3f}".format(self.portfolio.name, self.date, self.value,
+                                                             self.cash_flow, self.gain)
 
 
 class SecurityPerformance(Performance):

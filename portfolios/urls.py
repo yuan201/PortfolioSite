@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from .views import PortfolioCreateView, PortfolioDetailView, PortfolioListView
+from .views import PortfolioCreateView, PortfolioDetailView, PortfolioListView, PortfolioUpdatePerfView
 
 urlpatterns = [
     url(regex=r'^new/$',
@@ -14,4 +14,9 @@ urlpatterns = [
     url(regex=r'^list/$',
         view=PortfolioListView.as_view(),
         name="list"),
+
+    url(regex=r'^(?P<pk>[0-9]+)/update_perf/$',
+        view=PortfolioUpdatePerfView.as_view(),
+        name="update_perf"),
+
 ]

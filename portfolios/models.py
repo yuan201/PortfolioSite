@@ -51,13 +51,6 @@ class Portfolio(models.Model):
     def get_absolute_url(self):
         return reverse('portfolios:detail', args=[self.id])
 
-    def total_value(self, date=None):
-        """calculate the total value of the portfolio for a particular day"""
-        if date is None:
-            date = last_business_day()
-
-        return self.position(date).total_value()
-
     @staticmethod
     def insert_holding(hld, date=None):
         if date is not None:
@@ -117,13 +110,11 @@ class Portfolio(models.Model):
 
     def sum_each_currency(self, date=None):
         """Summary the value of the portfolio for each currency at a particular date"""
-        if not self.holdings:
-            return {}
-
-        if date is None:
-            date = last_business_day()
-
         return self.position(date).sum_each_currency()
+
+    def total_value(self, date=None):
+        """calculate the total value of the portfolio for a particular day"""
+        return self.position(date).total_value()
 
     def sum_currency(self):
         """
@@ -139,17 +130,31 @@ class Portfolio(models.Model):
         """removing holdings after a specific date"""
         self.holdings.filter(security=security).filter(date__gte=datetime).delete()
 
-    def position(self, date):
+    def position(self, date=None):
         # there are gaps in the holding database when there is no transaction.
         # so we need to find all the securities in the portfolio first and then
         # find their last holding info before the date
+        if date is None:
+            date = last_business_day()
+
         pos = Position(self.holdings.filter(security=hld.security).filter(date__lte=date).latest()
-                       for hld in self.holdings.all().distinct('security'))
+                       for hld in self.holdings.filter(date__lte=date).distinct('security'))
 
         for hld in pos:
             hld.date = date
             hld.update_value()
         return pos
+
+    def update_performance(self):
+        self.performance.update(self, append=True, end_date=last_business_day())
+
+    def cash_flow(self, date):
+        nextday = date + 1
+        transactions = self.transactions.filter(datetime__gte=date).filter(datetime__lt=nextday).all()
+        cf = 0
+        for t in transactions:
+            cf += t.cash_value
+        return cf
 
 
 class Holding(models.Model):

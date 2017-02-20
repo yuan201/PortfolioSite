@@ -39,18 +39,3 @@ class Position(list):
             values[hld.security.currency] += hld.value
         return values
 
-    def values(self, year=None):
-        if year is None:
-            return self._value_all()
-        else:
-            return self._value_year(year)
-
-    def _value_all(self):
-        date_range = pd.date_range(
-            start=self.holdings.first().date,
-            end=last_business_day(),
-            freq='B'
-        )
-        values = pd.DataFrame(index=date_range,
-                              data=np.zeros([len(date_range),2]),
-                              columns=['values', 'cashflow'])
