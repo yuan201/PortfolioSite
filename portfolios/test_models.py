@@ -1,9 +1,9 @@
 from decimal import Decimal
 import datetime as dt
+import pandas as pd
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-import pandas as pd
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
 
@@ -14,6 +14,9 @@ from transactions.factories import transaction_factory
 from .factories import PortfolioFactory, HoldingFactory
 from securities.factories import SecurityFactory, SecInfoFactory
 from quotes.factories import QuoteFactory
+from transactions.factories import TransactionFactory
+from quotes.factories import QuoteFactory
+from exchangerates.factories import ExchangeRateFactory
 
 
 class PortfolioModelTest(TestCase):
@@ -182,6 +185,20 @@ class PortfolioModelTest(TestCase):
         self.assertEqual(len(hlds), 2)
         self.assertAlmostEqual(self.p1.total_value(), 5700)
 
+    def test_cash_flow(self):
+        days = pd.bdate_range(start='2016-08-01', periods=4)
+        transaction_factory('buy', self.p1, self.s1, days[0], price=10., shares=200, fee=100.)
+        transaction_factory('sell', self.p1, self.s1, days[1], price=8., shares=100, fee=50.)
+        transaction_factory('buy', self.p1, self.s2, days[1], price=80., shares=500, fee=120.)
+        transaction_factory('sell', self.p1, self.s2, days[2], price=95, shares=200, fee=40.)
+        QuoteFactory(security=self.s1, date=days[2], close=12.)
+        QuoteFactory(security=self.s2, date=days[2], close=15.)
+
+        self.assertEqual(self.p1.cash_flow(days[0]), -2100)
+        self.assertEqual(self.p1.cash_flow(days[1]), -39370)
+        self.assertEqual(self.p1.cash_flow(days[2]), 18960)
+        self.assertEqual(self.p1.cash_flow(days[3]), 0)
+
 
 # todo implement unit tests for Holding model
 class HoldingModelTest(TestCase):
@@ -222,4 +239,53 @@ class HoldingModelTest(TestCase):
 
     def test_update_all_values(self):
         pass
+
+
+class PositionTest(TestCase):
+
+    def setUp(self):
+        self.p1 = PortfolioFactory(name='value')
+        self.s1 = SecurityFactory(symbol='MSYH')
+        self.s2 = SecurityFactory(symbol='GOOG', currency='USD')
+        self.s3 = SecurityFactory(symbol='GLDQ')
+        days = pd.bdate_range(start='2016-08-01', periods=3)
+        self.days = days
+        TransactionFactory(type='buy', portfolio=self.p1, security=self.s1, datetime=days[0], shares=100, price=5)
+        TransactionFactory(type='buy', portfolio=self.p1, security=self.s2, datetime=days[1], shares=200)
+        QuoteFactory(security=self.s1, date=days[0], close=10)
+        QuoteFactory(security=self.s1, date=days[1], close=11)
+        QuoteFactory(security=self.s1, date=days[2], close=12)
+        QuoteFactory(security=self.s2, date=days[0], close=5)
+        QuoteFactory(security=self.s2, date=days[1], close=7)
+        QuoteFactory(security=self.s3, date=days[2], close=9)
+        QuoteFactory(security=self.s3, date=days[0], close=20)
+        QuoteFactory(security=self.s3, date=days[1], close=25)
+        QuoteFactory(security=self.s3, date=days[2], close=30)
+        ExchangeRateFactory(currency='USD', rate=Decimal(1.2), date=days[1])
+        self.p1.update_holdings(days[2])
+
+    def test_position_total_value_one_security(self):
+        pos = self.p1.position(self.days[0])
+        self.assertEqual(pos.total_value(), 1000)
+
+    def test_position_value_two_securities_diff_currency(self):
+        pos = self.p1.position(self.days[1])
+        self.assertEqual(pos.value('CNY'), 1100)
+        self.assertEqual(pos.value('USD'), 1400)
+
+    def test_position_value_two_securities_same_currency(self):
+        TransactionFactory(type='buy', portfolio=self.p1, security=self.s3, datetime=self.days[0], shares=30)
+        self.p1.update_holdings(self.days[2])
+
+        pos = self.p1.position(self.days[0])
+        self.assertEqual(pos.value('CNY'), 1600)
+        self.assertEqual(pos.total_value(), 1600)
+
+    def test_position_total_value_two_sec_diff_currency(self):
+        pos = self.p1.position(self.days[1])
+        self.assertAlmostEqual(pos.total_value(), 2780)
+
+    def test_portfolio_total_value(self):
+        self.assertEqual(self.p1.total_value(self.days[0]), 1000)
+        self.assertAlmostEqual(self.p1.total_value(self.days[1]), 2780)
 

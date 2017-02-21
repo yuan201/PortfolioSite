@@ -29,7 +29,7 @@ class Position(list):
             if currency == BASE_CURRENCY:
                 total += value
             else:
-                rate = ExchangeRate.filter(currency=currency).filter(date__lte=date).latest().rate
+                rate = ExchangeRate.objects.filter(currency=currency).filter(date__lte=date).latest().rate
                 total += value * rate
         return total
 
