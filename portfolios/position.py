@@ -39,3 +39,12 @@ class Position(list):
             values[hld.security.currency] += hld.value
         return values
 
+    def sum_currency(self):
+        """
+        function to build the string array for html output. The 'unordered_list' tag is required to turn
+        the string array to html list.
+        """
+        result = []
+        for currency, value in self.sum_each_currency().items():
+            result.append("{}: {:.2f}".format(currency, value))
+        return result

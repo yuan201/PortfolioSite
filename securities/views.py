@@ -87,7 +87,7 @@ class SecDetailView(TitleHeaderMixin, FormView):
         # todo get all data to view and use js to filter
         # todo might use AJAX to update data based on user input
         sec = get_object_or_404(Security, pk=self.kwargs['pk'])
-        context['quotes'] = Quote.objects.filter(security=sec).order_by('-date').all()[:5]
+        context['quotes'] = Quote.objects.filter(security=sec).order_by('-date').all()[:10]
         context['security'] = sec
         return context
 

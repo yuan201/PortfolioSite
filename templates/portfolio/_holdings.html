@@ -1,0 +1,27 @@
+<div>
+    <h4>
+        Total Value: {{ position.total_value|floatformat:2 }}
+    </h4>
+    <ul>
+        {{ position.sum_currency|unordered_list }}
+    </ul>
+</div>
+
+<div>
+    <table class="table table-striped" id="holding_table">
+        <thead>
+        <td>Name</td>
+        <td>Symbol</td>
+        <td>Currency</td>
+        <td>Shares</td>
+        <td>Cost</td>
+        <td>Cost/s</td>
+        <td>Value</td>
+        <td>Dividend</td>
+        <td>Gain</td>
+        </thead>
+        {% for hld in position %}
+            <tr>{{ hld.as_t|safe }}</tr>
+        {% endfor %}
+    </table>
+</div>

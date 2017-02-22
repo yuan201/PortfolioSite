@@ -24,31 +24,11 @@ Portfolio
             <h3>Holdings</h3>
         </div>
         <div>
-            <h4>
-                Total Value: {{ portfolio.total_value|floatformat:2 }}
-            </h4>
-            <ul>
-                {{ portfolio.sum_currency|unordered_list }}
-            </ul>
+            <a href="{% url 'portfolios:update_hlds' portfolio.id %}"
+               class="btn btn-default" role="button">Update</a>
         </div>
-
         <div>
-            <table class="table table-striped" id="holding_table">
-                <thead>
-                    <td>Name</td>
-                    <td>Symbol</td>
-                    <td>Currency</td>
-                    <td>Shares</td>
-                    <td>Cost</td>
-                    <td>Cost/s</td>
-                    <td>Value</td>
-                    <td>Dividend</td>
-                    <td>Gain</td>
-                </thead>
-                {% for hld in holdings %}
-                    <tr>{{ hld.as_t|safe }}</tr>
-                {% endfor %}
-            </table>
+            {% include 'portfolio/_holdings.html' %}
         </div>
     </div>
 
@@ -56,10 +36,9 @@ Portfolio
         <div class="page-header">
             <h3>Performance List</h3>
         </div>
-        <a href="{% url 'portfolios:update_perf' portfolio.id %}"
-           class="btn btn-default" role="button">Update</a>
         <div>
-
+            <a href="{% url 'portfolios:update_perf' portfolio.id %}"
+               class="btn btn-default" role="button">Update</a>
         </div>
         <div class="col-md-6">
             {% include 'portfolio/_performance.html' %}

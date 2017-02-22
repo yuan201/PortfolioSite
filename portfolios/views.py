@@ -14,6 +14,7 @@ from .models import Portfolio, Holding
 from core.mixins import PortfoliosMixin
 from todos.models import Todo
 from transactions.forms import TransactionsUploadForm
+from core.utils import last_business_day
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
@@ -43,9 +44,8 @@ class PortfolioDetailView(TemplateView):
         context['transactions'] = portfolio.transactions.all()
         context['upload_form'] = TransactionsUploadForm(portfolios=portfolio)
         # quick test
-        last_day = pd.Timestamp(dt.date.today(), offset='B') - 1
         Holding.update_all_values(portfolio)
-        context['holdings'] = portfolio.position(date=last_day)
+        context['position'] = portfolio.position(date=last_business_day())
         context['performance'] = portfolio.performance.order_by('-date').all()[:10]
         return context
 
@@ -62,5 +62,18 @@ class PortfolioUpdatePerfView(RedirectView):
 
     def get(self, request, *args, **kwargs):
         portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        portfolio.performance.all().delete()
         portfolio.update_performance()
+        return super().get(request, *args, **kwargs)
+
+
+class PortfolioHoldingUpdateView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        return portfolio.get_absolute_url()
+
+    def get(self, request, *args, **kwargs):
+        portfolio = get_object_or_404(Portfolio, pk=kwargs['pk'])
+        portfolio.remove_all_holdings()
+        portfolio.update_holdings()
         return super().get(request, *args, **kwargs)

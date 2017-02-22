@@ -80,7 +80,7 @@ class PortfolioPerformance(Performance):
         get_latest_by = 'date'
 
     def __str__(self):
-        return "{}@{}(value={}, cashflow={}, gain={:.3f}".format(self.portfolio.name, self.date, self.value,
+        return "{}@{}(value={}, cash flow={}, gain={:.3f}".format(self.portfolio.name, self.date, self.value,
                                                              self.cash_flow, self.gain)
 
 

@@ -84,21 +84,21 @@ class Transaction(models.Model):
         return result.replace('<td>0.00</td>', '<td></td>').replace('<td>0</td>', '<td></td>')
 
     def transact(self, holding):
-        if self.type=='buy':
+        if self.type == 'buy':
             holding.shares += self.shares
             holding.cost += self.cash_value
-        elif self.type=='sell':
+        elif self.type == 'sell':
             if self.shares > holding.shares:
                 raise SellMoreThanHold
             cost_s = holding.cost_per_share()
             holding.shares -= self.shares
             holding.cost += cost_s * self.shares
             holding.gain += (self.price - cost_s) * self.shares - self.fee
-        elif self.type=='dividend':
-            if holding.shares==0:
+        elif self.type == 'dividend':
+            if holding.shares == 0:
                 raise DividendOnEmptyHolding
             holding.dividend += self.dividend
-        elif self.type=='split':
+        elif self.type == 'split':
             holding.shares = int(holding.shares * self.ratio)
         return holding
 

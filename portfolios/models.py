@@ -75,12 +75,25 @@ class Portfolio(models.Model):
         txn.processed = True
         txn.save()
 
-    def update_holdings(self, end):
+    def remove_all_holdings(self):
+        self.holdings.all().delete()
+        for txn in self.transactions.all():
+            txn.processed = False
+            txn.save()
+
+    def remove_holdings_after(self, security, datetime):
+        """removing holdings after a specific date"""
+        self.holdings.filter(security=security).filter(date__gte=datetime).delete()
+
+    def update_holdings(self, end=None):
         if not self.transactions.all():
             return
 
+        if end is None:
+            end = last_business_day()
+
         hlds = {}
-        for txn in self.transactions.all():
+        for txn in self.transactions.order_by('datetime').all():
             sym = txn.security.symbol
 
             if sym not in hlds:  # Transaction for a new security
@@ -116,20 +129,6 @@ class Portfolio(models.Model):
         """calculate the total value of the portfolio for a particular day"""
         return self.position(date).total_value()
 
-    def sum_currency(self):
-        """
-        function to build the string array for html output. The 'unordered_list' tag is required to turn
-        the string array to html list.
-        """
-        result = []
-        for currency, value in self.sum_each_currency().items():
-            result.append("{}: {:.2f}".format(currency, value))
-        return result
-
-    def remove_holdings_after(self, security, datetime):
-        """removing holdings after a specific date"""
-        self.holdings.filter(security=security).filter(date__gte=datetime).delete()
-
     def position(self, date=None):
         # there are gaps in the holding database when there is no transaction.
         # so we need to find all the securities in the portfolio first and then
@@ -142,7 +141,7 @@ class Portfolio(models.Model):
 
         for hld in pos:
             hld.date = date
-            hld.update_value()
+            hld.update_value(save_to_db=False)
         return pos
 
     def update_performance(self):
@@ -214,16 +213,17 @@ class Holding(models.Model):
             return -self.cost/self.shares
         return 0
 
-    def update_value(self):
+    def update_value(self, save_to_db=True):
         quoter = Quoter.quoter_factory('Local')
         try:
-            close = quoter.get_close(self.security, self.date)
+            close = quoter.get_last_close(self.security, self.date)
         except Quote.DoesNotExist:
             pass
             # TODO add feature to enable auto quotes update when missing
         else:
             self.value = close * self.shares
-            self.save()
+            if save_to_db:
+                self.save()
 
     @classmethod
     def update_all_values(cls, portfolio):
