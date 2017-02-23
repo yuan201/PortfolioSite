@@ -26,6 +26,11 @@ from .position import Position
 class WrongTxnType(PortfolioException):
     pass
 
+
+class NoPerformanceRecord(PortfolioException):
+    pass
+
+
 # todo figure out a proper structure for logging
 logger = logging.getLogger(__name__)
 
@@ -154,6 +159,23 @@ class Portfolio(models.Model):
         for t in transactions:
             cf += t.cash_value
         return cf
+
+    def twrr(self, start, end, annualize=False):
+        qs = self.performance.filter(date__gt=start).filter(date__lte=end)
+        if qs.count() == 0:
+            raise NoPerformanceRecord
+        gain = Decimal(1)
+
+        for p in qs.all():
+            gain *= p.gain/100+1
+
+        if annualize:
+            gain **= Decimal(260/qs.count())
+
+        return gain-1
+
+    def mwrr(self, start, end):
+        pass
 
 
 class Holding(models.Model):

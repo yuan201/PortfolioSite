@@ -289,3 +289,36 @@ class PositionTest(TestCase):
         self.assertEqual(self.p1.total_value(self.days[0]), 1000)
         self.assertAlmostEqual(self.p1.total_value(self.days[1]), 2780)
 
+
+class PortfolioReturnTest(TestCase):
+
+    def setUp(self):
+        self.p1 = PortfolioFactory(name='value')
+        self.s1 = SecurityFactory(symbol='MSYH')
+        self.s2 = SecurityFactory(symbol='GOOG', currency='USD')
+        self.s3 = SecurityFactory(symbol='GLDQ')
+        days = pd.bdate_range(start='2016-08-01', periods=3)
+        self.days = days
+        TransactionFactory(type='buy', portfolio=self.p1, security=self.s1, datetime=days[0], shares=100, price=5)
+        QuoteFactory(security=self.s1, date=days[0], close=10)
+        QuoteFactory(security=self.s1, date=days[1], close=10.1)
+        QuoteFactory(security=self.s1, date=days[2], close=10.2)
+        QuoteFactory(security=self.s2, date=days[0], close=5)
+        QuoteFactory(security=self.s2, date=days[1], close=7)
+        QuoteFactory(security=self.s3, date=days[2], close=9)
+        QuoteFactory(security=self.s3, date=days[0], close=20)
+        QuoteFactory(security=self.s3, date=days[1], close=25)
+        QuoteFactory(security=self.s3, date=days[2], close=30)
+        ExchangeRateFactory(currency='USD', rate=Decimal(1.2), date=days[1])
+        self.p1.update_holdings(days[2])
+
+    def test_twrr_single_transaction_no_annualize(self):
+        self.p1.update_performance()
+        self.assertAlmostEqual(self.p1.twrr(start=self.days[0], end=self.days[2], annualize=False), Decimal(0.02))
+
+    def test_twrr_single_transaction_annualize(self):
+        self.p1.update_performance()
+        self.assertAlmostEqual(self.p1.twrr(start=self.days[0], end=self.days[2], annualize=True), Decimal(1.02**130-1))
+
+    def test_twrr_multiple_transactions(self):
+        pass
