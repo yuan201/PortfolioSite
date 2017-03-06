@@ -170,7 +170,8 @@ class Portfolio(models.Model):
             gain *= p.gain/100+1
 
         if annualize:
-            gain **= Decimal(260/qs.count())
+            gain **= Decimal(261/qs.count())
+            # 261 business days in a year, confirmed with Pandas
 
         return gain-1
 

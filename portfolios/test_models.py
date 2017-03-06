@@ -314,11 +314,13 @@ class PortfolioReturnTest(TestCase):
 
     def test_twrr_single_transaction_no_annualize(self):
         self.p1.update_performance()
-        self.assertAlmostEqual(self.p1.twrr(start=self.days[0], end=self.days[2], annualize=False), Decimal(0.02))
+        self.assertAlmostEqual(self.p1.twrr(start=self.days[0], end=self.days[2], annualize=False),
+                               Decimal(0.02))
 
     def test_twrr_single_transaction_annualize(self):
         self.p1.update_performance()
-        self.assertAlmostEqual(self.p1.twrr(start=self.days[0], end=self.days[2], annualize=True), Decimal(1.02**130-1))
+        self.assertAlmostEqual(self.p1.twrr(start=self.days[0], end=self.days[2], annualize=True),
+                               Decimal(1.02**(261/2)-1))
 
     def test_twrr_multiple_transactions(self):
         pass

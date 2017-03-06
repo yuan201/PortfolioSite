@@ -1,4 +1,6 @@
 import datetime as dt
+import pandas as pd
+import json
 
 from django.shortcuts import render
 from django.views.generic import TemplateView, RedirectView
@@ -8,7 +10,8 @@ from django.views.generic.detail import DetailView
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse
-import pandas as pd
+from django.core.serializers.json import DjangoJSONEncoder
+from django.core import serializers
 
 from .models import Portfolio, Holding
 from core.mixins import PortfoliosMixin
@@ -22,7 +25,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'homepage.html'
 
     def get_context_data(self, **kwargs):
-        context = super(HomePageView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['todo'] = Todo
         return context
 
@@ -36,9 +39,10 @@ class PortfolioCreateView(CreateView):
 class PortfolioDetailView(TemplateView):
     template_name = 'portfolio/portfolio_detail.html'
 
-    # todo remove quick test and implement this properly
+    # todo add performance for this year, last year, last month
+    # todo add performance chart
     def get_context_data(self, **kwargs):
-        context = super(PortfolioDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
         context['portfolio'] = portfolio
         context['transactions'] = portfolio.transactions.all()
@@ -77,3 +81,20 @@ class PortfolioHoldingUpdateView(RedirectView):
         portfolio.remove_all_holdings()
         portfolio.update_holdings()
         return super().get(request, *args, **kwargs)
+
+
+class PortfolioChartView(TemplateView):
+    # todo make other data available for charts (benchmark, gain, etc.)
+    # todo refactor chart js code to show multiple charts
+    # todo clean up code for charts
+    template_name = 'portfolio/portfolio_chart.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
+        values = []
+        for p in portfolio.performance.order_by('date').filter(date__gt=dt.date(2016,1,1)).all():
+            values.append({'date': p.date.isoformat(), 'value': float(p.value)})
+
+        context['values'] = json.dumps(values)
+        return context

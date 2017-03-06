@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from .views import PortfolioCreateView, PortfolioDetailView, PortfolioListView, \
-    PortfolioUpdatePerfView, PortfolioHoldingUpdateView
+    PortfolioUpdatePerfView, PortfolioHoldingUpdateView, PortfolioChartView
 
 
 urlpatterns = [
@@ -23,6 +23,10 @@ urlpatterns = [
 
     url(regex=r'^(?P<pk>[0-9]+)/update_hlds/$',
         view=PortfolioHoldingUpdateView.as_view(),
-        name="update_hlds")
+        name="update_hlds"),
+
+    url(regex=r'^(?P<pk>[0-9]+)/chart/$',
+        view=PortfolioChartView.as_view(),
+        name="chart"),
 
 ]

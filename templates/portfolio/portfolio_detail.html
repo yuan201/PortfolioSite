@@ -17,6 +17,7 @@ Portfolio
     <div class="jumbotron">
         <h1>{{ portfolio.name }}</h1>
         <h2><i>{{ portfolio.description }}</i></h2>
+        <a href="{% url 'portfolios:chart' portfolio.id %}">Chart</a>
     </div>
 
     <div class="row">
