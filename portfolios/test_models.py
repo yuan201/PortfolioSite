@@ -297,7 +297,7 @@ class PortfolioReturnTest(TestCase):
         self.s1 = SecurityFactory(symbol='MSYH')
         self.s2 = SecurityFactory(symbol='GOOG', currency='USD')
         self.s3 = SecurityFactory(symbol='GLDQ')
-        days = pd.bdate_range(start='2016-08-01', periods=3)
+        days = pd.bdate_range(start='2016-08-01', periods=3, offset='D')
         self.days = days
         TransactionFactory(type='buy', portfolio=self.p1, security=self.s1, datetime=days[0], shares=100, price=5)
         QuoteFactory(security=self.s1, date=days[0], close=10)
@@ -323,4 +323,19 @@ class PortfolioReturnTest(TestCase):
                                Decimal(1.02**(261/2)-1))
 
     def test_twrr_multiple_transactions(self):
+        pass
+
+    def test_mwrr_no_transaction_no_annualize(self):
+        self.p1.update_performance()
+        # note the transaction happens on days[0] while portfolio at the end of days[0] is used
+        # as initial cost.
+        self.assertAlmostEqual(self.p1.mwrr(start=self.days[0], end=self.days[2], annualize=False),
+                               Decimal(0.02))
+
+    def test_mwrr_single_transaction_no_annualize(self):
+        self.p1.update_performance()
+        self.assertAlmostEqual(self.p1.mwrr(start=self.days[0]-1, end=self.days[2], annualize=False),
+                               Decimal(1.04))
+
+    def test_performance_summary(self):
         pass

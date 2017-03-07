@@ -1,0 +1,22 @@
+{% load bench_extras %}
+
+<table class="table table-striped" id="performance_summary_table">
+    <thead>
+        <td></td>
+        <td>last week</td>
+        <td>last year</td>
+        <td>YTD</td>
+    </thead>
+    <tr>
+        <td>TWRR</td>
+        <td>{{ summary.twrr.last_week|percent }}</td>
+        <td>{{ summary.twrr.last_year|percent }}</td>
+        <td>{{ summary.twrr.ytd|percent }}</td>
+    </tr>
+    <tr>
+        <td>MWRR</td>
+        <td>{{ summary.mwrr.last_week|percent }}</td>
+        <td>{{ summary.mwrr.last_year|percent }}</td>
+        <td>{{ summary.mwrr.ytd|percent }}</td>
+    </tr>
+</table>

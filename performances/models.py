@@ -43,9 +43,11 @@ class PortPerfManager(models.Manager):
         if append and performances.count()>0:
             base_record = performances.latest()
             start_date = to_business_timestamp(base_record.date)+1
-        else:
+        elif portfolio.transactions.count() > 0:
             base_record = PortfolioPerformance(portfolio=portfolio, value=0)
             start_date = portfolio.transactions.earliest().datetime
+        else:
+            return
 
         for d in pd.date_range(start=start_date, end=end_date, freq='B'):
             pos = portfolio.position(d)

@@ -21,7 +21,7 @@ from quoters.quoter import Quoter
 from core.exceptions import PortfolioException
 from core.config import INIT_DATE
 from exchangerates.models import ExchangeRate
-from core.config import BASE_CURRENCY, CURRENCY_CHOICES
+from core.config import BASE_CURRENCY, CURRENCY_CHOICES, DAYS_IN_A_YEAR
 from .position import Position
 from quoters.quotertushare import QuoterTushare
 from quotes.forms import QuotesForm
@@ -168,29 +168,59 @@ class Portfolio(models.Model):
         qs = self.performance.filter(date__gt=start).filter(date__lte=end)
         if qs.count() == 0:
             raise NoPerformanceRecord
+
         gain = Decimal(1)
 
         for p in qs.all():
             gain *= p.gain/100+1
 
         if annualize:
-            gain **= Decimal(261/qs.count())
-            # 261 business days in a year, confirmed with Pandas
+            gain **= Decimal(DAYS_IN_A_YEAR/qs.count())
 
         return gain-1
 
     def mwrr(self, start, end, annualize=False):
-        pass
+        """
+        calculate money weighted rate of return
+        portfolio value right before start is considered initial cost
+        and portfolio is assumed to sell at the end to calculate final value
+        """
+        drange = pd.bdate_range(start+1, end, offset='B')
+        values = np.zeros(len(drange)+1)
+
+        values[0] = -self.position(start).total_value()
+        for i, d in enumerate(drange):
+            values[i+1] = self.cash_flow(d)
+        values[-1] += float(self.position(end).total_value())
+
+        values = np.trim_zeros(values, 'f')
+        # remove zeros from the front which represents days without any holding or transactions
+        # this will not impact np.irr but changes the data length when calculate total mwrr
+        irr = np.irr(values)
+        if annualize:
+            irr = np.power(irr+1, DAYS_IN_A_YEAR) - 1
+        else:
+            irr = np.power(irr+1, len(values)-1) - 1
+        return Decimal(irr)
 
     def performance_summary(self):
         summary = {}
         end = last_business_day()
 
+        if self.performance.count() == 0:
+            return summary
+
         summary['twrr'] = PerformanceSummary(
             last_week=self.twrr(start=end-5, end=end),
-            last_year=self.twrr(start=end-261, end=end),
-            ytd=self.twrr(start=end-YearBegin(1), end=end)
+            last_year=self.twrr(start=end-DAYS_IN_A_YEAR, end=end),
+            ytd=self.twrr(start=to_business_timestamp(end-YearBegin(1)), end=end)
         )
+        summary['mwrr'] = PerformanceSummary(
+            last_week=self.mwrr(start=end-5, end=end),
+            last_year=self.mwrr(start=end-DAYS_IN_A_YEAR, end=end),
+            ytd=self.mwrr(start=to_business_timestamp(end-YearBegin(1)), end=end)
+        )
+
         return summary
 
     def update_quotes(self):

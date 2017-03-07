@@ -22,6 +22,15 @@ Portfolio
 
     <div class="row">
         <div class="page-header">
+            <h3>Performance Summary</h3>
+        </div>
+        <div class="col-md-6">
+            {% include 'portfolio/_performance_summary.html' %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="page-header">
             <h3>Holdings</h3>
         </div>
         <div>
@@ -42,7 +51,7 @@ Portfolio
                class="btn btn-default" role="button">Update</a>
         </div>
         <div class="col-md-6">
-            {% include 'portfolio/_performance.html' %}
+            {% include 'portfolio/_performance_list.html' %}
         </div>
     </div>
 

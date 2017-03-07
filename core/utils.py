@@ -23,4 +23,7 @@ def next_business_day(date):
 
 
 def to_business_timestamp(datetime):
-    return pd.Timestamp(datetime, offset='B')
+    # move forward in case datetime is not a business day
+    return pd.Timestamp(datetime, offset='B') - 1 + 1
+
+

@@ -18,3 +18,6 @@ STOCK_EXCHANGES = (
     ('NASDAQ', 'Nasdaq Stock Market'),
     ('HKEX', 'Hongkong Stock Exchange')
 )
+
+DAYS_IN_A_YEAR = 261
+# 261 business days in a year, confirmed with Pandas
