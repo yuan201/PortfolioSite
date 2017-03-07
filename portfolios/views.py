@@ -44,13 +44,18 @@ class PortfolioDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         portfolio = get_object_or_404(Portfolio, pk=self.kwargs['pk'])
+
+        # Updating quotes for just the securities held by the portfolio
+        portfolio.update_quotes()
+        Holding.update_all_values(portfolio)
+        portfolio.update_performance()
+
         context['portfolio'] = portfolio
         context['transactions'] = portfolio.transactions.all()
         context['upload_form'] = TransactionsUploadForm(portfolios=portfolio)
-        # quick test
-        Holding.update_all_values(portfolio)
         context['position'] = portfolio.position(date=last_business_day())
         context['performance'] = portfolio.performance.order_by('-date').all()[:10]
+        context['summary'] = portfolio.performance_summary()
         return context
 
 

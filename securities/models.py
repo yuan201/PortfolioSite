@@ -7,10 +7,8 @@ from django.core.exceptions import ObjectDoesNotExist
 import pandas as pd
 import numpy as np
 
-from core.utils import build_link
+from core.utils import build_link, last_business_day, to_business_timestamp
 from core.config import CURRENCY_CHOICES, STOCK_EXCHANGES
-
-
 
 
 class Security(models.Model):

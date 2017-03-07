@@ -1,4 +1,5 @@
 from decimal import getcontext
+from collections import namedtuple
 
 from django.db import models
 from django.core.validators import ValidationError
@@ -27,3 +28,6 @@ class DecimalField(models.DecimalField):
         super().__init__(*args, **kwargs)
         self.max_digits = MAXD
         self.decimal_places = PREC
+
+
+PerformanceSummary = namedtuple('PerformanceSummary', 'last_week, last_year, ytd')

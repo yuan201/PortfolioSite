@@ -8,19 +8,23 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 import pandas as pd
 import numpy as np
+from pandas.tseries.offsets import YearBegin
 
 from securities.models import Security
 from transactions.exceptions import FirstTransactionNotBuy
 from benchmarks.models import Benchmark
-from core.types import PositiveDecimalField
+from core.types import PositiveDecimalField, PerformanceSummary
 from core.utils import date_, build_link
 from core.utils import to_business_timestamp, last_business_day
 from quotes.models import Quote
 from quoters.quoter import Quoter
 from core.exceptions import PortfolioException
+from core.config import INIT_DATE
 from exchangerates.models import ExchangeRate
 from core.config import BASE_CURRENCY, CURRENCY_CHOICES
 from .position import Position
+from quoters.quotertushare import QuoterTushare
+from quotes.forms import QuotesForm
 
 
 class WrongTxnType(PortfolioException):
@@ -175,8 +179,36 @@ class Portfolio(models.Model):
 
         return gain-1
 
-    def mwrr(self, start, end):
+    def mwrr(self, start, end, annualize=False):
         pass
+
+    def performance_summary(self):
+        summary = {}
+        end = last_business_day()
+
+        summary['twrr'] = PerformanceSummary(
+            last_week=self.twrr(start=end-5, end=end),
+            last_year=self.twrr(start=end-261, end=end),
+            ytd=self.twrr(start=end-YearBegin(1), end=end)
+        )
+        return summary
+
+    def update_quotes(self):
+        for hld in self.holdings.distinct('security'):
+            self.update_sec_quotes(security=hld.security, quoter="Tushare")
+
+    def update_sec_quotes(self, security, quoter):
+        if security.quotes.count() > 0:
+            start = to_business_timestamp(security.quotes.latest().date) + 1
+        else:
+            start = INIT_DATE
+        data = {'start': start,
+                'end': last_business_day(),
+                'mode': 'append',
+                'quoter': quoter}
+        form = QuotesForm(data=data, security=security)
+        if form.is_valid():
+            form.save()
 
 
 class Holding(models.Model):
