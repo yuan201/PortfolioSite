@@ -19,5 +19,13 @@ STOCK_EXCHANGES = (
     ('HKEX', 'Hongkong Stock Exchange')
 )
 
+EXCHANGE_DEFAULT_QUOTER = {
+    "SSE": "Tushare",
+    "SZSE": "Tushare",
+    "NYSE": "pandas",
+    "NASDAQ": "pandas",
+    "HKEX": "pandas",
+}
+
 DAYS_IN_A_YEAR = 261
 # 261 business days in a year, confirmed with Pandas

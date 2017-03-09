@@ -23,7 +23,7 @@ class Security(models.Model):
     list_date = models.DateField(null=True, blank=True)
 
     class Meta:
-        ordering = ['symbol']
+        ordering = ['exchange', 'symbol']
 
     def __str__(self):
         return "{}".format(self.symbol)

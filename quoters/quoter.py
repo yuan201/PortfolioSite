@@ -6,6 +6,10 @@ class UnknownQuoter(Exception):
     pass
 
 
+class RemoteDataError(Exception):
+    pass
+
+
 # todo need to wrap pandas web engine
 # todo find a source for all HK listed stocks
 class Quoter(object):

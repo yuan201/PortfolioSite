@@ -21,12 +21,24 @@ class Command(BaseCommand):
         parser.add_argument('quoter', help='choose which quoter to get quotes from')
         parser.add_argument('--start', nargs=1, help='start date')
         parser.add_argument('--end', nargs=1, help='end date')
+        parser.add_argument('--exchange', nargs=1, help='exchange')
+        # TODO add argument for specifying a subset of securities to update
 
     def handle(self, *args, **options):
-        self.stdout.write('Getting quotes from {}\nFrom {} to {}'.format(
-            options['quoter'], options['start'][0], options['end'][0]))
+        self.stdout.write('Getting quotes for {} from {}\nFrom {} to {}'.format(
+            options['exchange'][0], options['quoter'], options['start'][0], options['end'][0]))
 
-        all_secs = Security.objects.filter(Q(exchange='SSE') | Q(exchange='SZSE'))
+        if options['exchange'][0].lower() == 'all':
+            all_secs = Security.objects.all()
+        else:
+            exchanges = options['exchange'][0].split(',')
+            qexp = Q(exchange=exchanges[0])
+            for i, ex in enumerate(exchanges):
+                if i == 0:
+                    continue
+                qexp |= Q(exchange=ex)
+
+            all_secs = Security.objects.filter(qexp)
 
         count = 0
         for sec in all_secs:

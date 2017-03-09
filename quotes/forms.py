@@ -7,7 +7,7 @@ from crispy_forms.bootstrap import StrictButton
 from crispy_forms.layout import Submit
 from django.core.urlresolvers import reverse_lazy
 
-from quoters.quoter import SymbolNotExist, UnknownQuoter, Quoter
+from quoters.quoter import SymbolNotExist, UnknownQuoter, RemoteDataError, Quoter
 from quotes.models import Quote
 from quotes.tasks import task_get_quote
 
@@ -15,7 +15,7 @@ from quotes.tasks import task_get_quote
 logger = logging.getLogger('quotes_view')
 
 MODE_CHOICES = (('append', 'Append'), ('overwrite', 'Overwrite'), ('discard', 'Discard Existing'))
-QUOTERS = (('Tushare', 'Tushare'), ('Xueqiu', 'Xueqiu'))
+QUOTERS = (('Tushare', 'Tushare'), ('Xueqiu', 'Xueqiu'), ('pandas', 'pandas'))
 
 
 class QuotesForm(forms.Form):
@@ -46,7 +46,7 @@ class QuotesForm(forms.Form):
 
         logger.debug('in clean')
 
-        if start >= end:
+        if start > end:
             msg = u'end date before start date'
             self.add_error('start', msg)
             return cleaned_data
@@ -71,6 +71,9 @@ class QuotesForm(forms.Form):
             logger.debug('get {} quotes'.format(self.quotes['open'].count()))
         except SymbolNotExist:
             msg = u'symbol not found on this quoter'
+            self.add_error(None, msg)
+        except RemoteDataError:
+            msg = u'remove data error'
             self.add_error(None, msg)
 
         return cleaned_data

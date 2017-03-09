@@ -19,7 +19,7 @@ from core.utils import to_business_timestamp, last_business_day
 from quotes.models import Quote
 from quoters.quoter import Quoter
 from core.exceptions import PortfolioException
-from core.config import INIT_DATE
+from core.config import INIT_DATE, EXCHANGE_DEFAULT_QUOTER
 from exchangerates.models import ExchangeRate
 from core.config import BASE_CURRENCY, CURRENCY_CHOICES, DAYS_IN_A_YEAR
 from .position import Position
@@ -225,7 +225,8 @@ class Portfolio(models.Model):
 
     def update_quotes(self):
         for hld in self.holdings.distinct('security'):
-            self.update_sec_quotes(security=hld.security, quoter="Tushare")
+            self.update_sec_quotes(security=hld.security,
+                                   quoter=EXCHANGE_DEFAULT_QUOTER[hld.security.exchange])
 
     def update_sec_quotes(self, security, quoter):
         if security.quotes.count() > 0:

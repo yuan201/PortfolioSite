@@ -71,7 +71,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _convert_csv_to_dataframe(csvfile):
-        basics = pd.read_csv(csvfile, dtype='object')
+        basics = pd.read_csv(csvfile, dtype=str)
         basics = basics.set_index('symbol')
         return basics
 
@@ -97,6 +97,9 @@ class Command(BaseCommand):
             basics['list_date'] = basics['list_date'].map(self._md)
         elif options['source'] == 'Local':
             basics = self._convert_csv_to_dataframe(options['file'][0])
+        else:
+            self.stdout.write("Wrong Source")
+            return
 
         self._update_database(basics)
 
