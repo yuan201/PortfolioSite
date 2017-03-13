@@ -1,7 +1,7 @@
 import datetime as dt
 
 # todo move config to database (maybe after adding multi-user support)
-INIT_DATE = dt.date(2016, 8, 1)
+INIT_DATE = dt.date(2015, 1, 1)
 
 CURRENCY_CHOICES = (
     ('CNY', 'Chinese Yuan'),
