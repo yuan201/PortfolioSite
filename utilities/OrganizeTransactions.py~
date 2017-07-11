@@ -1,0 +1,8 @@
+import sys
+import csv
+
+def organize_zszq(file):
+    with open(file) as csvfile:
+        csvreader = csv.Reader(csvfile)
+        for line in csvreader():
+            
