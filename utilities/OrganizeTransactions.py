@@ -11,10 +11,10 @@ Header = ['symbol','name','type_','date','shares','price',
 
 def organize_zszq(file):
     lines = []
-    with open(file) as csvfile:
+    with open(file, encoding='utf-8-sig') as csvfile:
         csvreader = csv.DictReader(csvfile, )
         for line in csvreader:
-            print(line)
+            #print(line)
             l = organize_line_zszq(line)
             if l['type_'] != 'invalid':
                 lines.append(l)
@@ -33,7 +33,7 @@ def organize_line_zszq(line):
         fee = 0,
         dividend = 0,
         ratio = 0,
-        currency='cny',
+        currency='CNY',
     )
 
     if t['type_'] == 'buy':
@@ -47,10 +47,18 @@ def organize_line_zszq(line):
     elif t['type_'] == 'dividend':
         t['dividend'] = float(line['成交金额'])
 
-    if t['symbol'].startswith('60'):
+    if len(t['symbol'])==5 and t['symbol'][0] == '0':
+        t['symbol'] += '.HK'
+    elif (t['symbol'].startswith('60') or t['symbol'].startswith('90') or
+          t['symbol'].startswith('5')):
         t['symbol'] += '.SS'
-    elif t['symbol'].startswith('00'):
+    elif t['symbol'].startswith('00') or t['symbol'].startswith('20'):
         t['symbol'] += '.SZ'
+
+    if t['symbol'].startswith('90'):
+        t['currency'] = 'USD'
+    if t['symbol'].startswith('20'):
+        t['currency'] = 'HKD'
         
     return t
 
@@ -78,7 +86,11 @@ def zszq_datetime(date_, time_):
     
     
 def dumplines(lines, file):
-    print(lines)
+    with open(file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=Header)
+        writer.writeheader()
+        for line in lines:
+            writer.writerow(line)
 
 
 def usage():
@@ -91,5 +103,6 @@ if __name__ == "__main__":
 
     if sys.argv[1] == "zszq":
         lines = organize_zszq(sys.argv[2])
+        lines.sort(key=lambda x: x['date'])
         dumplines(lines, sys.argv[3])
         

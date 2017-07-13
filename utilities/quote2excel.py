@@ -36,8 +36,6 @@ def get_quotes(securities, daterange):
                                   autype=None, index=sec.index);
             quote = convert_date(quote)
             quotes[sec.longname] = quote['close']
-        elif sec.exchange == 'HK':
-            pass # get quotes from yahoo
     return quotes
 
 
