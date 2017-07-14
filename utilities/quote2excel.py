@@ -11,6 +11,7 @@ import csv
 from collections import namedtuple
 import datetime as dt
 import sys
+from pathlib import Path
 
 Security = namedtuple('Security',
                       ['symbol','exchange','name','index','longname'])
@@ -31,13 +32,29 @@ def read_symbol_file(file):
 def get_quotes(securities, daterange):
     quotes = pd.DataFrame(index=daterange)
     for sec in securities.values():
+        # for those listed on Shanghai or Shengzheng,
+        # Tushare is used to get the data
         if sec.exchange == 'SS' or sec.exchange == 'SZ':
             quote = ts.get_k_data(code=sec.symbol,
                                   autype=None, index=sec.index);
             quote = convert_date(quote)
             quotes[sec.longname] = quote['close']
+        # or those listed in HK, data is only available through
+        # yahoo right now and the pandas datareader is broken
+        # so I have to download them manually and import them here.
+        elif sec.exchange == 'HK':
+            p = Path('hkquotes/{}.HK.csv'.format(sec.symbol[1:]))
+            if not p.exists():
+                print("{} doesn't exist".format(p))
+            else:
+                quotes[sec.longname] = parse_hk_quote(sec, p)['close']
     return quotes
 
+def parse_hk_quote(sec, quotefile):
+    quote = pd.read_csv(quotefile)
+    newcolumns = [col.lower() for col in quote.columns]
+    quote.columns = newcolumns
+    return convert_date(quote)
 
 # date from tushare is just orinary string, need to convert
 def convert_date(quote):
@@ -72,6 +89,7 @@ if __name__ == '__main__':
     secs = read_symbol_file(sys.argv[1])
     daterange = pd.bdate_range(sys.argv[2], sys.argv[3])
     quotes = get_quotes(secs, daterange)
+    quotes.fillna(method='ffill', inplace=True)
     csvlist = quotes.to_csv().split()
     csvlist = addname(csvlist, secs)
     save2csv(csvlist, sys.argv[4])
