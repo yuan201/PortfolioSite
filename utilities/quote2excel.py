@@ -22,9 +22,10 @@ def read_symbol_file(file):
     with open(file) as csvfile:
         sym_reader = csv.reader(csvfile)
         for row in sym_reader:
-            se = row[0].split('.')
-            securities[row[0]] = Security(se[0],se[1],row[1],
-                                          len(se)==3,row[0])
+            if len(row) == 2:
+                se = row[0].split('.')
+                securities[row[0]] = Security(se[0],se[1],row[1],
+                                              len(se)==3,row[0])
     return securities
 
 
@@ -79,7 +80,7 @@ def addname(csvlist, secs):
     return csvlist
 
 def save2csv(csvlist, csvfile):
-    with open(csvfile, 'w') as file:
+    with open(csvfile, 'w', encoding='utf-8') as file:
         file.write('\n'.join(csvlist))
 
 if __name__ == '__main__':
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         usage()
         exit()
     secs = read_symbol_file(sys.argv[1])
-    daterange = pd.bdate_range(sys.argv[2], sys.argv[3])
+    daterange = pd.date_range(sys.argv[2], sys.argv[3])
     quotes = get_quotes(secs, daterange)
     quotes.fillna(method='ffill', inplace=True)
     csvlist = quotes.to_csv().split()

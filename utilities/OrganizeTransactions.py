@@ -92,17 +92,44 @@ def dumplines(lines, file):
         for line in lines:
             writer.writerow(line)
 
+def fillin_cashflow_zszq(cffile, lines):
+    with open(cffile) as csvfile:
+        cflines = []
+        csvreader = csv.DictReader(csvfile)
+        for line in csvreader:
+            line['date'] = zszq_datetime(line['成交日期'], "00:00:00")
+            cflines.append(line)
+
+    cflines.sort(key=lambda x: x['date'])
+
+    # find the matching cash flow record for each transaction line
+    i = 0
+    for line in lines:
+        print(line)
+        while line['date'] > cflines[i]['date']:
+            i+=1
+        while line['name'] != cflines[i]['证券名称']:
+            i+=1
+        # finding a matching record
+        line['fee'] = cflines[i]['手续费'] + cflines[i]['印花税'] + \
+	              cflines[i]['过户费'] + cflines[i]['结算费']
+        line['cashflow'] = cflines[i]['发生金额']
+        
+            
 
 def usage():
-    print("Usage:\n  {} type infile outfile".format(sys.argv[0]))
+    print("Usage:\n  {} type infiles outfile".format(sys.argv[0]))
     exit()
             
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) < 4:
         usage()
 
     if sys.argv[1] == "zszq":
         lines = organize_zszq(sys.argv[2])
         lines.sort(key=lambda x: x['date'])
-        dumplines(lines, sys.argv[3])
+        if len(sys.argv) > 4:
+            fillin_cashflow_zszq(sys.argv[3], lines)
+        dumplines(lines, sys.argv[-1])
+        
         
